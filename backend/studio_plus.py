@@ -5,6 +5,10 @@ LensFlow Studio Plus — advanced AI features:
 3. Voice Clone      — ElevenLabs cloned voice for Elite tier agents
 
 All routes mount under /api/studio-plus/*
+
+IMPORTANT: All heavy imports (PIL, moviepy, ImageContent) are LAZY (inside
+the route handlers only) to keep the FastAPI cold-start footprint small so
+the backend fits within tight memory limits on the Starter deployment plan.
 """
 from __future__ import annotations
 
@@ -21,15 +25,22 @@ from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, Field
-from elevenlabs.client import ElevenLabs
-from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
-from PIL import Image
 
 logger = logging.getLogger("lensflow.studio_plus")
 
-# Output directories (ephemeral — for current session only, cleaned up periodically)
+# Lazy-init video directory — created on first use, NOT at import time,
+# to avoid filesystem writes during module load.
+_VIDEO_DIR: Optional[Path] = None
+
+
+def _video_dir() -> Path:
+    global _VIDEO_DIR
+    if _VIDEO_DIR is None:
+        _VIDEO_DIR = Path(tempfile.gettempdir()) / "lensflow_videos"
+        _VIDEO_DIR.mkdir(parents=True, exist_ok=True)
+    return _VIDEO_DIR
+
 VIDEO_DIR = Path(tempfile.gettempdir()) / "lensflow_videos"
-VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
 GLAMOUR_PRESETS = {
     "magazine_hdr": (
@@ -97,6 +108,7 @@ def _strip_b64(data: str) -> str:
 
 
 def _decode_image_to_path(b64_data: str, out_dir: Path, idx: int) -> Path:
+    from PIL import Image  # lazy
     raw = base64.b64decode(_strip_b64(b64_data))
     img = Image.open(io.BytesIO(raw)).convert("RGB")
     # Resize to 1920x1080 max while preserving aspect
@@ -114,8 +126,9 @@ def _decode_image_to_path(b64_data: str, out_dir: Path, idx: int) -> Path:
 def _cleanup_old_videos(max_age_seconds: int = 3600) -> None:
     """Best-effort cleanup of videos older than 1 hour."""
     try:
+        vdir = _video_dir()
         now = time.time()
-        for p in VIDEO_DIR.glob("*.mp4"):
+        for p in vdir.glob("*.mp4"):
             if now - p.stat().st_mtime > max_age_seconds:
                 p.unlink(missing_ok=True)
     except Exception:
@@ -124,7 +137,7 @@ def _cleanup_old_videos(max_age_seconds: int = 3600) -> None:
 
 # ===== Builder =====
 def build_router(
-    eleven_client: Optional[ElevenLabs],
+    eleven_client,  # Optional[ElevenLabs] — typed loosely to avoid eager import
     emergent_key: str,
     db,
     get_current_user,
@@ -178,7 +191,7 @@ def build_router(
                     c = c.with_position("center")
                     clips.append(c)
                 video = concatenate_videoclips(clips, method="compose").with_audio(audio)
-                out = VIDEO_DIR / f"confidence_{uuid.uuid4().hex}.mp4"
+                out = _video_dir() / f"confidence_{uuid.uuid4().hex}.mp4"
                 video.write_videofile(
                     str(out),
                     fps=24,
@@ -219,7 +232,7 @@ def build_router(
         # Filename safety: only allow our generated naming pattern
         if not filename.startswith("confidence_") or not filename.endswith(".mp4"):
             raise HTTPException(status_code=404, detail="Not found")
-        path = VIDEO_DIR / filename
+        path = _video_dir() / filename
         if not path.exists():
             raise HTTPException(status_code=404, detail="Video expired or not found")
         from fastapi.responses import FileResponse
@@ -248,6 +261,10 @@ def build_router(
             raise HTTPException(status_code=400, detail="Unknown preset")
 
         try:
+            # Lazy imports — keep cold-start memory low
+            from PIL import Image
+            from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+
             image_b64 = _strip_b64(req.image)
             # Validate it's a real image
             try:

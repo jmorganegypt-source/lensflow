@@ -393,6 +393,12 @@ async def root():
     return {"app": "LensFlow", "version": "1.0", "status": "online"}
 
 
+@api.get("/health")
+async def health():
+    """Lightweight liveness probe — no DB, no auth, no I/O. Used by K8s health checks."""
+    return {"status": "ok"}
+
+
 # ---------- Auth ----------
 @api.post("/auth/register")
 async def register(req: RegisterReq, response: Response):
