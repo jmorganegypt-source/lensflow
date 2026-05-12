@@ -1,0 +1,59 @@
+{
+  "summary": "Initial end-to-end testing of LensFlow AI Real Estate Media Platform. Backend: 12/14 pytest tests pass (auth flows, presenters, concierge, projects CRUD, dashboard stats, GPT-5.2 script gen all working). Two failures: ElevenLabs TTS returns 404 voice_not_found for the configured Mia voice_id and a datetime tz mismatch in brute-force lockout causes 500 instead of 429. Frontend: Landing, Presenters, Pricing, Concierge, Login (admin/seeded), Dashboard, Projects, Studio (form loads with all controls), and Sidebar Logout all work end-to-end with proper data-testid coverage.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/tts/preview",
+        "issue": "ElevenLabs returns 404 voice_not_found for voice_id 'EXAVITQu4vr4xnSDxMaC' (Mia). The hard-coded voice IDs in PRESENTERS (server.py lines 249, 259, 269, 279) are public ElevenLabs preset IDs that are NOT available on this account. As a result, TTS preview/voice synthesis is broken for ALL four presenters. Server log: \"A voice with voice_id 'EXAVITQu4vr4xnSDxMaC' was not found.\"",
+        "priority": "CRITICAL"
+      },
+      {
+        "endpoint": "POST /api/auth/login (after 5 failed attempts)",
+        "issue": "Brute-force lockout throws 500 'TypeError: can\\'t compare offset-naive and offset-aware datetimes' instead of 429. Root cause: in check_brute_force (server.py line 143) the locked_until value loaded from MongoDB is naive (BSON strips tz) while datetime.now(timezone.utc) is aware. Fix: replace tzinfo when reading, e.g. `lu = rec['locked_until']; if lu.tzinfo is None: lu = lu.replace(tzinfo=timezone.utc)` before comparing. Same pattern should be applied to reset_password expiry check (line 388).",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Hear-voice / TTS preview button on Presenters & Studio",
+        "issue": "Will surface a 500 error to users because the backend ElevenLabs voice_ids are invalid for the account. UI itself loads fine.",
+        "affected_selectors": ["hear-voice button on /presenters", "voice preview controls in /app/studio"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Replace ElevenLabs voice_ids in PRESENTERS with voice IDs available on the provided ElevenLabs account. Either (a) fetch the account's voice library via GET https://api.elevenlabs.io/v1/voices and pick 4 available voices, or (b) use 'eleven_turbo_v2_5' default model voices that the account has subscribed to. Verify by hitting /api/tts/preview with each new voice_id.",
+    "Fix datetime tz comparison in check_brute_force (server.py line 143) and reset_password expiry check (line 388): coerce naive datetimes from Mongo to UTC-aware before comparing — e.g. `lu = rec['locked_until']; if lu.tzinfo is None: lu = lu.replace(tzinfo=timezone.utc); if lu > datetime.now(timezone.utc): ...`",
+    "Optionally re-test /api/tts/preview and brute-force lockout after fixes."
+  ],
+  "critical_code_review_comments": [
+    "server.py PRESENTERS voice_ids are public ElevenLabs preset voice IDs (EXAVITQu4vr4xnSDxMaC etc.) that are NOT guaranteed to exist on a given API key. Use account-owned voices or use the /voices endpoint dynamically.",
+    "check_brute_force compares naive Mongo datetimes against aware datetime.now(timezone.utc) — same anti-pattern exists in reset_password. Pydantic models stored via insert_one preserve tz when written but reads come back naive in motor.",
+    "CORS_ORIGINS is set to explicit origins (good), but allow_origins fallback splits on '*' which would NOT actually enable wildcard with credentials. OK for now since CORS_ORIGINS is explicitly set.",
+    "/api/auth/forgot-password logs the reset link to stdout — fine for dev but should be wired to an email service before production.",
+    "Brute force keying on `{ip}:{email}` is reasonable; just fix the tz bug so it actually triggers 429 instead of 500.",
+    "All endpoints correctly exclude `_id` via projection or serializer — good."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (new)"
+  ],
+  "success_rate": {"backend": "86%", "frontend": "100%"},
+  "test_credentials": "admin@lensflow.ai / LensFlow2026! (verified working)",
+  "seed_data_creation": "Created one TEST_Project that was deleted as part of CRUD test. Admin user has one generated script (from GPT-5.2 test) and one concierge_request (from concierge test).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend tests live at /app/backend/tests/backend_test.py — run with `pytest /app/backend/tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml`. The TTS test will keep failing until voice_ids in /app/backend/server.py PRESENTERS are replaced with voices available on the ELEVENLABS_API_KEY account. The brute_force test will keep failing until naive/aware datetime comparison is fixed in check_brute_force. All other 12 tests should keep passing including LIVE GPT-5.2 script generation via emergentintegrations.",
+  "rca_of_the_issues": {
+    "tts_404": "ElevenLabs public preset voice IDs (EXAVITQu4vr4xnSDxMaC = Sarah, TxGEqnHWrfWFTfGW9XjX = Josh, 9BWtsMINqrJLrRacOk9x = Aria, JBFqnCBsd6RMkjVDRZzb = George) are not in the API key's voice library. Reproduction: POST /api/tts/preview with any of the four PRESENTERS voice_ids → 500 with detail 'voice_not_found'. Mitigation: call GET https://api.elevenlabs.io/v1/voices on the provided key, pick 4 owned/shared voices, update PRESENTERS.",
+    "brute_force_500": "After 5 failed logins, locked_until is written via Motor with tz-aware UTC datetime, but on subsequent read Mongo returns it as naive. The next login attempt evaluates `rec['locked_until'] > datetime.now(timezone.utc)` which raises TypeError → 500. Mitigation: normalize naive → aware on read."
+  }
+}
