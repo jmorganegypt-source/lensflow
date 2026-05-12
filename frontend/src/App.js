@@ -22,6 +22,7 @@ import Recorder from "./pages/app/Recorder";
 import Projects from "./pages/app/Projects";
 import Settings from "./pages/app/Settings";
 import BillingSuccess from "./pages/app/BillingSuccess";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 // Lumen
 import LumenLanding from "./pages/lumen/Landing";
@@ -86,6 +87,7 @@ export default function App() {
       <AuthProvider>
         <LumenAuthProvider>
           <Toaster richColors position="top-right" />
+          <PWAInstallPrompt />
           <Routes>
             {/* LensFlow (root) */}
             <Route path="/" element={<Landing />} />

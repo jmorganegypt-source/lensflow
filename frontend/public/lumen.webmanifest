@@ -1,0 +1,22 @@
+{
+  "name": "Lumen — Record. Read. Send love.",
+  "short_name": "Lumen",
+  "description": "AI-written, beautifully filmed video messages for the people you love. 60 seconds. Done.",
+  "start_url": "/lumen?source=pwa",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#FF6B6B",
+  "background_color": "#FFF1E6",
+  "scope": "/lumen",
+  "categories": ["lifestyle", "photo", "social"],
+  "icons": [
+    { "src": "/lumen-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/lumen-icon.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "/lumen-icon.svg", "sizes": "512x512", "type": "image/svg+xml" },
+    { "src": "/lumen-icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "New moment", "url": "/lumen/app/create", "description": "Create a video" },
+    { "name": "Library", "url": "/lumen/app/library", "description": "Your sent moments" }
+  ]
+}

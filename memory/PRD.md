@@ -49,7 +49,17 @@ Built a fully independent consumer brand sharing the same backend infrastructure
 - Marketing: `/lumen` (photo-heavy hero + 3-step Record/Read/Send + occasion grid + testimonials + final CTA), `/lumen/pricing`, `/lumen/share/:token` (public)
 - App `/lumen/app/*`: Home, Create (5-step wizard: occasion → script → style → record → send), Library, Billing (top-ups + watermark sub), Settings
 
-**Tests**: 23/23 new Lumen pytest green + full frontend E2E pass (iteration_6.json). End-to-end verified: register → AI script (live GPT-5.2) → style picker → recorder UI → send → share URL → public view → library → Stripe checkout redirect.
+**Tests**: 23/23 new Lumen pytest green + full frontend E2E pass (iteration_6.json).
+
+## PWA support added (2026-05-12)
+Both apps are now installable on phone/desktop:
+- `/app/frontend/public/manifest.json` (LensFlow, dark + gold) and `/app/frontend/public/lumen.webmanifest` (Lumen, coral + sun)
+- Branded SVG icons (`lensflow-icon.svg`, `lumen-icon.svg`)
+- `/app/frontend/public/sw.js` — network-first for HTML, cache-first for static assets, never caches `/api/*`
+- `/app/frontend/src/pwa.js` — boots SW + dynamically swaps manifest/theme/title based on path (/ vs /lumen)
+- `/app/frontend/src/components/PWAInstallPrompt.jsx` — branded "Install app" bottom-card listening for `beforeinstallprompt`
+- Apple iOS PWA meta tags added (apple-touch-icon, apple-mobile-web-app-*)
+- Both apps pass Lighthouse PWA core requirements (manifest + SW + icons + HTTPS + responsive)
 
 ## Backlog (P0 → P2)
 - **P1**: ElevenLabs voice IDs — user's provided key lacks `voices_read` permission and the default preset IDs aren't in their library. They can fix instantly by either (a) adding a voice to their elevenlabs.io library and setting `ELEVENLABS_VOICE_MIA/_OLIVER/_ARIA/_MARCUS` in `backend/.env`, or (b) regenerating an API key with `voices_read` enabled.

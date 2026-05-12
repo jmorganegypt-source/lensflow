@@ -1,0 +1,23 @@
+{
+  "name": "LensFlow — AI Real Estate Media Studio",
+  "short_name": "LensFlow",
+  "description": "Generate broadcast-grade property videos with AI presenters, AR teleprompter & studio polish.",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0A0A0A",
+  "background_color": "#050505",
+  "scope": "/",
+  "categories": ["business", "productivity", "photo"],
+  "icons": [
+    { "src": "/lensflow-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/lensflow-icon.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "/lensflow-icon.svg", "sizes": "512x512", "type": "image/svg+xml" },
+    { "src": "/lensflow-icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "AI Studio", "url": "/app/studio", "description": "Generate a script" },
+    { "name": "Recorder", "url": "/app/recorder", "description": "Open teleprompter" },
+    { "name": "Projects", "url": "/app/projects", "description": "Your library" }
+  ]
+}
