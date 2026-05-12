@@ -519,6 +519,15 @@ async def tts_preview(req: TTSPreviewReq, user: dict = Depends(get_current_user)
     except Exception as e:
         logger.exception("TTS error")
         err = str(e)
+        if "detected_unusual_activity" in err or "Unusual activity" in err or "Free Tier usage disabled" in err:
+            raise HTTPException(
+                status_code=402,
+                detail=(
+                    "ElevenLabs blocked this request: Free Tier is disabled for cloud/VPN IPs. "
+                    "Upgrade your ElevenLabs account to the Starter plan ($5/mo) at "
+                    "elevenlabs.io/app/subscription to unlock voice generation."
+                ),
+            )
         if "voice_not_found" in err or "404" in err:
             raise HTTPException(
                 status_code=404,
