@@ -136,11 +136,18 @@ async def get_current_user(request: Request) -> dict:
 
 
 # Brute force protection
+def _to_aware_utc(dt):
+    if dt and dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 async def check_brute_force(identifier: str) -> None:
     rec = await db.login_attempts.find_one({"identifier": identifier})
     if not rec:
         return
-    if rec.get("locked_until") and rec["locked_until"] > datetime.now(timezone.utc):
+    locked_until = _to_aware_utc(rec.get("locked_until"))
+    if locked_until and locked_until > datetime.now(timezone.utc):
         raise HTTPException(status_code=429, detail="Too many failed attempts. Try again in 15 minutes.")
 
 
@@ -239,6 +246,9 @@ class ConciergeReq(BaseModel):
 
 # ---------------------------------------------------------------------------
 # Presenters catalog (static)
+# Voice IDs are configurable via env so users can plug in their own
+# ElevenLabs cloned voices. Defaults are public preset IDs (may not be
+# available on all API keys).
 # ---------------------------------------------------------------------------
 PRESENTERS = [
     {
@@ -246,7 +256,7 @@ PRESENTERS = [
         "name": "Mia",
         "tagline": "Luxury Residential · Warm & Elegant",
         "description": "Australian-British inflection. Best for prestige residential, beachfront and heritage estates.",
-        "voice_id": "EXAVITQu4vr4xnSDxMaC",  # Sarah (warm female) - ElevenLabs preset
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_MIA", "EXAVITQu4vr4xnSDxMaC"),
         "avatar": "https://customer-assets.emergentagent.com/job_luxury-video-studio-1/artifacts/o3r5ea29_Mia_Headshot.jpg",
         "accent": "Australian-British",
         "specialty": ["Residential", "Beachfront", "Heritage"],
@@ -256,7 +266,7 @@ PRESENTERS = [
         "name": "Oliver",
         "tagline": "Corporate Elite · Authoritative",
         "description": "Refined British baritone. Built for commercial, off-the-plan and investor-grade properties.",
-        "voice_id": "TxGEqnHWrfWFTfGW9XjX",  # Josh (authoritative male) - ElevenLabs preset
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_OLIVER", "TxGEqnHWrfWFTfGW9XjX"),
         "avatar": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
         "accent": "British RP",
         "specialty": ["Commercial", "Off-the-plan", "Investor"],
@@ -266,7 +276,7 @@ PRESENTERS = [
         "name": "Aria",
         "tagline": "Modern Lifestyle · Fresh & Confident",
         "description": "Vibrant American voice for new developments, lifestyle marketing and Instagram-first reels.",
-        "voice_id": "9BWtsMINqrJLrRacOk9x",  # Aria
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_ARIA", "9BWtsMINqrJLrRacOk9x"),
         "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
         "accent": "American",
         "specialty": ["New Developments", "Lifestyle", "Social Media"],
@@ -276,7 +286,7 @@ PRESENTERS = [
         "name": "Marcus",
         "tagline": "International Luxe · Sophisticated",
         "description": "Continental polish for international buyers. Translates the language of wealth.",
-        "voice_id": "JBFqnCBsd6RMkjVDRZzb",  # George (smooth male)
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_MARCUS", "JBFqnCBsd6RMkjVDRZzb"),
         "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
         "accent": "Continental European",
         "specialty": ["International", "Penthouse", "Estate"],
@@ -385,7 +395,7 @@ async def forgot_password(req: ForgotPasswordReq):
 @api.post("/auth/reset-password")
 async def reset_password(req: ResetPasswordReq):
     rec = await db.password_reset_tokens.find_one({"token": req.token, "used": False})
-    if not rec or rec["expires_at"] < datetime.now(timezone.utc):
+    if not rec or _to_aware_utc(rec["expires_at"]) < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Invalid or expired token")
     await db.users.update_one({"_id": ObjectId(rec["user_id"])}, {"$set": {"password_hash": hash_password(req.new_password)}})
     await db.password_reset_tokens.update_one({"_id": rec["_id"]}, {"$set": {"used": True}})
@@ -424,7 +434,19 @@ async def tts_preview(req: TTSPreviewReq, user: dict = Depends(get_current_user)
         return {"audio_url": f"data:audio/mpeg;base64,{b64}", "voice_id": req.voice_id}
     except Exception as e:
         logger.exception("TTS error")
-        raise HTTPException(status_code=500, detail=f"Voice generation failed: {str(e)[:200]}")
+        err = str(e)
+        if "voice_not_found" in err or "404" in err:
+            raise HTTPException(
+                status_code=404,
+                detail=(
+                    "Voice not available on your ElevenLabs key. "
+                    "Add a voice you own to your library at elevenlabs.io, then set "
+                    "ELEVENLABS_VOICE_MIA / _OLIVER / _ARIA / _MARCUS in backend/.env."
+                ),
+            )
+        if "missing_permissions" in err or "401" in err or "403" in err:
+            raise HTTPException(status_code=403, detail="ElevenLabs key permissions insufficient — enable text_to_speech for this key.")
+        raise HTTPException(status_code=500, detail=f"Voice generation failed: {err[:200]}")
 
 
 # ---------- AI Studio (script generation) ----------
