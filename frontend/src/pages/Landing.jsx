@@ -6,15 +6,18 @@ import Footer from "../components/Footer";
 import api from "../lib/api";
 import { ArrowUpRight, Play, Sparkles, Mic, Film, Send, Check, Star, Zap, Shield, Globe2 } from "lucide-react";
 
-const HERO_BG = "/assets/property/elite-penthouse.jpg";
-const FEATURE_BG = "/assets/property/concierge-interior.jpg";
+const HERO_BG = "/assets/property/sunset-pool.jpg";
+const FEATURE_BG = "/assets/property/tropical-villa.jpg";
 const AGENT_HERO = "/assets/property/agent-hero.jpg";
+const TELEPROMPTER_DEMO = "/assets/property/teleprompter-demo.jpg";
+const ELITE_ESTATE = "/assets/property/elite-estates.jpg";
+const AGENT_TESTIMONIAL = "/assets/property/agent-marcus.jpg";
 
 const stats = [
   { v: "12×", l: "Faster than agencies", id: "stat-1" },
   { v: "<5 min", l: "From brief to broadcast", id: "stat-2" },
-  { v: "$29.90", l: "Standard / month", id: "stat-3" },
-  { v: "27", l: "Markets supported", id: "stat-4" },
+  { v: "$23.90", l: "Standard / month", id: "stat-3" },
+  { v: "20%", l: "Below competitors", id: "stat-4" },
 ];
 
 const fadeUp = { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-80px" }, transition: { duration: 0.7, ease: "easeOut" } };
@@ -185,11 +188,14 @@ export default function Landing() {
               </div>
             </motion.div>
 
-            <motion.div {...fadeUp} className="md:col-span-3 glass tracing-border rounded-3xl p-8">
-              <div className="font-mono text-xs text-white/40 mb-4">02 — RECORD</div>
-              <Mic className="text-[#C99A2E] mb-4" size={28} />
-              <h3 className="font-serif text-2xl mb-2">Or speak it yourself</h3>
-              <p className="text-white/55 text-sm">AR teleprompter overlay on iPhone, iPad & desktop. Eye-line stays on camera.</p>
+            <motion.div {...fadeUp} className="md:col-span-3 glass tracing-border rounded-3xl p-8 overflow-hidden relative">
+              <img src={TELEPROMPTER_DEMO} alt="" className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-25 pointer-events-none" />
+              <div className="relative">
+                <div className="font-mono text-xs text-white/40 mb-4">02 — RECORD</div>
+                <Mic className="text-[#C99A2E] mb-4" size={28} />
+                <h3 className="font-serif text-2xl mb-2">Or speak it yourself</h3>
+                <p className="text-white/55 text-sm">AR teleprompter overlay on iPhone, iPad & desktop. Eye-line stays on camera.</p>
+              </div>
             </motion.div>
 
             <motion.div {...fadeUp} className="md:col-span-3 glass tracing-border rounded-3xl p-8">
@@ -207,7 +213,7 @@ export default function Landing() {
             </motion.div>
 
             <motion.div {...fadeUp} className="md:col-span-4 glass rounded-3xl p-10 relative overflow-hidden">
-              <img src={FEATURE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
+              <img src={ELITE_ESTATE} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25" />
               <div className="relative">
                 <div className="font-mono text-xs text-[#C99A2E] mb-3">CONCIERGE — WHITE GLOVE</div>
                 <h3 className="font-serif text-3xl mb-3">Prefer it done for you?</h3>
@@ -255,16 +261,23 @@ export default function Landing() {
       <section className="py-32 px-6 lg:px-10">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
           {[
-            { q: "We replaced a $14K agency line item with LensFlow in one weekend.", a: "Jasmine Reid", r: "Principal · Sotheby's Mosman", id: "test-1" },
-            { q: "Mia closed two viewings before the listing went live. The hook is unreal.", a: "Daniel Whitford", r: "Director · Belle Property", id: "test-2" },
-            { q: "Mayfair to Manly in one platform. The concierge tier is genuinely magic.", a: "Hugo Lambert", r: "Knight Frank · London", id: "test-3" },
+            { q: "We replaced a $14K agency line item with LensFlow in one weekend.", a: "Jasmine Reid", r: "Principal · Sotheby's Mosman", id: "test-1", img: AGENT_HERO },
+            { q: "Mia closed two viewings before the listing went live. The hook is unreal.", a: "Daniel Whitford", r: "Director · Belle Property", id: "test-2", img: AGENT_TESTIMONIAL },
+            { q: "Mayfair to Manly in one platform. The concierge tier is genuinely magic.", a: "Hugo Lambert", r: "Knight Frank · London", id: "test-3", img: null },
           ].map((t) => (
             <motion.div key={t.id} {...fadeUp} data-testid={t.id} className="glass rounded-3xl p-10 hover:border-white/15 transition-colors">
               <div className="flex gap-1 mb-6">{[0,1,2,3,4].map(i => <Star key={i} size={14} className="fill-[#C99A2E] text-[#C99A2E]" />)}</div>
               <p className="font-serif text-xl leading-snug mb-8">"{t.q}"</p>
-              <div className="text-sm">
-                <div className="font-medium">{t.a}</div>
-                <div className="text-white/40 font-mono text-xs uppercase tracking-wider mt-0.5">{t.r}</div>
+              <div className="flex items-center gap-4">
+                {t.img && (
+                  <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 shrink-0">
+                    <img src={t.img} alt={t.a} className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <div className="text-sm">
+                  <div className="font-medium">{t.a}</div>
+                  <div className="text-white/40 font-mono text-xs uppercase tracking-wider mt-0.5">{t.r}</div>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -295,16 +308,16 @@ export default function Landing() {
           <motion.div {...fadeUp}>
             <div className="text-xs uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-4">Pricing</div>
             <h2 className="font-serif text-5xl lg:text-7xl tracking-tighter mb-6">
-              From $29.90 a month. <span className="italic text-[#C99A2E]">Cancel anytime.</span>
+              From $23.90 a month. <span className="italic text-[#C99A2E]">Cancel anytime.</span>
             </h2>
-            <p className="text-white/55 text-lg max-w-2xl mx-auto mb-10">Four tiers — Standard, Professional, Elite Partner and Concierge. Pick the one that matches your listing volume.</p>
+            <p className="text-white/55 text-lg max-w-2xl mx-auto mb-10">Four tiers — Standard, Professional, Elite Partner and Concierge. <span className="text-[#C99A2E]">20% under any comparable AI video tool</span>, guaranteed.</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-3xl mx-auto">
               {[
-                { name: "Standard", price: "$29.90", note: "/ mo" },
-                { name: "Professional", price: "$79.90", note: "/ mo", featured: true },
-                { name: "Elite", price: "$1,500", note: "/ mo" },
-                { name: "Concierge", price: "$2,200", note: "/ listing" },
+                { name: "Standard", price: "$23.90", note: "/ mo" },
+                { name: "Professional", price: "$59.90", note: "/ mo", featured: true },
+                { name: "Elite", price: "$1,199", note: "/ mo" },
+                { name: "Concierge", price: "$1,790", note: "/ listing" },
               ].map((p, i) => (
                 <div key={i} data-testid={`pricing-teaser-${p.name.toLowerCase()}`} className={`rounded-2xl p-5 ${p.featured ? "bg-[#C99A2E] text-black" : "glass"}`}>
                   <div className={`text-[10px] font-mono uppercase tracking-[0.18em] mb-2 ${p.featured ? "text-black/60" : "text-white/45"}`}>{p.name}</div>

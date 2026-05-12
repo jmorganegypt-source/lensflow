@@ -11,7 +11,7 @@ const tiers = [
   {
     id: "standard",
     name: "Standard",
-    price: "$29.90",
+    price: "$23.90",
     cadence: "AUD / month",
     blurb: "The essential kit for everyday listings.",
     cta: "Choose Standard",
@@ -30,7 +30,7 @@ const tiers = [
   {
     id: "professional",
     name: "Professional",
-    price: "$79.90",
+    price: "$59.90",
     cadence: "AUD / month",
     blurb: "The agent's standard kit. Unlimited drafts.",
     cta: "Choose Professional",
@@ -49,7 +49,7 @@ const tiers = [
   {
     id: "elite",
     name: "Elite Partner",
-    price: "$1,500",
+    price: "$1,199",
     cadence: "AUD / month",
     blurb: "White-glove agency tier. Built around your brand.",
     cta: "Choose Elite",
@@ -68,7 +68,7 @@ const tiers = [
   {
     id: "concierge",
     name: "Concierge",
-    price: "$2,200",
+    price: "$1,790",
     cadence: "AUD / per listing",
     blurb: "Done for you. Broadcast-grade, 24-hour turnaround.",
     cta: "Book Concierge",
@@ -124,13 +124,17 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-[#050505] text-white" data-testid="pricing-page">
       <MarketingNav />
-      <section className="pt-40 pb-24 px-6 lg:px-10">
+      <section className="pt-40 pb-12 px-6 lg:px-10">
         <div className="max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C99A2E]/10 border border-[#C99A2E]/30 mb-6" data-testid="price-guarantee-badge">
+            <span className="w-1.5 h-1.5 bg-[#C99A2E] rounded-full animate-pulse" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#C99A2E]">Lowest price guarantee · 20% below any competitor</span>
+          </div>
           <div className="text-xs uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-5">Pricing</div>
           <h1 className="font-serif text-6xl lg:text-8xl tracking-tighter leading-[0.95] mb-6">
             Built for the way <br /><span className="italic text-[#C99A2E]">agents really sell.</span>
           </h1>
-          <p className="text-lg text-white/55 max-w-2xl mx-auto">Four tiers. Cancel anytime. Upgrade as your listings grow.</p>
+          <p className="text-lg text-white/55 max-w-2xl mx-auto">Four tiers · Australian-built · Beats every comparable AI video tool on price.</p>
         </div>
       </section>
 
@@ -168,6 +172,30 @@ export default function Pricing() {
           ))}
         </div>
         <p className="text-center text-white/40 text-xs mt-10 font-mono uppercase tracking-[0.2em]">All prices in AUD · GST inclusive · Cancel anytime</p>
+
+        {/* Competitor comparison strip */}
+        <div className="max-w-4xl mx-auto mt-14 glass rounded-3xl p-8 lg:p-10" data-testid="competitor-compare">
+          <div className="text-center mb-6">
+            <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-2">Why LensFlow wins on price</div>
+            <h3 className="font-serif text-3xl tracking-tighter">Same job. <span className="italic text-[#C99A2E]">Less money.</span></h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            {[
+              { tool: "BombBomb", price: "$59 USD", ours: "$59.90 AUD" },
+              { tool: "Synthesia", price: "$89 USD", ours: "$59.90 AUD" },
+              { tool: "HeyGen", price: "$89 USD", ours: "$59.90 AUD" },
+              { tool: "Pictory", price: "$59 USD", ours: "$59.90 AUD" },
+            ].map((c, i) => (
+              <div key={i} className="p-4 rounded-2xl bg-white/[0.03]" data-testid={`compare-${c.tool.toLowerCase()}`}>
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">{c.tool}</div>
+                <div className="font-serif text-lg line-through text-white/50">{c.price}</div>
+                <div className="font-serif text-xl text-[#C99A2E] mt-1">{c.ours}</div>
+                <div className="text-[10px] font-mono text-white/40 mt-1">LensFlow</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-white/50 text-sm text-center mt-6 max-w-2xl mx-auto">Show us a comparable quote and we'll <span className="text-[#C99A2E] font-medium">beat it by 20%</span> — locked in for 12 months.</p>
+        </div>
       </section>
 
       <section className="px-6 lg:px-10 pb-32">

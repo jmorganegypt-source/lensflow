@@ -721,10 +721,10 @@ async def submit_concierge(req: ConciergeReq):
 # ---------- Payments (Stripe) ----------
 # Server-side authoritative price packages — never trust the frontend
 PAYMENT_PACKAGES = {
-    "starter_monthly":      {"amount": 29.90,   "currency": "aud", "label": "Standard · Monthly",     "plan": "starter"},
-    "professional_monthly": {"amount": 79.90,   "currency": "aud", "label": "Professional · Monthly", "plan": "professional"},
-    "elite_monthly":        {"amount": 1500.00, "currency": "aud", "label": "Elite Partner · Monthly", "plan": "elite"},
-    "concierge_listing":    {"amount": 2200.00, "currency": "aud", "label": "Concierge · Per Listing", "plan": "concierge"},
+    "starter_monthly":      {"amount": 23.90,   "currency": "aud", "label": "Standard · Monthly",     "plan": "starter"},
+    "professional_monthly": {"amount": 59.90,   "currency": "aud", "label": "Professional · Monthly", "plan": "professional"},
+    "elite_monthly":        {"amount": 1199.00, "currency": "aud", "label": "Elite Partner · Monthly", "plan": "elite"},
+    "concierge_listing":    {"amount": 1790.00, "currency": "aud", "label": "Concierge · Per Listing", "plan": "concierge"},
 }
 
 
