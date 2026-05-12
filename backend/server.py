@@ -947,12 +947,24 @@ async def shutdown():
 app.include_router(api)
 app.include_router(lumen_module.router)
 
-# CORS
-allow_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "*").split(",") if o.strip()]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allow_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS — supports wildcard (`*`) while still allowing credentials (cookies)
+# by echoing the request origin via regex. Works for preview, production, and
+# custom domains without manual whitelisting.
+_cors_env = os.environ.get("CORS_ORIGINS", "*").strip()
+if _cors_env == "*" or not _cors_env:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=".*",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    allow_origins = [o.strip() for o in _cors_env.split(",") if o.strip()]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allow_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
