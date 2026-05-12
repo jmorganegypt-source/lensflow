@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import lumenApi, { lumenErr } from "../../../lib/lumenApi";
 import { toast } from "sonner";
-import { Trash2, Send, Copy, FolderHeart, PlusCircle, Check } from "lucide-react";
+import { Trash2, Send, Copy, FolderHeart, PlusCircle, Check, Share2 } from "lucide-react";
 
 export default function LumenLibrary() {
   const [moments, setMoments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState(null);
+
+  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
 
   const load = async () => {
     setLoading(true);
@@ -28,6 +30,18 @@ export default function LumenLibrary() {
     navigator.clipboard.writeText(url);
     setCopiedId(m.id);
     setTimeout(() => setCopiedId(null), 1800);
+  };
+
+  const share = async (m) => {
+    const url = `${window.location.origin}/lumen/share/${m.share_token}`;
+    if (!navigator.share) { copy(m); return; }
+    try {
+      await navigator.share({
+        title: `A Lumen moment for ${m.recipient_name}`,
+        text: "Press play 💌",
+        url,
+      });
+    } catch {}
   };
 
   return (
@@ -63,8 +77,13 @@ export default function LumenLibrary() {
               <p className="text-xs text-[#FF6B6B] font-semibold uppercase tracking-widest mb-3">{m.occasion?.replace("_"," ")}</p>
               <p className="text-sm text-[#5C5C7A] line-clamp-3 mb-4 flex-1">{m.script}</p>
               <div className="flex gap-2">
+                {canNativeShare && (
+                  <button onClick={() => share(m)} data-testid={`share-${m.id}`} className="lumen-btn-primary text-xs flex-1 inline-flex items-center justify-center gap-1.5 py-2">
+                    <Share2 size={12}/> Share
+                  </button>
+                )}
                 <button onClick={() => copy(m)} data-testid={`copy-${m.id}`} className="lumen-btn-ghost text-xs flex-1 inline-flex items-center justify-center gap-1.5 py-2">
-                  {copiedId === m.id ? <><Check size={12}/> Copied</> : <><Copy size={12}/> Copy link</>}
+                  {copiedId === m.id ? <><Check size={12}/> Copied</> : <><Copy size={12}/> Copy</>}
                 </button>
               </div>
               <div className="mt-3 text-xs text-[#9999B0] flex items-center justify-between">

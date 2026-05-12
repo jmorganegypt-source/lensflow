@@ -163,6 +163,22 @@ export default function LumenCreate() {
     } finally { setSending(false); }
   };
 
+  const nativeShare = async () => {
+    if (!sentResult?.url) return;
+    if (!navigator.share) { copyLink(); return; }
+    try {
+      await navigator.share({
+        title: `A Lumen moment for ${recipient}`,
+        text: senderNote || `I made a little video for you. Press play 💌`,
+        url: sentResult.url,
+      });
+    } catch (e) {
+      // user cancelled — ignore
+    }
+  };
+
+  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+
   const copyLink = () => {
     if (!sentResult?.url) return;
     navigator.clipboard.writeText(sentResult.url);
@@ -393,11 +409,21 @@ export default function LumenCreate() {
             <div className="lumen-card p-8 text-center" data-testid="send-success">
               <div className="text-5xl mb-3">💌</div>
               <h3 className="lumen-display text-3xl mb-2">Sent to {sentResult.recipient || recipient}.</h3>
-              <p className="text-[#5C5C7A] mb-6">Your moment is live. Here's the share link:</p>
+              <p className="text-[#5C5C7A] mb-6">Your moment is live. Send it anywhere:</p>
               <div className="bg-[#FFF1E6] rounded-xl p-3 text-sm text-[#5C5C7A] font-mono break-all mb-4 text-left">{sentResult.url}</div>
-              <button onClick={copyLink} data-testid="copy-link" className="lumen-btn-primary inline-flex items-center gap-2 text-sm">
-                {copied ? <><Check size={14}/> Copied</> : <><Copy size={14}/> Copy link</>}
-              </button>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {canNativeShare && (
+                  <button onClick={nativeShare} data-testid="native-share" className="lumen-btn-primary inline-flex items-center gap-2 text-sm">
+                    <Send size={14}/> Share to phone apps
+                  </button>
+                )}
+                <button onClick={copyLink} data-testid="copy-link" className="lumen-btn-ghost inline-flex items-center gap-2 text-sm">
+                  {copied ? <><Check size={14}/> Copied</> : <><Copy size={14}/> Copy link</>}
+                </button>
+              </div>
+              <p className="mt-4 text-xs text-[#9999B0]">
+                {canNativeShare ? "Opens iMessage, WhatsApp, Instagram, AirDrop & more." : "Paste it anywhere — Messages, WhatsApp, email."}
+              </p>
             </div>
           ) : (
             <div className="lumen-card p-6 space-y-4">
