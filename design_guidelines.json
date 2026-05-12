@@ -1,0 +1,113 @@
+{
+  "theme": "dark",
+  "archetype": "5 (Jewel & Luxury)",
+  "colors": {
+    "background": "#050505",
+    "surface_glass": "rgba(255, 255, 255, 0.03)",
+    "surface_glass_border": "rgba(255, 255, 255, 0.08)",
+    "primary_accent": "#C99A2E",
+    "primary_accent_hover": "#DBC075",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "rgba(255, 255, 255, 0.6)",
+    "text_tertiary": "rgba(255, 255, 255, 0.4)",
+    "danger": "#EF4444",
+    "success": "#10B981",
+    "panel_bg": "#0A0A0A"
+  },
+  "typography": {
+    "headings": {
+      "family": "Playfair Display",
+      "weights": ["400", "600"],
+      "tracking": "tracking-tight",
+      "tailwind_class": "font-serif"
+    },
+    "body": {
+      "family": "Outfit",
+      "weights": ["300", "400", "500"],
+      "tailwind_class": "font-sans"
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "usage": "Data points, script timestamps, technical details",
+      "tailwind_class": "font-mono"
+    }
+  },
+  "layout": {
+    "spacing_scale": "Generous (p-8, p-12, p-24) to create cinematic breathing room.",
+    "border_radius": "rounded-2xl for main cards, rounded-full for pills/buttons.",
+    "glassmorphism": {
+      "active": true,
+      "style": "backdrop-blur-2xl bg-white/5 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#C99A2E] text-black font-medium hover:bg-[#DBC075] transition-all rounded-full px-8 py-3",
+      "glass": "backdrop-blur-md bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-full px-8 py-3"
+    },
+    "cards": {
+      "style": "bg-[#0A0A0A] border border-white/5 rounded-2xl p-8 hover:border-white/10 transition-colors"
+    },
+    "navigation": {
+      "style": "fixed top-0 w-full z-50 backdrop-blur-xl bg-black/50 border-b border-white/5"
+    }
+  },
+  "pages": {
+    "landing": {
+      "hero": "Cinematic full-bleed background image with heavy dark gradient overlay (bg-black/60). Asymmetrical typography layout. The main headline should be massive using Playfair Display.",
+      "how_it_works": "Bento grid (Mode A: Tetris Grid) showing the 4 steps with glowing borders (The 'Tracing Beam' effect).",
+      "presenter_preview": "Horizontal scrolling marquee of AI presenters."
+    },
+    "dashboard": {
+      "layout": "Control Room Grid (Mode B). Sidebar navigation with glassmorphism. Dense data presentation using JetBrains Mono for metrics."
+    },
+    "ai_studio": {
+      "layout": "Two-column split view. Left: Property input form. Right: Editable script preview with glassmorphic tools overlay."
+    },
+    "recorder": {
+      "ui": "Immersive dark mode. Teleprompter text in center, camera feed as background with blur, prominent red record button."
+    },
+    "pricing": {
+      "layout": "3-tier card layout. Pro tier highlighted with gold glow (`shadow-[0_0_30px_rgba(201,154,46,0.3)]`)."
+    }
+  },
+  "media": {
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1757524492552-d47a66a2b63e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwzfHxsdXh1cnklMjBtb2Rlcm4lMjBtYW5zaW9uJTIwZXh0ZXJpb3IlMjBkdXNrfGVufDB8fHx8MTc3ODU5MjgyNHww&ixlib=rb-4.1.0&q=85",
+        "category": "hero_background",
+        "description": "Modern house with large windows at dusk. Use as the main cinematic hero background with a dark overlay."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1759256243437-9c8f7238c42b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBtb2Rlcm4lMjBtYW5zaW9uJTIwZXh0ZXJpb3IlMjBkdXNrfGVufDB8fHx8MTc3ODU5MjgyNHww&ixlib=rb-4.1.0&q=85",
+        "category": "feature_background",
+        "description": "Castle-like mansion. Use for secondary feature sections or concierge background."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1772987438485-ac832640c8a5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjByZWFsJTIwZXN0YXRlJTIwYWdlbnQlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Nzg1OTI4MjR8MA&ixlib=rb-4.1.0&q=85",
+        "category": "avatar_mia",
+        "description": "Mia AI Presenter Avatar"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBtYW58ZW58MHx8fHwxNzc4NTkyODI0fDA&ixlib=rb-4.1.0&q=85",
+        "category": "avatar_oliver",
+        "description": "Oliver AI Presenter Avatar"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Run: yarn add @fontsource/playfair-display @fontsource/outfit @fontsource/jetbrains-mono lucide-react framer-motion react-fast-marquee",
+    "Use standard HTML tags and Tailwind for Landing/Marketing pages to ensure maximum creativity and asymmetrical bento grids. Do not rely heavily on strict Card components here.",
+    "Use Shadcn UI components (Tabs, Dialog, Select, Dropdown, Tables) for the Dashboard, AI Studio, Recorder, and Settings to ensure high functionality.",
+    "Implement the 'Crystal Glass' effect (backdrop-blur-xl bg-white/5 border border-white/10) for floating headers, floating action bars, and modal overlays.",
+    "Headings must use 'font-serif' (Playfair Display) to convey luxury, while body text uses 'font-sans' (Outfit) for legibility. DO NOT use Inter.",
+    "Ensure all interactive elements and key text elements include a 'data-testid' attribute (e.g., data-testid='pricing-pro-tier-button').",
+    "Never use pure black or pure gray. Use #050505 for the absolute background to add an expensive, moody cinematic depth.",
+    "Primary CTA buttons must be Gold (#C99A2E) with black text. Avoid using gold for large background areas; keep it restricted to accents and buttons.",
+    "For the Recorder UI, create an immersive view with absolute positioning, blurring the background, and placing teleprompter text prominently over the 'camera' feed view."
+  ],
+  "accessibility": {
+    "focus_states": "focus:ring-2 focus:ring-[#C99A2E] focus:outline-none",
+    "contrast_ratio": "Ensure gold text on dark backgrounds meets WCAG AA guidelines. When using gold on light glassmorphism, adjust opacity for legibility."
+  }
+}
