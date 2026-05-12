@@ -204,7 +204,7 @@ def test_payments_checkout_unauthenticated():
     """Unauthenticated checkout must reject."""
     r = requests.post(
         f"{API}/payments/checkout",
-        json={"package_id": "pro_monthly", "origin_url": BASE_URL},
+        json={"package_id": "professional_monthly", "origin_url": BASE_URL},
         timeout=20,
     )
     assert r.status_code == 401, f"Expected 401, got {r.status_code}: {r.text}"
@@ -220,11 +220,11 @@ def test_payments_checkout_invalid_package(admin_session):
     assert r.status_code == 400, f"Expected 400, got {r.status_code}: {r.text}"
 
 
-def test_payments_checkout_valid_pro_monthly(admin_session):
-    """Valid pro_monthly returns checkout.stripe.com URL + session_id; persists txn."""
+def test_payments_checkout_valid_professional_monthly(admin_session):
+    """Valid professional_monthly returns checkout.stripe.com URL + session_id; persists txn."""
     r = admin_session.post(
         f"{API}/payments/checkout",
-        json={"package_id": "pro_monthly", "origin_url": BASE_URL},
+        json={"package_id": "professional_monthly", "origin_url": BASE_URL},
         timeout=30,
     )
     assert r.status_code == 200, f"Expected 200, got {r.status_code}: {r.text}"
@@ -247,7 +247,7 @@ def test_payments_status_initiated_no_500(admin_session):
     j = r.json()
     assert j["payment_status"] == "initiated", f"Expected initiated, got: {j}"
     assert j["status"] == "open", f"Expected open, got: {j}"
-    assert j["package_id"] == "pro_monthly"
+    assert j["package_id"] == "professional_monthly"
 
 
 def test_payments_status_unknown_session_returns_404(admin_session):
@@ -270,7 +270,7 @@ def test_payments_txn_persisted_in_mongo(admin_session):
         assert txn is not None, f"No payment_transactions row for {sid}"
         assert txn["payment_status"] == "initiated"
         assert txn["status"] == "open"
-        assert txn["package_id"] == "pro_monthly"
+        assert txn["package_id"] == "professional_monthly"
         assert txn["plan"] == "pro"
         assert txn["amount"] == 149.00
     finally:
@@ -441,7 +441,7 @@ def test_payments_status_paid_email_idempotency(admin_session):
             "session_id": fake_sid,
             "user_id": admin_id,
             "user_email": admin_email,
-            "package_id": "pro_monthly",
+            "package_id": "professional_monthly",
             "plan": "pro",
             "amount": 149.0,
             "currency": "usd",

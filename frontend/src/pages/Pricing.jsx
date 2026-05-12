@@ -1,63 +1,80 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MarketingNav from "../components/MarketingNav";
 import Footer from "../components/Footer";
-import { Check, Sparkles, Crown, Phone, Loader2 } from "lucide-react";
+import { Check, Sparkles, Crown, Gem, Phone, Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import api, { formatApiErrorDetail } from "../lib/api";
 import { toast } from "sonner";
 
 const tiers = [
   {
-    id: "starter",
-    name: "Starter",
-    price: "$0",
-    cadence: "Free forever",
-    blurb: "Test the engine on your next listing.",
-    cta: "Start free",
-    href: "/register",
+    id: "standard",
+    name: "Standard",
+    price: "$29.90",
+    cadence: "AUD / month",
+    blurb: "The essential kit for everyday listings.",
+    cta: "Choose Standard",
     icon: Sparkles,
     highlight: false,
-    package_id: null,
+    package_id: "starter_monthly",
     perks: [
-      "3 AI scripts / month",
-      "1 AI presenter (Mia)",
-      "Teleprompter recorder",
-      "720p export",
-      "Watermarked",
+      "HD teleprompter",
+      "AI script writer",
+      "Captions auto-generated",
+      "Basic branding overlays",
+      "Mia & Oliver presenters",
+      "1080p export",
     ],
   },
   {
-    id: "pro",
-    name: "Pro",
-    price: "$149",
-    cadence: "per month",
+    id: "professional",
+    name: "Professional",
+    price: "$79.90",
+    cadence: "AUD / month",
     blurb: "The agent's standard kit. Unlimited drafts.",
-    cta: "Choose Pro",
-    href: null,
+    cta: "Choose Professional",
     icon: Crown,
     highlight: true,
-    package_id: "pro_monthly",
+    package_id: "professional_monthly",
     perks: [
-      "Unlimited AI scripts",
+      "Everything in Standard",
+      "4K recording",
+      "Luxury scene switching",
+      "Premium exports (REA · Domain · Rightmove)",
       "All 4 presenters · all accents",
-      "1080p · 4K export",
-      "REA · Domain · Rightmove formatting",
-      "No watermark",
-      "Priority TTS rendering",
+      "No watermark · Priority TTS",
     ],
   },
   {
-    id: "enterprise",
+    id: "elite",
+    name: "Elite Partner",
+    price: "$1,500",
+    cadence: "AUD / month",
+    blurb: "White-glove agency tier. Built around your brand.",
+    cta: "Choose Elite",
+    icon: Gem,
+    highlight: false,
+    package_id: "elite_monthly",
+    perks: [
+      "Private AI presenter (yours only)",
+      "Face upload avatar engine",
+      "Voice clone / voice polish",
+      "Priority rendering queue",
+      "Dedicated account strategist",
+      "Custom brand templates",
+    ],
+  },
+  {
+    id: "concierge",
     name: "Concierge",
-    price: "From $1,490",
-    cadence: "per listing",
-    blurb: "We produce. You publish. White-glove team.",
-    cta: "Book a call",
-    href: "/concierge",
+    price: "$2,200",
+    cadence: "AUD / per listing",
+    blurb: "Done for you. Broadcast-grade, 24-hour turnaround.",
+    cta: "Book Concierge",
     icon: Phone,
     highlight: false,
-    package_id: null,
+    package_id: "concierge_listing",
     perks: [
       "Done-for-you production",
       "Dedicated editor & strategist",
@@ -70,11 +87,11 @@ const tiers = [
 ];
 
 const faqs = [
-  { q: "What's the catch on the free plan?", a: "Genuinely none. 3 scripts/month, watermarked output. We make money when you publish more than that — so we let the work speak first." },
-  { q: "Can I use my own ElevenLabs key?", a: "Yes on Pro and above. Bring your own keys or use ours — costs are bundled either way." },
+  { q: "Can I switch plans later?", a: "Yes — upgrade or downgrade any time. Charges prorate to the day in Settings." },
+  { q: "Can I use my own ElevenLabs key?", a: "Yes on Professional and above. Bring your own keys or use ours — costs are bundled either way." },
   { q: "Does Mia's voice work outside Australia?", a: "Mia is bilingual-accent capable (AU/UK). Oliver, Aria and Marcus cover RP, American and Continental respectively." },
   { q: "How are videos delivered?", a: "Direct download in 9:16, 16:9 and 1:1 with captions, plus REA-compatible XML & Domain JSON exports." },
-  { q: "Can I cancel anytime?", a: "Yes. One click in Settings, prorated to the day." },
+  { q: "What's included in Concierge?", a: "A dedicated editor, strategist, drone/dusk b-roll, scriptwriting and a 24-hour final cut. Per-listing pricing, no commitment." },
 ];
 
 export default function Pricing() {
@@ -84,17 +101,12 @@ export default function Pricing() {
   const navigate = useNavigate();
 
   const handleTierClick = async (t) => {
-    if (!t.package_id) {
-      navigate(t.href);
-      return;
-    }
-    // user === null means AuthContext is still resolving /auth/me — wait
     if (user === null) {
       toast.message("Checking your session…");
       return;
     }
     if (!user) {
-      navigate("/register?next=/pricing");
+      navigate(`/register?next=/pricing&tier=${t.id}`);
       return;
     }
     setLoadingTier(t.id);
@@ -116,39 +128,38 @@ export default function Pricing() {
         <div className="max-w-5xl mx-auto text-center">
           <div className="text-xs uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-5">Pricing</div>
           <h1 className="font-serif text-6xl lg:text-8xl tracking-tighter leading-[0.95] mb-6">
-            Free to start.<br /><span className="italic text-[#C99A2E]">Cinematic by month two.</span>
+            Built for the way <br /><span className="italic text-[#C99A2E]">agents really sell.</span>
           </h1>
-          <p className="text-lg text-white/55 max-w-2xl mx-auto">Pick a plan that matches your listing volume. Upgrade or downgrade at any time.</p>
+          <p className="text-lg text-white/55 max-w-2xl mx-auto">Four tiers. Cancel anytime. Upgrade as your listings grow.</p>
         </div>
       </section>
 
       <section className="px-6 lg:px-10 pb-24">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {tiers.map((t) => (
-            <div key={t.id} data-testid={`pricing-tier-${t.id}`} className={`relative rounded-3xl p-10 transition-all ${t.highlight ? "bg-[#0E0E0E] border-2 border-[#C99A2E] gold-glow scale-[1.02]" : "glass hover:border-white/15"}`}>
+            <div key={t.id} data-testid={`pricing-tier-${t.id}`} className={`relative rounded-3xl p-8 transition-all flex flex-col ${t.highlight ? "bg-[#0E0E0E] border-2 border-[#C99A2E] gold-glow lg:scale-[1.03]" : "glass hover:border-white/15"}`}>
               {t.highlight && (
-                <div className="absolute -top-3 left-10 px-3 py-1 rounded-full bg-[#C99A2E] text-black text-[10px] font-mono uppercase tracking-widest">Most popular</div>
+                <div className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-[#C99A2E] text-black text-[10px] font-mono uppercase tracking-widest">Most popular</div>
               )}
-              <t.icon className="text-[#C99A2E] mb-5" size={28} />
-              <h3 className="font-serif text-3xl mb-1">{t.name}</h3>
-              <p className="text-white/55 text-sm mb-6">{t.blurb}</p>
+              <t.icon className="text-[#C99A2E] mb-5" size={26} />
+              <h3 className="font-serif text-2xl mb-1">{t.name}</h3>
+              <p className="text-white/55 text-sm mb-5 min-h-[40px]">{t.blurb}</p>
               <div className="mb-6">
-                <span className="font-serif text-6xl tracking-tighter">{t.price}</span>
-                <span className="text-white/45 ml-2 text-sm">{t.cadence}</span>
+                <span className="font-serif text-5xl tracking-tighter">{t.price}</span>
+                <span className="text-white/45 ml-2 text-xs block mt-1">{t.cadence}</span>
               </div>
-              <Link to={t.href || "#"} data-testid={`pricing-cta-${t.id}-link`} hidden />
               <button
                 onClick={() => handleTierClick(t)}
-                disabled={loadingTier === t.id || (t.package_id && user === null)}
+                disabled={loadingTier === t.id || user === null}
                 data-testid={`pricing-cta-${t.id}`}
-                className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-8 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
+                className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-7 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
               >
-                {loadingTier === t.id || (t.package_id && user === null) ? <Loader2 className="animate-spin" size={16} /> : t.cta}
+                {loadingTier === t.id || user === null ? <Loader2 className="animate-spin" size={16} /> : t.cta}
               </button>
-              <ul className="space-y-3">
+              <ul className="space-y-3 mt-auto">
                 {t.perks.map((p, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-white/75">
-                    <Check size={16} className="text-[#C99A2E] shrink-0 mt-0.5" />
+                    <Check size={14} className="text-[#C99A2E] shrink-0 mt-1" />
                     <span>{p}</span>
                   </li>
                 ))}
@@ -156,6 +167,7 @@ export default function Pricing() {
             </div>
           ))}
         </div>
+        <p className="text-center text-white/40 text-xs mt-10 font-mono uppercase tracking-[0.2em]">All prices in AUD · GST inclusive · Cancel anytime</p>
       </section>
 
       <section className="px-6 lg:px-10 pb-32">

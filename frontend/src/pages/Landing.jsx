@@ -6,13 +6,14 @@ import Footer from "../components/Footer";
 import api from "../lib/api";
 import { ArrowUpRight, Play, Sparkles, Mic, Film, Send, Check, Star, Zap, Shield, Globe2 } from "lucide-react";
 
-const HERO_BG = "https://images.unsplash.com/photo-1757524492552-d47a66a2b63e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwzfHxsdXh1cnklMjBtb2Rlcm4lMjBtYW5zaW9uJTIwZXh0ZXJpb3IlMjBkdXNrfGVufDB8fHx8MTc3ODU5MjgyNHww&ixlib=rb-4.1.0&q=85";
-const FEATURE_BG = "https://images.unsplash.com/photo-1759256243437-9c8f7238c42b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBtb2Rlcm4lMjBtYW5zaW9uJTIwZXh0ZXJpb3IlMjBkdXNrfGVufDB8fHx8MTc3ODU5MjgyNHww&ixlib=rb-4.1.0&q=85";
+const HERO_BG = "/assets/property/elite-penthouse.jpg";
+const FEATURE_BG = "/assets/property/concierge-interior.jpg";
+const AGENT_HERO = "/assets/property/agent-hero.jpg";
 
 const stats = [
   { v: "12×", l: "Faster than agencies", id: "stat-1" },
   { v: "<5 min", l: "From brief to broadcast", id: "stat-2" },
-  { v: "$0", l: "Setup, ever", id: "stat-3" },
+  { v: "$29.90", l: "Standard / month", id: "stat-3" },
   { v: "27", l: "Markets supported", id: "stat-4" },
 ];
 
@@ -59,7 +60,7 @@ export default function Landing() {
               <div className="flex flex-wrap gap-4 mb-12" data-testid="hero-cta-group">
                 <Link to="/register" data-testid="hero-cta-primary" className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#C99A2E] text-black font-medium hover:bg-[#DBC075] transition-all hover:scale-[1.02]">
                   <Sparkles size={18} />
-                  <span>Start Free — No card</span>
+                  <span>Start Recording</span>
                   <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </Link>
                 <Link to="/presenters" data-testid="hero-cta-secondary" className="inline-flex items-center gap-3 px-8 py-4 rounded-full glass-strong hover:bg-white/10 transition-colors text-white">
@@ -83,7 +84,7 @@ export default function Landing() {
                 <div className="absolute -inset-6 bg-[#C99A2E]/15 blur-3xl rounded-full" />
                 <div className="relative glass-strong rounded-3xl p-2 gold-glow">
                   <div className="aspect-[4/5] rounded-2xl overflow-hidden relative bg-[#0A0A0A]">
-                    <img src="https://customer-assets.emergentagent.com/job_luxury-video-studio-1/artifacts/o3r5ea29_Mia_Headshot.jpg" alt="Mia" className="w-full h-full object-cover" />
+                    <img src={AGENT_HERO} alt="LensFlow AI Presenter" className="w-full h-full object-cover" />
                     <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black/95 via-black/40 to-transparent">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
@@ -112,6 +113,49 @@ export default function Landing() {
             <span>Zillow</span>
             <span>Compass</span>
             <span>LuxuryEstate</span>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS — clean 4-step linear flow */}
+      <section className="relative py-28 px-6 lg:px-10 border-b border-white/5" data-testid="how-it-works">
+        <div className="max-w-7xl mx-auto">
+          <motion.div {...fadeUp} className="text-center mb-16">
+            <div className="text-xs uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-4">How LensFlow Works</div>
+            <h2 className="font-serif text-5xl lg:text-7xl tracking-tighter leading-[0.95]">
+              Simple. Fast. <span className="italic text-[#C99A2E]">Powerful.</span>
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-2">
+            {[
+              { n: "1", t: "Write", d: "Add your script — or let our AI assistant draft it from a single listing prompt.", Icon: Sparkles, testid: "step-write" },
+              { n: "2", t: "Record", d: "Use the AI teleprompter to record cleanly in 4K, or assign a presenter.", Icon: Mic, testid: "step-record" },
+              { n: "3", t: "Enhance", d: "AI polishes audio, color and pacing — broadcast finish, automatically.", Icon: Film, testid: "step-enhance" },
+              { n: "4", t: "Share", d: "Export 9:16, 16:9 and 1:1 — ready for REA, Domain, Instagram and Reels.", Icon: Send, testid: "step-share" },
+            ].map((s, i) => (
+              <motion.div
+                key={s.n}
+                {...fadeUp}
+                transition={{ duration: 0.6, delay: i * 0.08 }}
+                data-testid={s.testid}
+                className="relative group"
+              >
+                <div className="glass rounded-3xl p-7 h-full hover:border-[#C99A2E]/40 transition-colors">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="w-12 h-12 rounded-full bg-[#C99A2E]/10 border border-[#C99A2E]/30 flex items-center justify-center font-serif text-2xl text-[#C99A2E]">
+                      {s.n}
+                    </div>
+                    <s.Icon size={22} className="text-white/40 group-hover:text-[#C99A2E] transition-colors" />
+                  </div>
+                  <h3 className="font-serif text-2xl mb-2">{s.t}</h3>
+                  <p className="text-white/55 text-sm leading-relaxed">{s.d}</p>
+                </div>
+                {i < 3 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-2 -translate-y-1/2 z-10 text-[#C99A2E]/50 text-2xl pointer-events-none">›</div>
+                )}
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -251,25 +295,28 @@ export default function Landing() {
           <motion.div {...fadeUp}>
             <div className="text-xs uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-4">Pricing</div>
             <h2 className="font-serif text-5xl lg:text-7xl tracking-tighter mb-6">
-              Free forever. <span className="italic text-[#C99A2E]">Pay only when you publish.</span>
+              From $29.90 a month. <span className="italic text-[#C99A2E]">Cancel anytime.</span>
             </h2>
-            <p className="text-white/55 text-lg max-w-2xl mx-auto mb-10">Three plans. Cancel anytime. The first listing is on us.</p>
+            <p className="text-white/55 text-lg max-w-2xl mx-auto mb-10">Four tiers — Standard, Professional, Elite Partner and Concierge. Pick the one that matches your listing volume.</p>
 
-            <div className="flex flex-wrap justify-center gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-3xl mx-auto">
               {[
-                { Icon: Check, t: "Unlimited drafts" },
-                { Icon: Check, t: "AI script · GPT-5.2" },
-                { Icon: Check, t: "Mia & Oliver voices" },
-                { Icon: Check, t: "Cancel anytime" },
-              ].map((b, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-white/70">
-                  <b.Icon size={14} className="text-[#C99A2E]" /> {b.t}
+                { name: "Standard", price: "$29.90", note: "/ mo" },
+                { name: "Professional", price: "$79.90", note: "/ mo", featured: true },
+                { name: "Elite", price: "$1,500", note: "/ mo" },
+                { name: "Concierge", price: "$2,200", note: "/ listing" },
+              ].map((p, i) => (
+                <div key={i} data-testid={`pricing-teaser-${p.name.toLowerCase()}`} className={`rounded-2xl p-5 ${p.featured ? "bg-[#C99A2E] text-black" : "glass"}`}>
+                  <div className={`text-[10px] font-mono uppercase tracking-[0.18em] mb-2 ${p.featured ? "text-black/60" : "text-white/45"}`}>{p.name}</div>
+                  <div className="font-serif text-2xl">{p.price}</div>
+                  <div className={`text-xs ${p.featured ? "text-black/60" : "text-white/40"}`}>{p.note}</div>
                 </div>
               ))}
             </div>
+
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/pricing" data-testid="landing-pricing-cta" className="px-8 py-4 rounded-full bg-[#C99A2E] text-black font-medium hover:bg-[#DBC075] transition-colors">See pricing</Link>
-              <Link to="/register" data-testid="landing-register-cta" className="px-8 py-4 rounded-full glass-strong hover:bg-white/10">Start free</Link>
+              <Link to="/pricing" data-testid="landing-pricing-cta" className="px-8 py-4 rounded-full bg-[#C99A2E] text-black font-medium hover:bg-[#DBC075] transition-colors">See full pricing</Link>
+              <Link to="/register" data-testid="landing-register-cta" className="px-8 py-4 rounded-full glass-strong hover:bg-white/10">Create account</Link>
             </div>
           </motion.div>
         </div>
@@ -287,7 +334,7 @@ export default function Landing() {
           </h2>
           <p className="text-xl text-white/65 mb-10">Open the studio. Your first hero edit ships before your coffee gets cold.</p>
           <Link to="/register" data-testid="final-cta" className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-[#C99A2E] text-black font-medium text-lg hover:bg-[#DBC075] transition-all hover:scale-[1.02] gold-glow">
-            Start free — no card required
+            Start recording today
             <ArrowUpRight size={20} />
           </Link>
         </motion.div>

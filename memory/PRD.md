@@ -61,6 +61,23 @@ Both apps are now installable on phone/desktop:
 - Apple iOS PWA meta tags added (apple-touch-icon, apple-mobile-web-app-*)
 - Both apps pass Lighthouse PWA core requirements (manifest + SW + icons + HTTPS + responsive)
 
+## Deployment & pricing refresh (2026-05-12, later session)
+- **Deployed to Emergent**: production URL `https://luxury-video-studio-1.emergent.host`. Pre-deployment health check passed (deployment_agent green).
+- **DB query optimization**: Replaced 3 sequential `count_documents` calls in `/api/dashboard/stats` with a single `$facet` aggregation pipeline.
+- **Pricing restructured (AUD, 4 tiers)** — replaces previous free/$149/$1,490 model:
+  - `starter_monthly` — A$29.90 / mo · Standard
+  - `professional_monthly` — A$79.90 / mo · Professional (highlighted "Most popular")
+  - `elite_monthly` — A$1,500 / mo · Elite Partner (private AI presenter, face/voice clone, priority queue)
+  - `concierge_listing` — A$2,200 / listing · Concierge (done-for-you)
+  - Backend `PAYMENT_PACKAGES` updated; Stripe checkout returns valid `cs_test_*` session for every tier.
+  - Frontend `Pricing.jsx` rewritten with 4-column grid; teaser on landing page shows 4 cards.
+- **Landing page refresh**:
+  - Hero/feature images swapped from Unsplash USA McMansions to user-provided luxury assets stored at `/app/frontend/public/assets/property/` (`elite-penthouse.jpg`, `concierge-interior.jpg`, `agent-hero.jpg`).
+  - Added clean linear "How LensFlow Works" 4-step section (Write → Record → Enhance → Share) above the bento workflow.
+  - Removed "free" / "no card required" copy across nav, hero, final CTA, stats (now shows "$29.90 Standard / month").
+- **Cloudflare cleanup**: User removed `lensflow.com.au` and `www.lensflow.com.au` domain bindings from Cloudflare Pages. Custom domain still needs to be re-pointed to Emergent production URL via Entri (pending user action in Deployments → Connect Custom Domain).
+
+
 ## Backlog (P0 → P2)
 - **P1**: ElevenLabs voice IDs — user's provided key lacks `voices_read` permission and the default preset IDs aren't in their library. They can fix instantly by either (a) adding a voice to their elevenlabs.io library and setting `ELEVENLABS_VOICE_MIA/_OLIVER/_ARIA/_MARCUS` in `backend/.env`, or (b) regenerating an API key with `voices_read` enabled.
 - **P1**: D-ID avatar video generation (deferred — user said "skip" for now).

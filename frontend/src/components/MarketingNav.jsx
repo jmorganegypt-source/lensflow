@@ -46,7 +46,7 @@ export default function MarketingNav() {
             <>
               <Link to="/login" className="text-sm text-white/70 hover:text-white" data-testid="nav-login">Sign In</Link>
               <Link to="/register" className="px-6 py-2.5 rounded-full bg-[#C99A2E] text-black font-medium text-sm hover:bg-[#DBC075] transition-colors" data-testid="nav-cta">
-                Start Free
+                Start Recording
               </Link>
             </>
           )}
@@ -68,7 +68,7 @@ export default function MarketingNav() {
             ) : (
               <>
                 <Link to="/login" className="text-white/80">Sign In</Link>
-                <Link to="/register" className="px-6 py-3 rounded-full bg-[#C99A2E] text-black font-medium text-center">Start Free</Link>
+                <Link to="/register" className="px-6 py-3 rounded-full bg-[#C99A2E] text-black font-medium text-center">Start Recording</Link>
               </>
             )}
           </div>
