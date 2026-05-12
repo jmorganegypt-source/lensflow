@@ -1,0 +1,52 @@
+{
+  "summary": "Iteration 3 — added Stripe checkout (sk_test_emergent), Resend email (empty key → console-log fallback), and env-overridable ElevenLabs voice IDs. Backend: 24/24 pytest tests PASS including 8 new payment/webhook/reset-flow tests. Frontend: Pricing → Stripe Checkout redirect verified; logged-out routing for Starter/Concierge/Pro verified; /app/billing/success error state and 'Still processing' pending fallback both verified visually. Fixed one regression: presenters voice_id was '' because env-overridable voice IDs used os.environ.get(KEY, default) which doesn't apply default for set-but-empty env vars.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "Pre-existing: brute-force key uses request.client.host which behind K8s ingress is the proxy IP, splitting attempts across IP buckets (unchanged from iter 2)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Pricing → Choose Pro (logged-in)",
+        "issue": "Race condition: if the user clicks Pro immediately after navigating to /pricing, AuthContext has not yet resolved /auth/me and `user` is still falsy, so handleTierClick takes the logged-out branch and redirects to /register?next=/pricing instead of calling /api/payments/checkout. Reproduced reliably with no delay; adding a ~3.5s wait before the click makes the Stripe redirect succeed every time. Recommend the button render `disabled` while AuthContext is still in its loading state (e.g., user === undefined), and only enable once user is concretely null or an object.",
+        "affected_selectors": ["[data-testid=\"pricing-cta-pro\"]"],
+        "priority": "MEDIUM"
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix Pricing.jsx auth race: render Pro CTA disabled (or show a spinner) while AuthContext is still bootstrapping so an early click does not get bounced to /register?next=/pricing.",
+    "(Optional) Add an explicit STRIPE_WEBHOOK_SECRET env var with documentation so webhook signature verification can succeed in production — current behaviour (400 on missing/invalid signature) is correct but unusable for real Stripe webhook delivery."
+  ],
+  "critical_code_review_comments": [
+    "BUG FIXED: server.py used os.environ.get(\"ELEVENLABS_VOICE_MIA\", \"<default>\") which returns \"\" when the env var exists but is empty (as it is in /app/backend/.env). Changed to `os.environ.get(KEY) or \"<default>\"` for all four presenter voices.",
+    "create_checkout correctly persists payment_transactions with payment_status='initiated' and uses server-side authoritative PAYMENT_PACKAGES — frontend cannot inject prices. Good.",
+    "checkout_status correctly try/except wraps the Stripe retrieve (sk_test_emergent proxy returns 'No such checkout.session') and falls back to the local txn row → 200 with payment_status='initiated' verified in tests, no 500s.",
+    "Webhook handler at /api/webhook/stripe correctly returns 400 (not 500) on empty body and on bad/missing signature — exception is caught and re-raised as HTTPException(400).",
+    "send_password_reset_email helper correctly checks RESEND_KEY truthiness and falls back to console log; verified [EMAIL DEV] line in backend.err.log after running test_forgot_password_console_fallback_for_real_user.",
+    "Full reset password e2e works: token created → submitted → password updated → login succeeds with new password → token cannot be reused (400 on second submit).",
+    "Minor: server.py is now 855 lines — getting close to the 700-line guideline. Consider splitting into modules (auth, payments, studio, projects) at some point."
+  ],
+  "updated_files": [
+    "/app/backend/server.py (presenters PRESENTERS list — 4 lines: os.environ.get(K) or DEFAULT instead of os.environ.get(K, DEFAULT))",
+    "/app/backend/tests/backend_test.py (+8 new tests: payments_checkout x3, payments_status x2, payments_txn_persisted, stripe_webhook x2, forgot_password_console_fallback, reset_password_end_to_end)"
+  ],
+  "success_rate": {"backend": "100% (24/24)", "frontend": "Pricing + BillingSuccess flows verified manually + visually"},
+  "test_credentials": "admin@lensflow.ai / LensFlow2026! (verified working post-test)",
+  "seed_data_creation": "Each run creates: ephemeral register user, reset_<uuid> user + reset token, concierge_request, TEST_Project (deleted same test), generated_script, ~2 payment_transactions rows for admin, transient login_attempts (cleared by brute-force test end).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend suite at /app/backend/tests/backend_test.py — 24/24 green. Payment tests assume sk_test_emergent proxy cannot retrieve sessions; the test for status assert payment_status='initiated' (not 'paid'). Webhook tests assert 400, not 200. The forgot/reset test reads the token straight from mongo db.password_reset_tokens. Stripe redirect from /pricing was verified live → cs_test_... URL on checkout.stripe.com. The 'Still processing' fallback was screenshotted after 8 polls on a real session ID. Known UX issue: Pricing.jsx Pro button is clickable before AuthContext settles → routes to /register when admin is actually logged in. Worth a one-line fix in Pricing.jsx.",
+  "rca_of_the_issue": {
+    "presenters_empty_voice_id": "FIXED. os.environ.get(KEY, DEFAULT) only applies DEFAULT when KEY is absent from os.environ. The .env defined ELEVENLABS_VOICE_MIA=\"\" (intentional placeholder per iteration 3 spec), so KEY is present-but-empty and the default fallback never kicks in → /api/presenters returned voice_id=\"\" for all four presenters, breaking TTS. Changed to `os.environ.get(KEY) or DEFAULT` which evaluates the empty string as falsy and uses the default. Verified via re-running test_presenters_list.",
+    "pricing_pro_race": "OPEN. Pricing.jsx handleTierClick reads `user` from useAuth() synchronously. AuthContext initial state is null while /api/auth/me is in-flight; an early click sees null and routes to /register?next=/pricing. Suggested fix: have AuthContext expose an explicit `loading` flag (or use `user === undefined` for loading vs `null` for confirmed-logged-out) and gate the CTA on it."
+  }
+}

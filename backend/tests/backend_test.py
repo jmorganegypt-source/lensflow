@@ -199,6 +199,164 @@ def test_studio_scripts_list(admin_session):
     assert "scripts" in r.json()
 
 
+# ---------- Payments: Stripe checkout (iteration 3) ----------
+def test_payments_checkout_unauthenticated():
+    """Unauthenticated checkout must reject."""
+    r = requests.post(
+        f"{API}/payments/checkout",
+        json={"package_id": "pro_monthly", "origin_url": BASE_URL},
+        timeout=20,
+    )
+    assert r.status_code == 401, f"Expected 401, got {r.status_code}: {r.text}"
+
+
+def test_payments_checkout_invalid_package(admin_session):
+    """Invalid package id → 400 not 500."""
+    r = admin_session.post(
+        f"{API}/payments/checkout",
+        json={"package_id": "totally_fake", "origin_url": BASE_URL},
+        timeout=20,
+    )
+    assert r.status_code == 400, f"Expected 400, got {r.status_code}: {r.text}"
+
+
+def test_payments_checkout_valid_pro_monthly(admin_session):
+    """Valid pro_monthly returns checkout.stripe.com URL + session_id; persists txn."""
+    r = admin_session.post(
+        f"{API}/payments/checkout",
+        json={"package_id": "pro_monthly", "origin_url": BASE_URL},
+        timeout=30,
+    )
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}: {r.text}"
+    j = r.json()
+    assert "url" in j and "session_id" in j
+    assert "checkout.stripe.com" in j["url"], f"Unexpected url: {j['url']}"
+    assert j["session_id"].startswith("cs_"), f"Unexpected session_id: {j['session_id']}"
+    state["checkout_session_id"] = j["session_id"]
+
+
+def test_payments_status_initiated_no_500(admin_session):
+    """Freshly created session: must NOT 500. Should gracefully return 200 with
+    payment_status='initiated' and status='open' (falling back to local txn
+    because sk_test_emergent proxy can't retrieve sessions)."""
+    sid = state.get("checkout_session_id")
+    if not sid:
+        pytest.skip("Need previous checkout test to provide a session id")
+    r = admin_session.get(f"{API}/payments/status/{sid}", timeout=20)
+    assert r.status_code == 200, f"Got {r.status_code} (must not 500): {r.text}"
+    j = r.json()
+    assert j["payment_status"] == "initiated", f"Expected initiated, got: {j}"
+    assert j["status"] == "open", f"Expected open, got: {j}"
+    assert j["package_id"] == "pro_monthly"
+
+
+def test_payments_status_unknown_session_returns_404(admin_session):
+    """Unknown session id should 404 (not 500)."""
+    r = admin_session.get(f"{API}/payments/status/cs_test_doesnotexist_xyz", timeout=20)
+    assert r.status_code == 404, f"Expected 404, got {r.status_code}: {r.text}"
+
+
+def test_payments_txn_persisted_in_mongo(admin_session):
+    """Verify the checkout created a payment_transactions row with payment_status='initiated'."""
+    import pymongo
+    sid = state.get("checkout_session_id")
+    if not sid:
+        pytest.skip("Need previous checkout test")
+    mongo_url = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+    db_name = os.environ.get("DB_NAME", "lensflow_db")
+    client = pymongo.MongoClient(mongo_url)
+    try:
+        txn = client[db_name].payment_transactions.find_one({"session_id": sid})
+        assert txn is not None, f"No payment_transactions row for {sid}"
+        assert txn["payment_status"] == "initiated"
+        assert txn["status"] == "open"
+        assert txn["package_id"] == "pro_monthly"
+        assert txn["plan"] == "pro"
+        assert txn["amount"] == 149.00
+    finally:
+        client.close()
+
+
+def test_stripe_webhook_empty_body_returns_400():
+    """Malformed webhook payload must return 400 (not 500)."""
+    r = requests.post(f"{API}/webhook/stripe", data=b"", timeout=15)
+    assert r.status_code == 400, f"Expected 400, got {r.status_code}: {r.text}"
+
+
+def test_stripe_webhook_bad_signature_returns_400():
+    """Webhook with body but no/invalid signature must 400 (no STRIPE_WEBHOOK_SECRET set)."""
+    r = requests.post(
+        f"{API}/webhook/stripe",
+        data=b'{"foo": "bar"}',
+        headers={"Stripe-Signature": "t=123,v1=deadbeef", "Content-Type": "application/json"},
+        timeout=15,
+    )
+    assert r.status_code == 400, f"Expected 400, got {r.status_code}: {r.text}"
+
+
+# ---------- Password reset: console-log fallback + full reset flow ----------
+def test_forgot_password_console_fallback_for_real_user(admin_session):
+    """RESEND_API_KEY empty → must still 200 and log to console. Real user version."""
+    # Create a fresh user we can reset
+    email = f"reset_{uuid.uuid4().hex[:8]}@example.com"
+    r = requests.post(
+        f"{API}/auth/register",
+        json={"email": email, "password": "Init0Pass!", "name": "Reset User"},
+        timeout=20,
+    )
+    assert r.status_code == 200, r.text
+    state["reset_email"] = email
+    # forgot-password
+    r = requests.post(f"{API}/auth/forgot-password", json={"email": email}, timeout=20)
+    assert r.status_code == 200
+    assert "message" in r.json()
+
+
+def test_reset_password_end_to_end():
+    """Find reset token in mongo, submit reset, login with new password."""
+    import pymongo
+    email = state.get("reset_email")
+    if not email:
+        pytest.skip("Need previous forgot-password test to seed an email")
+
+    mongo_url = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+    db_name = os.environ.get("DB_NAME", "lensflow_db")
+    client = pymongo.MongoClient(mongo_url)
+    try:
+        user = client[db_name].users.find_one({"email": email.lower()})
+        assert user is not None
+        tok = client[db_name].password_reset_tokens.find_one(
+            {"user_id": str(user["_id"]), "used": False},
+            sort=[("expires_at", -1)],
+        )
+        assert tok is not None, "No reset token created (console-fallback path may have failed silently)"
+        token = tok["token"]
+    finally:
+        client.close()
+
+    new_password = "Brand0New!"
+    r = requests.post(
+        f"{API}/auth/reset-password",
+        json={"token": token, "new_password": new_password},
+        timeout=20,
+    )
+    assert r.status_code == 200, r.text
+    assert r.json().get("success") is True
+
+    # Login with new password
+    r = requests.post(f"{API}/auth/login", json={"email": email, "password": new_password}, timeout=20)
+    assert r.status_code == 200, r.text
+    assert "access_token" in r.json()
+
+    # Token cannot be reused
+    r = requests.post(
+        f"{API}/auth/reset-password",
+        json={"token": token, "new_password": "Another0!"},
+        timeout=15,
+    )
+    assert r.status_code == 400
+
+
 # ---------- Brute force lockout (run last) ----------
 def test_brute_force_lockout():
     """Failed logins must eventually trigger 429 lockout — and NEVER raise 500.

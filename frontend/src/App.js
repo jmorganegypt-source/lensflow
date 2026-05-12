@@ -19,6 +19,7 @@ import Studio from "./pages/app/Studio";
 import Recorder from "./pages/app/Recorder";
 import Projects from "./pages/app/Projects";
 import Settings from "./pages/app/Settings";
+import BillingSuccess from "./pages/app/BillingSuccess";
 
 function Protected({ children }) {
   const { user } = useAuth();
@@ -64,6 +65,7 @@ export default function App() {
             <Route path="recorder" element={<Recorder />} />
             <Route path="projects" element={<Projects />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="billing/success" element={<BillingSuccess />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

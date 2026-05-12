@@ -24,6 +24,10 @@ from pydantic import BaseModel, EmailStr, Field
 from elevenlabs.client import ElevenLabs
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from emergentintegrations.payments.stripe.checkout import (
+    StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse, CheckoutStatusResponse,
+)
+import resend
 
 
 # ---------------------------------------------------------------------------
@@ -44,6 +48,12 @@ REFRESH_TOKEN_DAYS = 30
 ELEVEN_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
 EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+STRIPE_KEY = os.environ.get("STRIPE_API_KEY", "")
+RESEND_KEY = os.environ.get("RESEND_API_KEY", "")
+RESEND_FROM = os.environ.get("RESEND_FROM_EMAIL", "LensFlow <onboarding@resend.dev>")
+
+if RESEND_KEY:
+    resend.api_key = RESEND_KEY
 
 eleven_client: Optional[ElevenLabs] = None
 if ELEVEN_KEY:
@@ -51,6 +61,39 @@ if ELEVEN_KEY:
         eleven_client = ElevenLabs(api_key=ELEVEN_KEY)
     except Exception as e:
         logger.warning(f"ElevenLabs init failed: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Email (Resend)
+# ---------------------------------------------------------------------------
+def send_password_reset_email(to_email: str, reset_link: str) -> None:
+    """Send password reset email via Resend, falling back to console log."""
+    if not RESEND_KEY:
+        logger.info(f"[EMAIL DEV] reset link for {to_email}: {reset_link}")
+        return
+    try:
+        resend.Emails.send({
+            "from": RESEND_FROM,
+            "to": [to_email],
+            "subject": "Reset your LensFlow password",
+            "html": f"""
+              <div style="font-family:'Outfit',sans-serif;background:#050505;color:#fff;padding:48px 24px;">
+                <div style="max-width:520px;margin:0 auto;background:#0A0A0A;border:1px solid rgba(201,154,46,0.25);border-radius:24px;padding:40px;">
+                  <h1 style="font-family:'Playfair Display',serif;font-size:32px;color:#fff;margin:0 0 8px;">Reset your password</h1>
+                  <p style="color:rgba(255,255,255,0.65);font-size:15px;line-height:1.6;">
+                    A password reset was requested for your LensFlow account. Tap the button below to choose a new one. This link expires in 1 hour.
+                  </p>
+                  <a href="{reset_link}" style="display:inline-block;margin:24px 0;background:#C99A2E;color:#000;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:500;">Reset password</a>
+                  <p style="color:rgba(255,255,255,0.35);font-size:12px;margin-top:32px;">Didn't request this? Ignore this email.</p>
+                </div>
+                <p style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;margin-top:24px;">LensFlow — Cinematic AI Real Estate Media</p>
+              </div>
+            """,
+        })
+        logger.info(f"[EMAIL] reset link sent to {to_email}")
+    except Exception as e:
+        logger.error(f"Resend send failed: {e} — falling back to console")
+        logger.info(f"[EMAIL DEV] reset link for {to_email}: {reset_link}")
 
 
 # ---------------------------------------------------------------------------
@@ -256,7 +299,7 @@ PRESENTERS = [
         "name": "Mia",
         "tagline": "Luxury Residential · Warm & Elegant",
         "description": "Australian-British inflection. Best for prestige residential, beachfront and heritage estates.",
-        "voice_id": os.environ.get("ELEVENLABS_VOICE_MIA", "EXAVITQu4vr4xnSDxMaC"),
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_MIA") or "EXAVITQu4vr4xnSDxMaC",
         "avatar": "https://customer-assets.emergentagent.com/job_luxury-video-studio-1/artifacts/o3r5ea29_Mia_Headshot.jpg",
         "accent": "Australian-British",
         "specialty": ["Residential", "Beachfront", "Heritage"],
@@ -266,7 +309,7 @@ PRESENTERS = [
         "name": "Oliver",
         "tagline": "Corporate Elite · Authoritative",
         "description": "Refined British baritone. Built for commercial, off-the-plan and investor-grade properties.",
-        "voice_id": os.environ.get("ELEVENLABS_VOICE_OLIVER", "TxGEqnHWrfWFTfGW9XjX"),
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_OLIVER") or "TxGEqnHWrfWFTfGW9XjX",
         "avatar": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
         "accent": "British RP",
         "specialty": ["Commercial", "Off-the-plan", "Investor"],
@@ -276,7 +319,7 @@ PRESENTERS = [
         "name": "Aria",
         "tagline": "Modern Lifestyle · Fresh & Confident",
         "description": "Vibrant American voice for new developments, lifestyle marketing and Instagram-first reels.",
-        "voice_id": os.environ.get("ELEVENLABS_VOICE_ARIA", "9BWtsMINqrJLrRacOk9x"),
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_ARIA") or "9BWtsMINqrJLrRacOk9x",
         "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
         "accent": "American",
         "specialty": ["New Developments", "Lifestyle", "Social Media"],
@@ -286,7 +329,7 @@ PRESENTERS = [
         "name": "Marcus",
         "tagline": "International Luxe · Sophisticated",
         "description": "Continental polish for international buyers. Translates the language of wealth.",
-        "voice_id": os.environ.get("ELEVENLABS_VOICE_MARCUS", "JBFqnCBsd6RMkjVDRZzb"),
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_MARCUS") or "JBFqnCBsd6RMkjVDRZzb",
         "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=srgb&fm=jpg&w=600&q=85",
         "accent": "Continental European",
         "specialty": ["International", "Penthouse", "Estate"],
@@ -388,7 +431,7 @@ async def forgot_password(req: ForgotPasswordReq):
             "expires_at": datetime.now(timezone.utc) + timedelta(hours=1),
         })
         reset_link = f"{FRONTEND_URL}/reset-password?token={token}"
-        logger.info(f"[PASSWORD RESET] {req.email}: {reset_link}")
+        send_password_reset_email(req.email, reset_link)
     return {"message": "If the email exists, a reset link has been sent."}
 
 
@@ -611,6 +654,156 @@ async def submit_concierge(req: ConciergeReq):
     await db.concierge_requests.insert_one(doc)
     logger.info(f"[CONCIERGE] {req.email} :: {req.message[:80]}")
     return {"success": True, "id": doc["id"]}
+
+
+# ---------- Payments (Stripe) ----------
+# Server-side authoritative price packages — never trust the frontend
+PAYMENT_PACKAGES = {
+    "pro_monthly":      {"amount": 149.00, "currency": "usd", "label": "Pro · Monthly",      "plan": "pro"},
+    "pro_yearly":       {"amount": 1490.00, "currency": "usd", "label": "Pro · Annual",      "plan": "pro"},
+    "concierge_hero":   {"amount": 1490.00, "currency": "usd", "label": "Concierge · Hero Edit", "plan": "concierge"},
+    "concierge_suite":  {"amount": 2490.00, "currency": "usd", "label": "Concierge · Full Suite", "plan": "concierge"},
+}
+
+
+class CheckoutInitReq(BaseModel):
+    package_id: str
+    origin_url: str
+
+
+def _stripe_for(request: Request) -> StripeCheckout:
+    host_url = str(request.base_url).rstrip("/")
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    return StripeCheckout(api_key=STRIPE_KEY, webhook_url=webhook_url)
+
+
+@api.post("/payments/checkout")
+async def create_checkout(req: CheckoutInitReq, request: Request, user: dict = Depends(get_current_user)):
+    if not STRIPE_KEY:
+        raise HTTPException(status_code=503, detail="Payments not configured")
+    pkg = PAYMENT_PACKAGES.get(req.package_id)
+    if not pkg:
+        raise HTTPException(status_code=400, detail="Invalid package")
+
+    origin = req.origin_url.rstrip("/")
+    success_url = f"{origin}/app/billing/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{origin}/pricing?canceled=1"
+
+    metadata = {
+        "user_id": str(user["_id"]),
+        "user_email": user["email"],
+        "package_id": req.package_id,
+        "plan": pkg["plan"],
+    }
+
+    stripe_checkout = _stripe_for(request)
+    checkout_req = CheckoutSessionRequest(
+        amount=pkg["amount"],
+        currency=pkg["currency"],
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata=metadata,
+    )
+    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_req)
+
+    await db.payment_transactions.insert_one({
+        "session_id": session.session_id,
+        "user_id": str(user["_id"]),
+        "user_email": user["email"],
+        "package_id": req.package_id,
+        "plan": pkg["plan"],
+        "amount": pkg["amount"],
+        "currency": pkg["currency"],
+        "payment_status": "initiated",
+        "status": "open",
+        "metadata": metadata,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"url": session.url, "session_id": session.session_id}
+
+
+@api.get("/payments/status/{session_id}")
+async def checkout_status(session_id: str, request: Request, user: dict = Depends(get_current_user)):
+    if not STRIPE_KEY:
+        raise HTTPException(status_code=503, detail="Payments not configured")
+    txn = await db.payment_transactions.find_one({"session_id": session_id, "user_id": str(user["_id"])}, {"_id": 0})
+    if not txn:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    # Try live Stripe retrieve; falls back to local txn state if proxy can't retrieve
+    # (the sk_test_emergent proxy doesn't support session retrieval, but webhooks still
+    # update payment_transactions reliably).
+    stripe_checkout = _stripe_for(request)
+    payment_status = txn.get("payment_status", "initiated")
+    status = txn.get("status", "open")
+    amount_total = int(txn.get("amount", 0) * 100)
+    currency = txn.get("currency", "usd")
+
+    try:
+        status_resp: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
+        payment_status = status_resp.payment_status
+        status = status_resp.status
+        amount_total = status_resp.amount_total
+        currency = status_resp.currency
+    except Exception as e:
+        logger.warning(f"Stripe retrieve failed (using local txn state): {str(e)[:120]}")
+
+    # Update once; never apply credits twice for the same session
+    if payment_status == "paid" and txn["payment_status"] != "paid":
+        await db.payment_transactions.update_one(
+            {"session_id": session_id},
+            {"$set": {
+                "payment_status": payment_status,
+                "status": status,
+                "amount_total": amount_total,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }},
+        )
+        plan = txn.get("plan") or "pro"
+        await db.users.update_one({"_id": ObjectId(txn["user_id"])}, {"$set": {"plan": plan}})
+        logger.info(f"[PAYMENT] {txn['user_email']} → plan: {plan} (session {session_id})")
+    elif status == "expired" and txn["status"] != "expired":
+        await db.payment_transactions.update_one(
+            {"session_id": session_id},
+            {"$set": {"payment_status": "expired", "status": "expired",
+                      "updated_at": datetime.now(timezone.utc).isoformat()}},
+        )
+    return {
+        "payment_status": payment_status,
+        "status": status,
+        "amount_total": amount_total,
+        "currency": currency,
+        "package_id": txn.get("package_id"),
+    }
+
+
+@api.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    if not STRIPE_KEY:
+        return {"received": False}
+    body = await request.body()
+    signature = request.headers.get("Stripe-Signature")
+    try:
+        stripe_checkout = _stripe_for(request)
+        event = await stripe_checkout.handle_webhook(body, signature)
+        if event.payment_status == "paid":
+            txn = await db.payment_transactions.find_one({"session_id": event.session_id})
+            if txn and txn["payment_status"] != "paid":
+                await db.payment_transactions.update_one(
+                    {"session_id": event.session_id},
+                    {"$set": {"payment_status": "paid", "status": "complete",
+                              "updated_at": datetime.now(timezone.utc).isoformat()}},
+                )
+                plan = (event.metadata or {}).get("plan") or txn.get("plan") or "pro"
+                user_id = (event.metadata or {}).get("user_id") or txn.get("user_id")
+                if user_id:
+                    await db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"plan": plan}})
+                    logger.info(f"[WEBHOOK] plan upgrade → {plan} for user {user_id}")
+        return {"received": True}
+    except Exception as e:
+        logger.exception("Stripe webhook error")
+        raise HTTPException(status_code=400, detail=str(e)[:200])
 
 
 # ---------------------------------------------------------------------------

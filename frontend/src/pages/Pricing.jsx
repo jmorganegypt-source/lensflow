@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MarketingNav from "../components/MarketingNav";
 import Footer from "../components/Footer";
-import { Check, Sparkles, Crown, Phone } from "lucide-react";
+import { Check, Sparkles, Crown, Phone, Loader2 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import api, { formatApiErrorDetail } from "../lib/api";
+import { toast } from "sonner";
 
 const tiers = [
   {
@@ -15,6 +18,7 @@ const tiers = [
     href: "/register",
     icon: Sparkles,
     highlight: false,
+    package_id: null,
     perks: [
       "3 AI scripts / month",
       "1 AI presenter (Mia)",
@@ -30,9 +34,10 @@ const tiers = [
     cadence: "per month",
     blurb: "The agent's standard kit. Unlimited drafts.",
     cta: "Choose Pro",
-    href: "/register",
+    href: null,
     icon: Crown,
     highlight: true,
+    package_id: "pro_monthly",
     perks: [
       "Unlimited AI scripts",
       "All 4 presenters · all accents",
@@ -52,6 +57,7 @@ const tiers = [
     href: "/concierge",
     icon: Phone,
     highlight: false,
+    package_id: null,
     perks: [
       "Done-for-you production",
       "Dedicated editor & strategist",
@@ -73,6 +79,31 @@ const faqs = [
 
 export default function Pricing() {
   const [open, setOpen] = useState(null);
+  const [loadingTier, setLoadingTier] = useState(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleTierClick = async (t) => {
+    if (!t.package_id) {
+      navigate(t.href);
+      return;
+    }
+    if (!user) {
+      navigate("/register?next=/pricing");
+      return;
+    }
+    setLoadingTier(t.id);
+    try {
+      const { data } = await api.post("/payments/checkout", {
+        package_id: t.package_id,
+        origin_url: window.location.origin,
+      });
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Checkout failed");
+    } finally { setLoadingTier(null); }
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] text-white" data-testid="pricing-page">
       <MarketingNav />
@@ -100,9 +131,15 @@ export default function Pricing() {
                 <span className="font-serif text-6xl tracking-tighter">{t.price}</span>
                 <span className="text-white/45 ml-2 text-sm">{t.cadence}</span>
               </div>
-              <Link to={t.href} data-testid={`pricing-cta-${t.id}`} className={`block text-center w-full py-3.5 rounded-full font-medium mb-8 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : "glass-strong hover:bg-white/10"}`}>
-                {t.cta}
-              </Link>
+              <Link to={t.href || "#"} data-testid={`pricing-cta-${t.id}-link`} hidden />
+              <button
+                onClick={() => handleTierClick(t)}
+                disabled={loadingTier === t.id}
+                data-testid={`pricing-cta-${t.id}`}
+                className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-8 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
+              >
+                {loadingTier === t.id ? <Loader2 className="animate-spin" size={16} /> : t.cta}
+              </button>
               <ul className="space-y-3">
                 {t.perks.map((p, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-white/75">
