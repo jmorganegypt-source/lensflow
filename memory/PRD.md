@@ -22,33 +22,24 @@ User uploaded an existing single-page LENSFLOW HTML site (luxury Australian real
 ## What's implemented (2026-05-12)
 
 ### Backend endpoints
-- Auth: register, login, logout, me, refresh, forgot-password, reset-password
-- Presenters: list (Mia, Oliver, Aria, Marcus) with env-overridable ElevenLabs voice IDs
+- Auth: register, login, logout, me, refresh, forgot-password (Resend email + console fallback), reset-password
+- Presenters: list (Mia, Oliver, Aria, Marcus) with env-overridable ElevenLabs voice IDs (`os.environ.get(K) or default`)
 - TTS preview: ElevenLabs convert (friendly 404 if voice not in user's library)
-- AI Studio: GPT-5.2 script generation with property fields, tone, presenter, duration
+- AI Studio: GPT-5.2 script generation
 - Projects: full CRUD with status filtering
-- Dashboard stats: project/script counts + minutes_saved
+- Dashboard stats
 - Concierge form intake
+- **Payments (Stripe)**: POST /api/payments/checkout (server-side authoritative packages), GET /api/payments/status/{session_id} (graceful fallback when sk_test_emergent proxy can't retrieve), POST /api/webhook/stripe (signature-verified, flips user.plan to "pro"/"concierge")
+- **Email (Resend)**: send_password_reset_email helper sends branded HTML email when RESEND_API_KEY is set, else falls back to console log
 
 ### Frontend pages
-- `/` Cinematic landing (hero, bento workflow, marquee presenters, testimonials, feature grid, pricing teaser, final CTA)
-- `/login`, `/register`, `/forgot-password`, `/reset-password`
-- `/presenters` (public): hear voice previews
-- `/pricing` (public): 3 tiers, FAQ accordion
-- `/concierge` (public): white-glove quote form
-- `/app/dashboard`: stats, quick actions, recent projects
-- `/app/studio`: GPT-5.2 script form + editable output + TTS preview + save-to-projects + record CTA
-- `/app/recorder`: camera preview, auto-scrolling teleprompter with speed/font controls, record/playback
-- `/app/projects`: filterable project library with delete
-- `/app/settings`: profile, plan, support links
-- Persistent sidebar + mobile bottom-nav inside `/app/*`
-
-### Auth seed
-- Admin: `admin@lensflow.ai` / `LensFlow2026!` (also documented in `/app/memory/test_credentials.md`)
+- Marketing: /, /presenters, /pricing (Stripe Checkout integrated for Pro tier), /concierge, /login, /register, /forgot-password, /reset-password
+- App shell `/app/*`: /dashboard, /studio, /recorder, /projects, /settings, **/billing/success (polling with graceful pending fallback)**
 
 ## Tests
-- 14/14 backend pytest green (iteration_2.json)
-- Frontend smoke verified via screenshots (landing + pricing)
+- 24/24 backend pytest green (iteration_3.json) — includes 8 payment/webhook/reset tests
+- Frontend Pricing → Stripe Checkout redirect verified
+- Email fallback verified via `[EMAIL DEV]` log line
 
 ## Backlog (P0 → P2)
 - **P1**: ElevenLabs voice IDs — user's provided key lacks `voices_read` permission and the default preset IDs aren't in their library. They can fix instantly by either (a) adding a voice to their elevenlabs.io library and setting `ELEVENLABS_VOICE_MIA/_OLIVER/_ARIA/_MARCUS` in `backend/.env`, or (b) regenerating an API key with `voices_read` enabled.

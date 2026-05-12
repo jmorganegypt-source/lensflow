@@ -88,6 +88,11 @@ export default function Pricing() {
       navigate(t.href);
       return;
     }
+    // user === null means AuthContext is still resolving /auth/me — wait
+    if (user === null) {
+      toast.message("Checking your session…");
+      return;
+    }
     if (!user) {
       navigate("/register?next=/pricing");
       return;
@@ -134,11 +139,11 @@ export default function Pricing() {
               <Link to={t.href || "#"} data-testid={`pricing-cta-${t.id}-link`} hidden />
               <button
                 onClick={() => handleTierClick(t)}
-                disabled={loadingTier === t.id}
+                disabled={loadingTier === t.id || (t.package_id && user === null)}
                 data-testid={`pricing-cta-${t.id}`}
                 className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-8 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
               >
-                {loadingTier === t.id ? <Loader2 className="animate-spin" size={16} /> : t.cta}
+                {loadingTier === t.id || (t.package_id && user === null) ? <Loader2 className="animate-spin" size={16} /> : t.cta}
               </button>
               <ul className="space-y-3">
                 {t.perks.map((p, i) => (
