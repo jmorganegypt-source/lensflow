@@ -683,9 +683,19 @@ async def delete_project(project_id: str, user: dict = Depends(get_current_user)
 @api.get("/dashboard/stats")
 async def dashboard_stats(user: dict = Depends(get_current_user)):
     uid = str(user["_id"])
-    projects_total = await db.projects.count_documents({"user_id": uid})
-    drafts = await db.projects.count_documents({"user_id": uid, "status": "draft"})
-    published = await db.projects.count_documents({"user_id": uid, "status": "published"})
+    pipeline = [
+        {"$match": {"user_id": uid}},
+        {"$facet": {
+            "total": [{"$count": "count"}],
+            "drafts": [{"$match": {"status": "draft"}}, {"$count": "count"}],
+            "published": [{"$match": {"status": "published"}}, {"$count": "count"}],
+        }},
+    ]
+    result = await db.projects.aggregate(pipeline).to_list(1)
+    bucket = result[0] if result else {"total": [], "drafts": [], "published": []}
+    projects_total = bucket["total"][0]["count"] if bucket["total"] else 0
+    drafts = bucket["drafts"][0]["count"] if bucket["drafts"] else 0
+    published = bucket["published"][0]["count"] if bucket["published"] else 0
     scripts_total = await db.scripts.count_documents({"user_id": uid})
     return {
         "projects": projects_total,
