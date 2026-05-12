@@ -29,6 +29,8 @@ from emergentintegrations.payments.stripe.checkout import (
 )
 import resend
 
+import lumen as lumen_module
+
 
 # ---------------------------------------------------------------------------
 # Setup
@@ -884,6 +886,18 @@ async def stripe_webhook(request: Request):
 # ---------------------------------------------------------------------------
 # Startup
 # ---------------------------------------------------------------------------
+def _resend_send(to_email: str, subject: str, html: str):
+    """Generic Resend sender used by lumen module (falls back to console log)."""
+    if not RESEND_KEY:
+        logger.info(f"[EMAIL DEV] {subject} → {to_email}")
+        return
+    try:
+        resend.Emails.send({"from": RESEND_FROM, "to": [to_email], "subject": subject, "html": html})
+        logger.info(f"[EMAIL] sent: {subject} → {to_email}")
+    except Exception as e:
+        logger.error(f"resend send failed: {e}")
+
+
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("email", unique=True)
@@ -910,6 +924,20 @@ async def startup():
         await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
         logger.info("Updated admin password")
 
+    # Init Lumen sub-app
+    lumen_module.init(
+        db=db,
+        jwt_secret=get_jwt_secret(),
+        frontend_url=FRONTEND_URL,
+        emergent_key=EMERGENT_KEY,
+        eleven_client=eleven_client,
+        stripe_key=STRIPE_KEY,
+        resend_send=_resend_send,
+        resend_from=RESEND_FROM,
+    )
+    await lumen_module.ensure_indexes(db)
+    logger.info("Lumen sub-app initialized")
+
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -917,6 +945,7 @@ async def shutdown():
 
 
 app.include_router(api)
+app.include_router(lumen_module.router)
 
 # CORS
 allow_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "*").split(",") if o.strip()]

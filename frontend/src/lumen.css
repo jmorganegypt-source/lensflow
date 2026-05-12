@@ -1,0 +1,115 @@
+/* Lumen design system — totally separate from LensFlow.
+   Bright, warm, photo-heavy, fun. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Caveat:wght@500;700&display=swap');
+
+.lumen-root {
+  --lumen-coral: #FF6B6B;
+  --lumen-coral-deep: #E84545;
+  --lumen-sun: #FFD166;
+  --lumen-cream: #FFF1E6;
+  --lumen-blush: #FFE3D8;
+  --lumen-mint: #B8F2D8;
+  --lumen-lilac: #D5C6F8;
+  --lumen-ink: #1A1A2E;
+  --lumen-ink-soft: #5C5C7A;
+  --lumen-muted: #9999B0;
+
+  background: linear-gradient(180deg, #FFF1E6 0%, #FFE3D8 100%);
+  color: var(--lumen-ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.lumen-root *,
+.lumen-root *::before,
+.lumen-root *::after {
+  border-color: rgba(26, 26, 46, 0.08);
+}
+
+.lumen-root ::selection {
+  background: var(--lumen-coral);
+  color: #fff;
+}
+
+.lumen-display { font-family: 'Fraunces', Georgia, serif; letter-spacing: -0.02em; font-weight: 600; }
+.lumen-hand { font-family: 'Caveat', cursive; }
+.lumen-card {
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 18px 40px rgba(255,107,107,0.10), 0 2px 6px rgba(26,26,46,0.04);
+}
+.lumen-btn-primary {
+  background: var(--lumen-coral);
+  color: #fff;
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-weight: 600;
+  transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 8px 24px rgba(255,107,107,0.35);
+}
+.lumen-btn-primary:hover { background: var(--lumen-coral-deep); transform: translateY(-1px); box-shadow: 0 12px 32px rgba(255,107,107,0.45); }
+.lumen-btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+.lumen-btn-ghost {
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(8px);
+  color: var(--lumen-ink);
+  border: 1px solid rgba(26,26,46,0.08);
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.lumen-btn-ghost:hover { background: #fff; }
+
+.lumen-input {
+  background: #fff;
+  border: 1.5px solid rgba(26,26,46,0.10);
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-size: 15px;
+  width: 100%;
+  color: var(--lumen-ink);
+  outline: none;
+  transition: border 0.15s, box-shadow 0.15s;
+}
+.lumen-input:focus { border-color: var(--lumen-coral); box-shadow: 0 0 0 4px rgba(255,107,107,0.12); }
+
+.lumen-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(26,26,46,0.06);
+}
+.lumen-chip.active { background: var(--lumen-coral); color: #fff; }
+
+.lumen-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+.lumen-sticker {
+  position: absolute;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 8px 20px rgba(26,26,46,0.12);
+}
+
+/* Photo grid for landing */
+.lumen-photo {
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(255,107,107,0.18);
+  transform: rotate(var(--rot, 0deg));
+  transition: transform 0.4s;
+}
+.lumen-photo:hover { transform: rotate(0deg) scale(1.02); }
