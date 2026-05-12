@@ -96,6 +96,47 @@ def send_password_reset_email(to_email: str, reset_link: str) -> None:
         logger.info(f"[EMAIL DEV] reset link for {to_email}: {reset_link}")
 
 
+def send_payment_thankyou_email(to_email: str, name: str, plan: str, amount: float, currency: str = "usd") -> None:
+    """Send a branded thank-you email after a successful Stripe payment."""
+    plan_label = {"pro": "Pro", "concierge": "Concierge"}.get(plan, plan.title())
+    amount_str = f"${amount:,.2f} {currency.upper()}"
+    studio_link = f"{FRONTEND_URL}/app/dashboard"
+    if not RESEND_KEY:
+        logger.info(f"[EMAIL DEV] thank-you for {to_email}: plan={plan_label} amount={amount_str}")
+        return
+    try:
+        resend.Emails.send({
+            "from": RESEND_FROM,
+            "to": [to_email],
+            "subject": f"You're on LensFlow {plan_label} — the full studio is unlocked",
+            "html": f"""
+              <div style="font-family:'Outfit',sans-serif;background:#050505;color:#fff;padding:48px 24px;">
+                <div style="max-width:560px;margin:0 auto;background:#0A0A0A;border:1px solid rgba(201,154,46,0.25);border-radius:24px;padding:44px;">
+                  <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#C99A2E;font-family:monospace;margin-bottom:12px;">Welcome to {plan_label}</div>
+                  <h1 style="font-family:'Playfair Display',serif;font-size:36px;line-height:1.05;color:#fff;margin:0 0 14px;">Thank you, {name or 'agent'}.</h1>
+                  <p style="color:rgba(255,255,255,0.7);font-size:16px;line-height:1.7;">Your payment of <strong style="color:#C99A2E;">{amount_str}</strong> has cleared and your full studio is live. All four presenters, unlimited scripts, broadcast exports — every cinematic tool is now in your hands.</p>
+                  <a href="{studio_link}" style="display:inline-block;margin:28px 0 12px;background:#C99A2E;color:#000;padding:14px 32px;border-radius:999px;text-decoration:none;font-weight:500;">Open the studio →</a>
+                  <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:32px 0;" />
+                  <h3 style="font-family:'Playfair Display',serif;font-size:18px;color:#fff;margin:0 0 10px;">What's unlocked</h3>
+                  <ul style="color:rgba(255,255,255,0.65);font-size:14px;line-height:1.9;padding-left:20px;margin:0;">
+                    <li>Unlimited GPT-5.2 script generation</li>
+                    <li>Mia, Oliver, Aria & Marcus (all accents)</li>
+                    <li>1080p &amp; 4K exports — no watermark</li>
+                    <li>REA · Domain · Rightmove formatting</li>
+                    <li>Priority TTS rendering</li>
+                  </ul>
+                  <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:32px;line-height:1.6;">Questions? Just reply to this email — concierge@lensflow.ai. Need an invoice or VAT/GST receipt? We've got you.</p>
+                </div>
+                <p style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;margin-top:24px;">LensFlow — Cinematic AI Real Estate Media</p>
+              </div>
+            """,
+        })
+        logger.info(f"[EMAIL] thank-you sent to {to_email} ({plan_label}, {amount_str})")
+    except Exception as e:
+        logger.error(f"Resend thank-you failed: {e} — falling back to console")
+        logger.info(f"[EMAIL DEV] thank-you for {to_email}: plan={plan_label} amount={amount_str}")
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -763,6 +804,18 @@ async def checkout_status(session_id: str, request: Request, user: dict = Depend
         plan = txn.get("plan") or "pro"
         await db.users.update_one({"_id": ObjectId(txn["user_id"])}, {"$set": {"plan": plan}})
         logger.info(f"[PAYMENT] {txn['user_email']} → plan: {plan} (session {session_id})")
+        # Send thank-you email (idempotent — only fires on first transition to paid)
+        try:
+            buyer = await db.users.find_one({"_id": ObjectId(txn["user_id"])})
+            send_payment_thankyou_email(
+                to_email=txn["user_email"],
+                name=(buyer or {}).get("name", ""),
+                plan=plan,
+                amount=txn.get("amount", amount_total / 100.0),
+                currency=txn.get("currency", "usd"),
+            )
+        except Exception as e:
+            logger.error(f"Thank-you email send failed (non-blocking): {e}")
     elif status == "expired" and txn["status"] != "expired":
         await db.payment_transactions.update_one(
             {"session_id": session_id},
@@ -800,6 +853,19 @@ async def stripe_webhook(request: Request):
                 if user_id:
                     await db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"plan": plan}})
                     logger.info(f"[WEBHOOK] plan upgrade → {plan} for user {user_id}")
+                    # Send thank-you email (idempotent — guarded by payment_status check above)
+                    try:
+                        buyer = await db.users.find_one({"_id": ObjectId(user_id)})
+                        if buyer:
+                            send_payment_thankyou_email(
+                                to_email=buyer["email"],
+                                name=buyer.get("name", ""),
+                                plan=plan,
+                                amount=txn.get("amount", 0.0),
+                                currency=txn.get("currency", "usd"),
+                            )
+                    except Exception as e:
+                        logger.error(f"Thank-you email send failed (non-blocking): {e}")
         return {"received": True}
     except Exception as e:
         logger.exception("Stripe webhook error")

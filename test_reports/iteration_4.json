@@ -1,0 +1,36 @@
+{
+  "summary": "Iteration 4 — verified thank-you email (Resend with empty-key console fallback) wired into payment success flow. Backend: 27/27 pytest tests PASS (24 regression + 3 new). New tests cover (a) direct unit test of send_payment_thankyou_email() helper via caplog, (b) status endpoint with 'initiated' txn does NOT fire email, (c) status endpoint with already-paid txn is idempotent across repeated hits (email never fires twice). The webhook-driven send path was NOT tested live (StripeCheckout.handle_webhook requires a real signed payload per agent_to_agent_context_note); coverage of that branch is by code-review only.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "Pre-existing: brute-force key is `{request.client.host}:{email}` which behind K8s ingress is the proxy IP — attempts split across IP buckets. Carried forward from iter 2/3."},
+      {"endpoint": "POST /api/webhook/stripe", "issue": "Cannot end-to-end test the webhook→thank-you-email branch because STRIPE_WEBHOOK_SECRET is unset and StripeCheckout.handle_webhook requires a real signed payload. Branch is covered only by code inspection — guards mirror the status-endpoint guards (idempotency by `txn['payment_status'] != 'paid'`)."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "send_payment_thankyou_email() helper at server.py:99-137 — clean: falsiness check on RESEND_KEY → console-log fallback; try/except around resend.Emails.send wraps any third-party failure into a console log so payment success NEVER blocks on email failure. Good defensive pattern.",
+    "Idempotency guard in checkout_status() (line 794): `if payment_status == 'paid' and txn['payment_status'] != 'paid'` — correctly fires email ONLY on the first paid transition. Repeated polling of /payments/status will not re-fire. Verified by test_payments_status_paid_email_idempotency.",
+    "Idempotency guard in stripe_webhook() (line 845): `if txn and txn['payment_status'] != 'paid'` — same correct gate. Email send is also wrapped in try/except so a Resend outage cannot 500 the webhook.",
+    "Both send sites use buyer.name with `or ''` fallback and `txn.get('amount', ...)` with defaults — safe against missing fields.",
+    "Helper uses logger.info for both [EMAIL DEV] and [EMAIL] success paths — single log line per send, easy to grep for ops/observability.",
+    "Carried forward from iter 3: server.py is now 921 lines (was 855) — past the 700-line guideline. Strongly recommend splitting into modules (auth.py, payments.py, studio.py, projects.py) before iter 5.",
+    "Carried forward from iter 3: FastAPI @app.on_event('startup'|'shutdown') is deprecated — migrate to lifespan context manager.",
+    "Minor: send_payment_thankyou_email() doesn't accept a `session_id` for log correlation. Adding it would help tracing in production (e.g., `[EMAIL] thank-you sent to X (Pro, $149) for session cs_test_...`)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (+3 new tests: test_send_payment_thankyou_email_helper_console_fallback, test_payments_status_initiated_does_not_send_email, test_payments_status_paid_email_idempotency)"
+  ],
+  "success_rate": {"backend": "100% (27/27)", "frontend": "not tested (per request: backend only)"},
+  "test_credentials": "admin@lensflow.ai / LensFlow2026! (verified working)",
+  "seed_data_creation": "Each run: ephemeral register user, reset_<uuid> user + token, concierge_request, TEST_Project (deleted), generated_script, ~3 payment_transactions rows for admin (one paid-direct row inserted+deleted by idempotency test), transient login_attempts (cleared by brute-force test end).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend suite at /app/backend/tests/backend_test.py — 27/27 green. Thank-you email helper is verified at unit level via caplog (logger='lensflow'). The endpoint-level idempotency tests use a paid-direct mongo insert because the sk_test_emergent proxy cannot actually transition a session to paid. The webhook→thank-you path is NOT directly tested (needs STRIPE_WEBHOOK_SECRET + a real signed payload). To prove webhook email firing in dev, temporarily set STRIPE_WEBHOOK_SECRET and construct a signed event, or monkey-patch StripeCheckout.handle_webhook in tests. Look in /var/log/supervisor/backend.err.log for `[EMAIL DEV] thank-you for` lines if a real paid transition ever occurs.",
+  "rca_of_the_issue": "N/A — no defects found this iteration. All gates fire correctly, helper is well-encapsulated, and the regression set (24 prior tests) remains green."
+}

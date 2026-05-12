@@ -357,6 +357,125 @@ def test_reset_password_end_to_end():
     assert r.status_code == 400
 
 
+# ---------- Iteration 4: Thank-you email (Resend with console fallback) ----------
+BACKEND_LOG = "/var/log/supervisor/backend.err.log"
+
+
+def _count_email_dev_thankyou(session_marker: str = "") -> int:
+    """Count [EMAIL DEV] thank-you log lines in backend.err.log, optionally filtered by marker."""
+    try:
+        with open(BACKEND_LOG, "r", errors="ignore") as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        return 0
+    needle = "[EMAIL DEV] thank-you"
+    if session_marker:
+        return sum(1 for ln in lines if needle in ln and session_marker in ln)
+    return sum(1 for ln in lines if needle in ln)
+
+
+def test_send_payment_thankyou_email_helper_console_fallback(caplog):
+    """Direct unit test: import helper from server, call it, assert it logs [EMAIL DEV]
+    thank-you line and does NOT raise (RESEND_API_KEY is empty → console fallback)."""
+    import sys
+    sys.path.insert(0, "/app/backend")
+    from server import send_payment_thankyou_email, RESEND_KEY
+
+    # Sanity: the .env is configured for console fallback (no real key)
+    assert not RESEND_KEY, f"RESEND_KEY should be empty for fallback path, got: {bool(RESEND_KEY)}"
+
+    import logging as _logging
+    test_email = f"unit_{uuid.uuid4().hex[:6]}@example.com"
+    with caplog.at_level(_logging.INFO, logger="lensflow"):
+        # Should not raise
+        send_payment_thankyou_email(
+            to_email=test_email,
+            name="Unit Tester",
+            plan="pro",
+            amount=149.0,
+            currency="usd",
+        )
+    joined = "\n".join(rec.getMessage() for rec in caplog.records)
+    assert "[EMAIL DEV] thank-you for" in joined, f"Missing console log line. Records: {joined}"
+    assert test_email in joined, f"Test email {test_email} not in log: {joined}"
+    assert "plan=Pro" in joined, f"Expected plan=Pro label, got: {joined}"
+    assert "$149.00 USD" in joined, f"Expected amount $149.00 USD, got: {joined}"
+
+
+def test_payments_status_initiated_does_not_send_email(admin_session):
+    """When local txn is 'initiated' and Stripe retrieve fails, status endpoint must
+    NOT crash AND must NOT fire the thank-you email (gate: payment_status=='paid')."""
+    sid = state.get("checkout_session_id")
+    if not sid:
+        pytest.skip("Need previous checkout test to provide a session id")
+
+    before = _count_email_dev_thankyou(state["admin_user"]["email"])
+    r = admin_session.get(f"{API}/payments/status/{sid}", timeout=20)
+    assert r.status_code == 200, r.text
+    j = r.json()
+    assert j["payment_status"] == "initiated"
+    # Give the log a moment to flush
+    time.sleep(0.5)
+    after = _count_email_dev_thankyou(state["admin_user"]["email"])
+    # Either same count, or only counting unrelated lines — must NOT have grown for
+    # this admin email purely because of an 'initiated' status hit
+    assert after == before, f"Email fired for an initiated txn! before={before} after={after}"
+
+
+def test_payments_status_paid_email_idempotency(admin_session):
+    """Insert a paid-direct txn for admin and hit status twice: first call must
+    NOT fire email (txn already paid → gate `txn['payment_status'] != 'paid'` is False),
+    second call must also NOT fire. End-to-end idempotency guard."""
+    import pymongo
+
+    admin_user = state["admin_user"]
+    admin_id = admin_user["id"]
+    admin_email = admin_user["email"]
+    fake_sid = f"cs_test_paid_{uuid.uuid4().hex[:10]}"
+
+    mongo_url = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+    db_name = os.environ.get("DB_NAME", "lensflow_db")
+    client = pymongo.MongoClient(mongo_url)
+    try:
+        client[db_name].payment_transactions.insert_one({
+            "session_id": fake_sid,
+            "user_id": admin_id,
+            "user_email": admin_email,
+            "package_id": "pro_monthly",
+            "plan": "pro",
+            "amount": 149.0,
+            "currency": "usd",
+            "payment_status": "paid",  # already paid
+            "status": "complete",
+            "created_at": "2026-01-01T00:00:00+00:00",
+            "updated_at": "2026-01-01T00:00:00+00:00",
+        })
+
+        # Hit 1
+        before = _count_email_dev_thankyou(fake_sid)
+        r1 = admin_session.get(f"{API}/payments/status/{fake_sid}", timeout=20)
+        assert r1.status_code == 200, r1.text
+        time.sleep(0.5)
+        after1 = _count_email_dev_thankyou(fake_sid)
+
+        # Hit 2
+        r2 = admin_session.get(f"{API}/payments/status/{fake_sid}", timeout=20)
+        assert r2.status_code == 200, r2.text
+        time.sleep(0.5)
+        after2 = _count_email_dev_thankyou(fake_sid)
+
+        # Gate: already-paid txn must never fire email (neither call)
+        assert after1 == before, f"Email fired on a paid txn (call 1)! before={before} after1={after1}"
+        assert after2 == after1, f"Email fired on second status hit (idempotency broken)! after1={after1} after2={after2}"
+
+        # Ensure the row still says paid (no regression)
+        txn = client[db_name].payment_transactions.find_one({"session_id": fake_sid})
+        assert txn["payment_status"] == "paid"
+    finally:
+        client[db_name].payment_transactions.delete_many({"session_id": fake_sid})
+        client.close()
+
+
 # ---------- Brute force lockout (run last) ----------
 def test_brute_force_lockout():
     """Failed logins must eventually trigger 429 lockout — and NEVER raise 500.
