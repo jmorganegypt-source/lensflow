@@ -163,6 +163,50 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* THE THREE EDGES — what makes us first */}
+      <section className="relative py-28 px-6 lg:px-10 bg-[#070707] border-b border-white/5" data-testid="three-edges">
+        <div className="max-w-7xl mx-auto">
+          <motion.div {...fadeUp} className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#C99A2E]/10 border border-[#C99A2E]/30 mb-5">
+              <span className="w-1.5 h-1.5 bg-[#C99A2E] rounded-full animate-pulse" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E]">World-first features · Built for real estate, not generic video</span>
+            </div>
+            <h2 className="font-serif text-5xl lg:text-7xl tracking-tighter leading-[0.95]">
+              Three things <span className="italic text-[#C99A2E]">no one else offers.</span>
+            </h2>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            <motion.div {...fadeUp} data-testid="edge-confidence" className="glass rounded-3xl p-8 hover:border-[#C99A2E]/40 transition-colors">
+              <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-3">01 — Confidence Mode</div>
+              <h3 className="font-serif text-3xl mb-4">For agents who'd rather not film themselves.</h3>
+              <p className="text-white/60 leading-relaxed mb-5">Drop in your script and listing photos. Pick a presenter. LensFlow composes a finished MP4 listing video — narrated by AI, set to a Ken-Burns slideshow. <span className="text-[#C99A2E]">No filming. No second takes. No camera anxiety.</span></p>
+              <Link to="/register" data-testid="edge-confidence-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                Try Confidence Mode <ArrowUpRight size={14} />
+              </Link>
+            </motion.div>
+
+            <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.1 }} data-testid="edge-glamour" className="glass rounded-3xl p-8 hover:border-[#C99A2E]/40 transition-colors">
+              <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-3">02 — Glamour Photos</div>
+              <h3 className="font-serif text-3xl mb-4">iPhone photos → Architectural Digest grade.</h3>
+              <p className="text-white/60 leading-relaxed mb-5">Upload a regular listing photo. Pick a look — Magazine HDR, Golden Hour, Dusk Twilight, Lifestyle, Interior Polish. Powered by Gemini Nano Banana. <span className="text-[#C99A2E]">No more crap phone shots dragging your listing down.</span></p>
+              <Link to="/register" data-testid="edge-glamour-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                Try Glamour Studio <ArrowUpRight size={14} />
+              </Link>
+            </motion.div>
+
+            <motion.div {...fadeUp} transition={{ duration: 0.7, delay: 0.2 }} data-testid="edge-voice" className="glass rounded-3xl p-8 hover:border-[#C99A2E]/40 transition-colors">
+              <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-3">03 — Voice Clone (Elite)</div>
+              <h3 className="font-serif text-3xl mb-4">Listings narrated in your voice — without filming.</h3>
+              <p className="text-white/60 leading-relaxed mb-5">Record 60 seconds. ElevenLabs clones your voice. Every future listing video is narrated by <em className="text-[#C99A2E]">you</em>, on autopilot. <span className="text-[#C99A2E]">Personal brand without the camera.</span></p>
+              <Link to="/pricing" data-testid="edge-voice-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                See Elite Partner <ArrowUpRight size={14} />
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* HOW IT WORKS — Bento Tetris */}
       <section className="relative py-32 px-6 lg:px-10">
         <div className="max-w-7xl mx-auto">

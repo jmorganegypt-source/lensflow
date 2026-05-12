@@ -1,11 +1,13 @@
 import React from "react";
 import { NavLink, Outlet, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { LayoutDashboard, Sparkles, Mic, FolderOpen, Settings as SettingsIcon, LogOut, ArrowUpRight } from "lucide-react";
+import { LayoutDashboard, Sparkles, Mic, FolderOpen, Settings as SettingsIcon, LogOut, ArrowUpRight, Wand2, Camera } from "lucide-react";
 
 const navItems = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
   { to: "/app/studio", label: "AI Studio", icon: Sparkles, id: "studio" },
+  { to: "/app/confidence", label: "Confidence Mode", icon: Camera, id: "confidence" },
+  { to: "/app/glamour", label: "Glamour Photos", icon: Wand2, id: "glamour" },
   { to: "/app/recorder", label: "Recorder", icon: Mic, id: "recorder" },
   { to: "/app/projects", label: "Projects", icon: FolderOpen, id: "projects" },
   { to: "/app/settings", label: "Settings", icon: SettingsIcon, id: "settings" },

@@ -77,6 +77,35 @@ Both apps are now installable on phone/desktop:
   - Teleprompter demo phone mockup now visible in the Bento "RECORD" card.
   - Concierge bento card features "Elite Estates · Redefining Luxury Living" branded shot.
   - Testimonials now have agent headshots (Jasmine + Marcus).
+
+## The 3 World-First Features — built 2026-05-12 (this session)
+LensFlow now positions as **"The first AI real estate platform built for camera-shy agents."** Three differentiator features:
+
+### 1. Confidence Mode (`/app/confidence`)
+- **What**: Camera-shy agents drop a script + 1-8 property photos + pick a presenter. Backend composes a full MP4 listing video (1920x1080 H.264 + AAC audio) with Ken-Burns slideshow + ElevenLabs narration. NO filming required.
+- **Backend**: `POST /api/studio-plus/confidence-video` — moviepy + ffmpeg compose. Output stored in `/tmp/lensflow_videos/`, served via `GET /api/studio-plus/video/{filename}`. Cleaned up hourly.
+- **Frontend**: `ConfidenceMode.jsx` — 4-step wizard (Script → Photos → Presenter → Render). Result is downloadable MP4.
+- **Verified**: 16.4s test render produced valid 865KB MP4, validated with ffprobe (h264 1920x1080, aac audio).
+
+### 2. Glamour Photo Studio (`/app/glamour`)
+- **What**: Agent uploads regular listing photo → AI returns magazine-grade architectural shot. 5 presets: Magazine HDR, Golden Hour, Dusk Twilight, Lifestyle Lush, Interior Polish.
+- **Integration**: Gemini Nano Banana via `emergentintegrations.llm.chat.LlmChat` with model `gemini-3.1-flash-image-preview`. Uses `EMERGENT_LLM_KEY` (no extra cost to user).
+- **Backend**: `POST /api/studio-plus/glamour/enhance` (auth + preset + base64 image in, enhanced base64 image out). Tracks usage in `glamour_jobs` collection.
+- **Frontend**: `GlamourStudio.jsx` — preset selector, drop zone, before/after slider, AI notes panel, download button.
+- **Verified**: Returned 894KB enhanced JPEG (1365x768) for sunset-pool test photo.
+
+### 3. Voice Clone Studio (Elite tier only, in Settings)
+- **What**: Elite plan agents record 60s of their voice → ElevenLabs `voices.ivc.create` → cloned voice_id saved to user record. Used for narration in their own voice.
+- **Backend**: `POST /api/studio-plus/voice-clone/create` (multipart audio + name), `GET /api/studio-plus/voice-clone/mine`, `DELETE /api/studio-plus/voice-clone/{voice_id}`. Plan gating: `elite`/`concierge`/`enterprise`/`admin` only.
+- **Frontend**: `Settings.jsx` voice-clone section — in-browser MediaRecorder (audio/webm) OR file upload, name field, list of cloned voices with delete button. Non-Elite users see a locked upsell card.
+- **Note**: Requires ElevenLabs key with `voices_write` + `voice_cloning` permissions. Friendly error messaging on permission/limit failures.
+
+### Architecture
+- New module: `/app/backend/studio_plus.py` — `build_router()` pattern, mounted under `/api/studio-plus/*`.
+- New dependencies installed: `ffmpeg` (apt) + `moviepy 2.2.1` (pip) for video composition.
+- Sidebar nav (`AppShell.jsx`) updated: Dashboard → AI Studio → **Confidence Mode** → **Glamour Photos** → Recorder → Projects → Settings.
+- Landing page now has "Three things no one else offers" section advertising Confidence Mode + Glamour Photos + Voice Clone with direct CTAs.
+
   - Added clean linear "How LensFlow Works" 4-step section.
   - Stats updated: $23.90 starter price + 20% below competitors callout.
 - **Cloudflare cleanup**: User removed `lensflow.com.au` + `www.lensflow.com.au` Pages domain bindings. Pending: re-point DNS to Emergent production URL via Entri in Deployments → Connect Custom Domain.

@@ -18,6 +18,8 @@ import Concierge from "./pages/Concierge";
 import AppShell from "./pages/app/AppShell";
 import Dashboard from "./pages/app/Dashboard";
 import Studio from "./pages/app/Studio";
+import ConfidenceMode from "./pages/app/ConfidenceMode";
+import GlamourStudio from "./pages/app/GlamourStudio";
 import Recorder from "./pages/app/Recorder";
 import Projects from "./pages/app/Projects";
 import Settings from "./pages/app/Settings";
@@ -102,6 +104,8 @@ export default function App() {
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="studio" element={<Studio />} />
+              <Route path="confidence" element={<ConfidenceMode />} />
+              <Route path="glamour" element={<GlamourStudio />} />
               <Route path="recorder" element={<Recorder />} />
               <Route path="projects" element={<Projects />} />
               <Route path="settings" element={<Settings />} />

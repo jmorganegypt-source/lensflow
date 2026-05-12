@@ -30,6 +30,7 @@ from emergentintegrations.payments.stripe.checkout import (
 import resend
 
 import lumen as lumen_module
+from studio_plus import build_router as build_studio_plus_router
 
 
 # ---------------------------------------------------------------------------
@@ -956,6 +957,17 @@ async def shutdown():
 
 app.include_router(api)
 app.include_router(lumen_module.router)
+
+# Studio Plus — Confidence Mode, Glamour Photos, Voice Clone
+_studio_plus_router = build_studio_plus_router(
+    eleven_client=eleven_client,
+    emergent_key=EMERGENT_KEY,
+    db=db,
+    get_current_user=get_current_user,
+)
+api_v2 = APIRouter(prefix="/api")
+api_v2.include_router(_studio_plus_router)
+app.include_router(api_v2)
 
 # CORS — supports wildcard (`*`) while still allowing credentials (cookies)
 # by echoing the request origin via regex. Works for preview, production, and
