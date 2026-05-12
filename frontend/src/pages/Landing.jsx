@@ -8,6 +8,7 @@ import { ArrowUpRight, Play, Sparkles, Mic, Film, Send, Check, Star, Zap, Shield
 
 const HERO_BG = "/assets/property/sunset-pool.jpg";
 const FEATURE_BG = "/assets/property/tropical-villa.jpg";
+const MIA_HERO = "/assets/property/mia-headshot.jpg";
 const AGENT_HERO = "/assets/property/agent-hero.jpg";
 const TELEPROMPTER_DEMO = "/assets/property/teleprompter-demo.jpg";
 const ELITE_ESTATE = "/assets/property/elite-estates.jpg";
@@ -87,7 +88,7 @@ export default function Landing() {
                 <div className="absolute -inset-6 bg-[#C99A2E]/15 blur-3xl rounded-full" />
                 <div className="relative glass-strong rounded-3xl p-2 gold-glow">
                   <div className="aspect-[4/5] rounded-2xl overflow-hidden relative bg-[#0A0A0A]">
-                    <img src={AGENT_HERO} alt="LensFlow AI Presenter" className="w-full h-full object-cover" />
+                    <img src={MIA_HERO} alt="Mia — LensFlow AI Presenter" className="w-full h-full object-cover object-top" />
                     <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black/95 via-black/40 to-transparent">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
