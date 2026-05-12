@@ -36,10 +36,20 @@ User uploaded an existing single-page LENSFLOW HTML site (luxury Australian real
 - Marketing: /, /presenters, /pricing (Stripe Checkout integrated for Pro tier), /concierge, /login, /register, /forgot-password, /reset-password
 - App shell `/app/*`: /dashboard, /studio, /recorder, /projects, /settings, **/billing/success (polling with graceful pending fallback)**
 
-## Tests
-- 24/24 backend pytest green (iteration_3.json) — includes 8 payment/webhook/reset tests
-- Frontend Pricing → Stripe Checkout redirect verified
-- Email fallback verified via `[EMAIL DEV]` log line
+## Sibling product — LUMEN (2026-05-12)
+
+Built a fully independent consumer brand sharing the same backend infrastructure.
+
+**Backend** (`/app/backend/lumen.py`, mounted at `/api/lumen/*`):
+- Separate `lumen_users` / `lumen_moments` / `lumen_payments` collections, separate JWT scope='lumen', separate cookie `lumen_token`, separate localStorage key `lumen_access_token`
+- Catalogs (occasions, looks, music, backgrounds, voices), GPT-5.2 script gen, ElevenLabs TTS, moments CRUD + share tokens + public share view (no auth, increments views, watermark flag), Stripe checkout for 4 packs ($9.90/1h, $17.90/2h, $24.95/3h, $5/mo no-watermark), graceful status polling, branded Resend email on send-moment, minutes gating (trial=unlimited, free=10/mo, credit-based)
+
+**Frontend** (`/lumen/*` routes, totally separate visual language):
+- Warm sunrise palette (#FF6B6B coral + #FFD166 sunshine + cream), Fraunces + Plus Jakarta Sans + Caveat hand-script
+- Marketing: `/lumen` (photo-heavy hero + 3-step Record/Read/Send + occasion grid + testimonials + final CTA), `/lumen/pricing`, `/lumen/share/:token` (public)
+- App `/lumen/app/*`: Home, Create (5-step wizard: occasion → script → style → record → send), Library, Billing (top-ups + watermark sub), Settings
+
+**Tests**: 23/23 new Lumen pytest green + full frontend E2E pass (iteration_6.json). End-to-end verified: register → AI script (live GPT-5.2) → style picker → recorder UI → send → share URL → public view → library → Stripe checkout redirect.
 
 ## Backlog (P0 → P2)
 - **P1**: ElevenLabs voice IDs — user's provided key lacks `voices_read` permission and the default preset IDs aren't in their library. They can fix instantly by either (a) adding a voice to their elevenlabs.io library and setting `ELEVENLABS_VOICE_MIA/_OLIVER/_ARIA/_MARCUS` in `backend/.env`, or (b) regenerating an API key with `voices_read` enabled.

@@ -493,11 +493,11 @@ async def send_moment(moment_id: str, req: SendMoment, u: dict = Depends(get_cur
 # ---------- Public share view ----------
 @router.get("/share/{token}")
 async def public_share(token: str):
-    doc = await _db().lumen_moments.find_one({"share_token": token}, {"_id": 0, "user_id": 0})
+    doc = await _db().lumen_moments.find_one({"share_token": token}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Moment not found")
     await _db().lumen_moments.update_one({"share_token": token}, {"$inc": {"views": 1}})
-    sender = await _db().lumen_users.find_one({"_id": ObjectId((await _db().lumen_moments.find_one({"share_token": token}))["user_id"])})
+    sender = await _db().lumen_users.find_one({"_id": ObjectId(doc["user_id"])})
     return {
         "occasion": doc.get("occasion"),
         "recipient_name": doc.get("recipient_name"),
