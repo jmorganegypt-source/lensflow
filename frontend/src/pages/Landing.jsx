@@ -11,7 +11,7 @@ import {
 
 // Local assets
 const MIA_PORTRAIT = "/assets/property/mia-headshot.jpg";
-const MIA_VIDEO_CLIP = "https://customer-assets.emergentagent.com/job_back-for-you/artifacts/noyb8gkn_optimized_mia_clip.mp4";
+const MIA_VIDEO_CLIP = "/assets/property/mia-clip.mp4";
 const OLIVER_PORTRAIT = "/assets/property/oliver-portrait.jpg";
 const HERO_PROPERTY = "/assets/property/sunset-pool.jpg";
 const FEATURE_BG = "/assets/property/tropical-villa.jpg";
@@ -119,6 +119,7 @@ export default function Landing() {
                   muted
                   loop
                   playsInline
+                  preload="auto"
                 />
                 {/* Top branding */}
                 <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
@@ -128,12 +129,15 @@ export default function Landing() {
                   </div>
                   <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-red-500/90 text-white">
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    <span className="text-[10px] font-mono uppercase tracking-wider">LIVE</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider">REC</span>
                   </div>
                 </div>
                 {/* Bottom label */}
                 <div className="absolute inset-x-0 bottom-0 px-5 py-5 bg-gradient-to-t from-black/95 via-black/40 to-transparent text-white">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01</div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E]">AI Presenter · 01</span>
+                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 backdrop-blur text-[9px] font-mono uppercase tracking-wider"><Play size={8} className="fill-white"/> Playing</span>
+                  </div>
                   <div className="font-serif text-2xl leading-none">Mia</div>
                   <div className="text-white/70 text-xs mt-1.5">Australian-British · Warm · Live recording</div>
                 </div>
