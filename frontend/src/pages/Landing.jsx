@@ -99,12 +99,12 @@ export default function Landing() {
           <motion.div {...stagger(1)} className="lg:col-span-6 relative">
             <div className="relative h-[560px] lg:h-[640px]">
               {/* MIA card — left back */}
-              <div className="absolute left-0 top-12 w-[42%] aspect-[3/4.2] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-3 group" data-testid="hero-mia-card">
+              <div className="absolute left-0 top-12 w-[42%] aspect-[3/4.6] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-3 group" data-testid="hero-mia-card">
                 <img
                   src={MIA_PORTRAIT}
                   alt="Mia — LensFlow AI Presenter"
                   className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
-                  style={{ objectPosition: "center top" }}
+                  style={{ objectPosition: "50% 18%" }}
                 />
                 <video
                   src={MIA_VIDEO_CLIP}
@@ -114,33 +114,33 @@ export default function Landing() {
                   loop
                   playsInline
                 />
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-[#C99A2E]/40">
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
                   <span className="font-serif text-[10px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
                   <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent text-white">
-                  <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01</div>
-                  <div className="font-serif text-lg leading-none">Mia</div>
-                  <div className="text-white/65 text-[10px] mt-1">Australian-British · Warm</div>
+                <div className="absolute inset-x-0 bottom-0 px-3 py-2.5 bg-gradient-to-t from-black/90 to-transparent text-white">
+                  <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-0.5">AI · 01</div>
+                  <div className="font-serif text-base leading-none">Mia</div>
+                  <div className="text-white/65 text-[9px] mt-0.5">Australian-British</div>
                 </div>
               </div>
 
               {/* OLIVER card — right back */}
-              <div className="absolute right-0 top-12 w-[42%] aspect-[3/4.2] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform rotate-3" data-testid="hero-oliver-card">
+              <div className="absolute right-0 top-12 w-[42%] aspect-[3/4.6] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform rotate-3" data-testid="hero-oliver-card">
                 <img
                   src={OLIVER_PORTRAIT}
                   alt="Oliver — LensFlow AI Presenter"
                   className="w-full h-full object-cover"
-                  style={{ objectPosition: "center top" }}
+                  style={{ objectPosition: "50% 15%" }}
                 />
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-[#C99A2E]/40">
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
                   <span className="font-serif text-[10px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
                   <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent text-white">
-                  <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 02</div>
-                  <div className="font-serif text-lg leading-none">Oliver</div>
-                  <div className="text-white/65 text-[10px] mt-1">British RP · Authoritative</div>
+                <div className="absolute inset-x-0 bottom-0 px-3 py-2.5 bg-gradient-to-t from-black/90 to-transparent text-white">
+                  <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-0.5">AI · 02</div>
+                  <div className="font-serif text-base leading-none">Oliver</div>
+                  <div className="text-white/65 text-[9px] mt-0.5">British RP</div>
                 </div>
               </div>
 
