@@ -105,16 +105,16 @@ export default function Landing() {
             </div>
           </motion.div>
 
-          {/* RIGHT — Phone teleprompter + Mia + Oliver cards */}
+          {/* RIGHT — Mia + Oliver showcase (no phone clutter) */}
           <motion.div {...stagger(1)} className="lg:col-span-6 relative">
-            <div className="relative h-[560px] lg:h-[640px]">
-              {/* MIA card — left back */}
-              <div className="absolute left-0 top-12 w-[42%] aspect-[3/4.6] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-3 group" data-testid="hero-mia-card">
+            <div className="relative h-[540px] lg:h-[620px] flex items-center justify-center">
+              {/* MIA — left, slightly behind & tilted */}
+              <div className="absolute left-2 lg:left-6 top-6 w-[46%] aspect-[3/4.2] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-3 group" data-testid="hero-mia-card">
                 <img
                   src={MIA_PORTRAIT}
                   alt="Mia — LensFlow AI Presenter"
                   className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
-                  style={{ objectPosition: "50% 18%" }}
+                  style={{ objectPosition: "50% 22%" }}
                 />
                 <video
                   src={MIA_VIDEO_CLIP}
@@ -124,72 +124,46 @@ export default function Landing() {
                   loop
                   playsInline
                 />
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
-                  <span className="font-serif text-[10px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
-                  <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
+                <div className="absolute top-4 left-4 right-4 flex items-center justify-center px-2.5 py-2 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
+                  <span className="font-serif text-[11px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
+                  <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 px-3 py-2.5 bg-gradient-to-t from-black/90 to-transparent text-white">
-                  <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-0.5">AI · 01</div>
-                  <div className="font-serif text-base leading-none">Mia</div>
-                  <div className="text-white/65 text-[9px] mt-0.5">Australian-British</div>
+                <div className="absolute inset-x-0 bottom-0 px-4 py-4 bg-gradient-to-t from-black/90 to-transparent text-white">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01</div>
+                  <div className="font-serif text-xl leading-none">Mia</div>
+                  <div className="text-white/70 text-[11px] mt-1">Australian-British · Warm</div>
                 </div>
               </div>
 
-              {/* OLIVER card — right back */}
-              <div className="absolute right-0 top-12 w-[42%] aspect-[3/4.6] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform rotate-3" data-testid="hero-oliver-card">
+              {/* OLIVER — right, slightly forward & tilted */}
+              <div className="absolute right-2 lg:right-6 top-16 w-[46%] aspect-[3/4.2] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform rotate-3" data-testid="hero-oliver-card">
                 <img
                   src={OLIVER_PORTRAIT}
                   alt="Oliver — LensFlow AI Presenter"
                   className="w-full h-full object-cover"
-                  style={{ objectPosition: "50% 15%" }}
+                  style={{ objectPosition: "50% 18%" }}
                 />
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
-                  <span className="font-serif text-[10px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
-                  <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
+                <div className="absolute top-4 left-4 right-4 flex items-center justify-center px-2.5 py-2 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
+                  <span className="font-serif text-[11px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
+                  <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 px-3 py-2.5 bg-gradient-to-t from-black/90 to-transparent text-white">
-                  <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-0.5">AI · 02</div>
-                  <div className="font-serif text-base leading-none">Oliver</div>
-                  <div className="text-white/65 text-[9px] mt-0.5">British RP</div>
-                </div>
-              </div>
-
-              {/* PHONE teleprompter — front center */}
-              <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[58%] aspect-[9/19] rounded-[2.5rem] bg-[#0A0A0A] shadow-[0_30px_80px_-20px_rgba(15,26,46,0.45)] border-[6px] border-[#1A1A1A] overflow-hidden" data-testid="hero-phone">
-                {/* Status bar */}
-                <div className="flex items-center justify-between px-5 pt-3 text-white text-[10px] font-mono">
-                  <span>9:41</span>
-                  <span className="flex items-center gap-1 text-red-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                    <span>00:00:45</span>
-                  </span>
-                  <span>1080p</span>
-                </div>
-                {/* Teleprompter script — fills the whole frame now */}
-                <div className="px-5 py-6">
-                  <div className="text-[#C99A2E] text-[10px] font-mono uppercase tracking-[0.22em] mb-4">— Teleprompter</div>
-                  <p className="text-white text-[13px] leading-relaxed">
-                    Welcome to this <span className="text-[#C99A2E]">extraordinary</span> waterfront residence, where modern elegance meets breathtaking views.
-                  </p>
-                  <p className="text-white/85 text-[12px] leading-relaxed mt-3">
-                    Every detail has been meticulously designed to deliver the ultimate <span className="text-[#C99A2E]">luxury lifestyle</span>.
-                  </p>
-                  <p className="text-white/55 text-[11px] leading-relaxed mt-3">
-                    From floor-to-ceiling glass, to bespoke imported finishes, to the private infinity pool overlooking the harbour...
-                  </p>
-                </div>
-                {/* Record button */}
-                <div className="absolute inset-x-0 bottom-6 flex items-center justify-center gap-8 px-6">
-                  <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70 text-[10px] font-mono">Aa</div>
-                  <div className="w-14 h-14 rounded-full bg-red-500 ring-4 ring-white/30 shadow-lg" />
-                  <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70"><Camera size={14} /></div>
+                <div className="absolute inset-x-0 bottom-0 px-4 py-4 bg-gradient-to-t from-black/90 to-transparent text-white">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 02</div>
+                  <div className="font-serif text-xl leading-none">Oliver</div>
+                  <div className="text-white/70 text-[11px] mt-1">British RP · Authoritative</div>
                 </div>
               </div>
 
-              {/* Floating chip — top right */}
-              <div className="absolute -top-2 right-4 px-3 py-1.5 rounded-full bg-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-4k">
+              {/* Floating "4K" chip */}
+              <div className="absolute -top-2 right-8 px-3.5 py-1.5 rounded-full bg-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-4k">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[#0F1A2E]">4K · Cinematic</span>
+              </div>
+
+              {/* Floating "AI Studio" chip */}
+              <div className="absolute -bottom-2 left-4 px-3.5 py-1.5 rounded-full bg-[#0F1A2E] text-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-ai">
+                <Sparkles size={11} className="text-[#C99A2E]" />
+                <span className="text-[10px] font-mono uppercase tracking-wider">AI Studio · Live</span>
               </div>
             </div>
           </motion.div>
