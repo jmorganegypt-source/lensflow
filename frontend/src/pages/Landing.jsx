@@ -105,52 +105,56 @@ export default function Landing() {
             </div>
           </motion.div>
 
-          {/* RIGHT — Mia + Oliver showcase (no phone clutter) */}
+          {/* RIGHT — Mia VIDEO front and center + Oliver portrait beside */}
           <motion.div {...stagger(1)} className="lg:col-span-6 relative">
-            <div className="relative h-[540px] lg:h-[620px] flex items-center justify-center">
-              {/* MIA — left, slightly behind & tilted */}
-              <div className="absolute left-2 lg:left-6 top-6 w-[46%] aspect-[3/4.2] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-3 group" data-testid="hero-mia-card">
-                <img
-                  src={MIA_PORTRAIT}
-                  alt="Mia — LensFlow AI Presenter"
-                  className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
-                  style={{ objectPosition: "50% 22%" }}
-                />
+            <div className="relative h-[560px] lg:h-[640px] flex items-center justify-center">
+
+              {/* MIA — autoplay video, the star */}
+              <div className="absolute left-2 lg:left-0 top-0 w-[58%] aspect-[9/14] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-2 ring-1 ring-[#C99A2E]/40" data-testid="hero-mia-video">
                 <video
                   src={MIA_VIDEO_CLIP}
-                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  poster={MIA_PORTRAIT}
+                  className="w-full h-full object-cover"
                   autoPlay
                   muted
                   loop
                   playsInline
                 />
-                <div className="absolute top-4 left-4 right-4 flex items-center justify-center px-2.5 py-2 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
-                  <span className="font-serif text-[11px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
-                  <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
+                {/* Top branding */}
+                <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
+                    <span className="font-serif text-[11px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
+                    <span className="ml-1 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-red-500/90 text-white">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider">LIVE</span>
+                  </div>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 px-4 py-4 bg-gradient-to-t from-black/90 to-transparent text-white">
+                {/* Bottom label */}
+                <div className="absolute inset-x-0 bottom-0 px-5 py-5 bg-gradient-to-t from-black/95 via-black/40 to-transparent text-white">
                   <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01</div>
-                  <div className="font-serif text-xl leading-none">Mia</div>
-                  <div className="text-white/70 text-[11px] mt-1">Australian-British · Warm</div>
+                  <div className="font-serif text-2xl leading-none">Mia</div>
+                  <div className="text-white/70 text-xs mt-1.5">Australian-British · Warm · Live recording</div>
                 </div>
               </div>
 
-              {/* OLIVER — right, slightly forward & tilted */}
-              <div className="absolute right-2 lg:right-6 top-16 w-[46%] aspect-[3/4.2] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform rotate-3" data-testid="hero-oliver-card">
+              {/* OLIVER — companion portrait to the right */}
+              <div className="absolute right-0 top-20 w-[42%] aspect-[3/4.4] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform rotate-3" data-testid="hero-oliver-card">
                 <img
                   src={OLIVER_PORTRAIT}
                   alt="Oliver — LensFlow AI Presenter"
                   className="w-full h-full object-cover"
                   style={{ objectPosition: "50% 18%" }}
                 />
-                <div className="absolute top-4 left-4 right-4 flex items-center justify-center px-2.5 py-2 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
-                  <span className="font-serif text-[11px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
-                  <span className="ml-2 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
+                  <span className="font-serif text-[10px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
+                  <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 px-4 py-4 bg-gradient-to-t from-black/90 to-transparent text-white">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 02</div>
-                  <div className="font-serif text-xl leading-none">Oliver</div>
-                  <div className="text-white/70 text-[11px] mt-1">British RP · Authoritative</div>
+                <div className="absolute inset-x-0 bottom-0 px-3 py-2.5 bg-gradient-to-t from-black/90 to-transparent text-white">
+                  <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-0.5">AI · 02</div>
+                  <div className="font-serif text-lg leading-none">Oliver</div>
+                  <div className="text-white/65 text-[9px] mt-0.5">British RP</div>
                 </div>
               </div>
 
@@ -161,9 +165,51 @@ export default function Landing() {
               </div>
 
               {/* Floating "AI Studio" chip */}
-              <div className="absolute -bottom-2 left-4 px-3.5 py-1.5 rounded-full bg-[#0F1A2E] text-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-ai">
+              <div className="absolute -bottom-2 left-8 px-3.5 py-1.5 rounded-full bg-[#0F1A2E] text-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-ai">
                 <Sparkles size={11} className="text-[#C99A2E]" />
                 <span className="text-[10px] font-mono uppercase tracking-wider">AI Studio · Live</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ============== LIVE LISTING DEMO ============== */}
+      <section className="relative py-24 px-6 lg:px-10 bg-[#0F1A2E] text-white overflow-hidden" data-testid="live-listing-demo">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[#C99A2E]/10 blur-3xl pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div {...fadeUp}>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#C99A2E]/15 border border-[#C99A2E]/30 mb-5">
+              <span className="w-1.5 h-1.5 bg-[#C99A2E] rounded-full animate-pulse" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E]">Live demo · Real listing</span>
+            </div>
+            <h2 className="font-serif text-4xl lg:text-6xl tracking-tighter leading-[0.95] mb-6">
+              This is what your <br /><span className="italic text-[#C99A2E]">next listing</span> looks like.
+            </h2>
+            <p className="text-white/65 text-lg leading-relaxed mb-8">A real Mosman premium listing, narrated by Mia, branded as <em className="text-[#C99A2E]">LENSFLOW PRO ELITE ACCESS</em>. Same Mia. Same Oliver. Any property. Any agent.</p>
+            <ul className="space-y-3 mb-8">
+              {[
+                "Auto-overlay price, address, agent + brokerage",
+                "Mia or Oliver narrate in 4 voice profiles",
+                "Export 9:16 reel · 16:9 hero · 1:1 social",
+              ].map((b, i) => (
+                <li key={i} className="flex items-start gap-3 text-white/75 text-sm">
+                  <Check size={14} className="text-[#C99A2E] mt-1 shrink-0" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+            <Link to="/register" data-testid="demo-cta" className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-[#C99A2E] text-[#0F1A2E] font-medium hover:bg-[#DBC075] transition-colors">
+              <Sparkles size={16} /> Make my first listing
+              <ArrowUpRight size={16} />
+            </Link>
+          </motion.div>
+
+          <motion.div {...stagger(1)} className="relative">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-black border border-[#C99A2E]/30" data-testid="demo-listing-card">
+              <img src="/assets/property/mia-listing-card.jpg" alt="LensFlow listing demo — Mia narrating a Mosman waterfront residence" className="w-full h-full object-cover" />
+              <div className="absolute -top-3 -right-3 px-3 py-1.5 rounded-full bg-[#C99A2E] text-black text-[10px] font-mono uppercase tracking-wider shadow-lg">
+                Live render
               </div>
             </div>
           </motion.div>
