@@ -37,6 +37,7 @@ const tiers = [
     icon: Crown,
     highlight: true,
     package_id: "professional_monthly",
+    payment_link: "https://buy.stripe.com/28E00j1nv7Gc3I34n5",
     perks: [
       "Everything in Standard",
       "4K recording",
@@ -56,6 +57,7 @@ const tiers = [
     icon: Gem,
     highlight: false,
     package_id: "elite_monthly",
+    payment_link: "https://buy.stripe.com/00w3cv8PX1hO5Qbg5N",
     perks: [
       "Private AI presenter (yours only)",
       "Face upload avatar engine",
@@ -101,6 +103,11 @@ export default function Pricing() {
   const navigate = useNavigate();
 
   const handleTierClick = async (t) => {
+    // Payment Link path (no auth required) — direct redirect to hosted Stripe checkout
+    if (t.payment_link) {
+      window.location.href = t.payment_link;
+      return;
+    }
     if (user === null) {
       toast.message("Checking your session…");
       return;
@@ -154,11 +161,11 @@ export default function Pricing() {
               </div>
               <button
                 onClick={() => handleTierClick(t)}
-                disabled={loadingTier === t.id || user === null}
+                disabled={loadingTier === t.id || (!t.payment_link && user === null)}
                 data-testid={`pricing-cta-${t.id}`}
                 className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-7 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
               >
-                {loadingTier === t.id || user === null ? <Loader2 className="animate-spin" size={16} /> : t.cta}
+                {loadingTier === t.id || (!t.payment_link && user === null) ? <Loader2 className="animate-spin" size={16} /> : t.cta}
               </button>
               <ul className="space-y-3 mt-auto">
                 {t.perks.map((p, i) => (

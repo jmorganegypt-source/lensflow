@@ -11,6 +11,7 @@ import {
 
 // Local assets
 const MIA_PORTRAIT = "/assets/property/mia-headshot.jpg";
+const MIA_VIDEO_CLIP = "https://customer-assets.emergentagent.com/job_back-for-you/artifacts/noyb8gkn_optimized_mia_clip.mp4";
 const OLIVER_PORTRAIT = "/assets/property/oliver-portrait.jpg";
 const HERO_PROPERTY = "/assets/property/sunset-pool.jpg";
 const FEATURE_BG = "/assets/property/tropical-villa.jpg";
@@ -98,8 +99,25 @@ export default function Landing() {
           <motion.div {...stagger(1)} className="lg:col-span-6 relative">
             <div className="relative h-[560px] lg:h-[640px]">
               {/* MIA card — left back */}
-              <div className="absolute left-0 top-12 w-[42%] aspect-[3/4.2] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-3" data-testid="hero-mia-card">
-                <img src={MIA_PORTRAIT} alt="Mia — LensFlow AI Presenter" className="w-full h-full object-cover object-top" />
+              <div className="absolute left-0 top-12 w-[42%] aspect-[3/4.2] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-3 group" data-testid="hero-mia-card">
+                <img
+                  src={MIA_PORTRAIT}
+                  alt="Mia — LensFlow AI Presenter"
+                  className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+                  style={{ objectPosition: "center top" }}
+                />
+                <video
+                  src={MIA_VIDEO_CLIP}
+                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-[#C99A2E]/40">
+                  <span className="font-serif text-[10px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
+                  <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
+                </div>
                 <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent text-white">
                   <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01</div>
                   <div className="font-serif text-lg leading-none">Mia</div>
@@ -109,7 +127,16 @@ export default function Landing() {
 
               {/* OLIVER card — right back */}
               <div className="absolute right-0 top-12 w-[42%] aspect-[3/4.2] rounded-2xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform rotate-3" data-testid="hero-oliver-card">
-                <img src={OLIVER_PORTRAIT} alt="Oliver — LensFlow AI Presenter" className="w-full h-full object-cover object-top" />
+                <img
+                  src={OLIVER_PORTRAIT}
+                  alt="Oliver — LensFlow AI Presenter"
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: "center top" }}
+                />
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm border border-[#C99A2E]/40">
+                  <span className="font-serif text-[10px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
+                  <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
+                </div>
                 <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent text-white">
                   <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 02</div>
                   <div className="font-serif text-lg leading-none">Oliver</div>
