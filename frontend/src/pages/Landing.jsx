@@ -229,8 +229,8 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {/* MIA */}
             <motion.div {...stagger(0)} data-testid="presenter-mia-card" className="group bg-white border border-[#0F1A2E]/8 rounded-3xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all">
-              <div className="aspect-[5/4] relative overflow-hidden bg-[#0F1A2E]">
-                <img src={MIA_PORTRAIT} alt="Mia" className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-700" />
+              <div className="aspect-[4/5] relative overflow-hidden bg-[#0F1A2E]">
+                <img src={MIA_PORTRAIT} alt="Mia" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700" style={{ objectPosition: "50% 22%" }} />
                 <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur text-[10px] font-mono uppercase tracking-[0.22em] text-[#0F1A2E]">
                   Australian-British
                 </div>
@@ -249,8 +249,8 @@ export default function Landing() {
 
             {/* OLIVER */}
             <motion.div {...stagger(1)} data-testid="presenter-oliver-card" className="group bg-white border border-[#0F1A2E]/8 rounded-3xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all">
-              <div className="aspect-[5/4] relative overflow-hidden bg-[#0F1A2E]">
-                <img src={OLIVER_PORTRAIT} alt="Oliver" className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-700" />
+              <div className="aspect-[4/5] relative overflow-hidden bg-[#0F1A2E]">
+                <img src={OLIVER_PORTRAIT} alt="Oliver" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700" style={{ objectPosition: "50% 18%" }} />
                 <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur text-[10px] font-mono uppercase tracking-[0.22em] text-[#0F1A2E]">
                   British RP
                 </div>

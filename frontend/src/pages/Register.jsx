@@ -25,7 +25,7 @@ export default function Register() {
   return (
     <div className="min-h-screen flex bg-[#050505]" data-testid="register-page">
       <div className="hidden lg:flex w-1/2 relative overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1759256243437-9c8f7238c42b?crop=entropy&cs=srgb&fm=jpg&w=1400&q=85" alt="" className="w-full h-full object-cover" />
+        <img src="/assets/property/sunset-pool.jpg" alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-tr from-black/90 via-black/40 to-transparent" />
         <Link to="/" className="absolute top-10 left-10 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-full bg-[#C99A2E] flex items-center justify-center">
@@ -35,7 +35,7 @@ export default function Register() {
         </Link>
         <div className="absolute bottom-12 left-12 right-12 space-y-3">
           <h2 className="font-serif text-4xl leading-snug">Your studio, before your coffee.</h2>
-          {["Unlimited drafts forever","AI script writer · GPT-5.2","Mia, Oliver, Aria, Marcus — all included","REA · Domain · Rightmove ready"].map((b,i) => (
+          {["Unlimited drafts","AI script writer · GPT-5.2","Mia, Oliver, Aria, Marcus presenters","REA · Domain · Rightmove ready"].map((b,i) => (
             <div key={i} className="flex items-center gap-2 text-white/75 text-sm">
               <Check size={16} className="text-[#C99A2E]" /> {b}
             </div>
@@ -52,7 +52,7 @@ export default function Register() {
             <span className="font-serif text-2xl">LensFlow</span>
           </Link>
           <h1 className="font-serif text-5xl tracking-tighter mb-3">Create your studio.</h1>
-          <p className="text-white/55 mb-10">Free forever. No card. Cancel by closing the tab.</p>
+          <p className="text-white/55 mb-10">From $23.90/mo · Cancel anytime · 20% under any competitor.</p>
 
           <form onSubmit={submit} className="space-y-5" data-testid="register-form">
             <div>
