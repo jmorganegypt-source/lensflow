@@ -38,9 +38,19 @@ export default function Landing() {
 
       {/* ============== HERO ============== */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
-        {/* Soft warm gradient backdrop */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FAF7F2] via-[#F5EFE3] to-[#FAF7F2] pointer-events-none" />
-        <div className="absolute top-20 right-0 w-[600px] h-[600px] rounded-full bg-[#C99A2E]/8 blur-3xl pointer-events-none" />
+        {/* Big white villa background photo */}
+        <div className="absolute inset-0 pointer-events-none">
+          <img
+            src="/assets/property/villa-hero-bg.jpg"
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ objectPosition: "center 35%" }}
+          />
+          {/* Soft cream wash so text stays readable */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/85 to-[#FAF7F2]/30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#FAF7F2]" />
+        </div>
+        <div className="absolute top-20 right-0 w-[600px] h-[600px] rounded-full bg-[#C99A2E]/10 blur-3xl pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-10 grid lg:grid-cols-12 gap-10 items-center">
           {/* LEFT — Copy */}
@@ -155,16 +165,18 @@ export default function Landing() {
                   </span>
                   <span>1080p</span>
                 </div>
-                {/* Teleprompter script */}
+                {/* Teleprompter script — fills the whole frame now */}
                 <div className="px-5 py-6">
+                  <div className="text-[#C99A2E] text-[10px] font-mono uppercase tracking-[0.22em] mb-4">— Teleprompter</div>
                   <p className="text-white text-[13px] leading-relaxed">
-                    Welcome to this extraordinary waterfront residence, where <span className="text-[#C99A2E]">modern elegance</span> meets breathtaking views. Every detail has been meticulously designed to deliver the ultimate luxury <span className="text-[#C99A2E]">lifestyle</span>.
+                    Welcome to this <span className="text-[#C99A2E]">extraordinary</span> waterfront residence, where modern elegance meets breathtaking views.
                   </p>
-                </div>
-                {/* Property preview thumbnail */}
-                <div className="mx-5 rounded-xl overflow-hidden h-[110px] mb-5 relative">
-                  <img src={HERO_PROPERTY} alt="" className="w-full h-full object-cover" />
-                  <div className="absolute top-2 left-2 px-2 py-1 rounded-full bg-black/60 text-white text-[9px] font-mono uppercase tracking-wider">Live Preview</div>
+                  <p className="text-white/85 text-[12px] leading-relaxed mt-3">
+                    Every detail has been meticulously designed to deliver the ultimate <span className="text-[#C99A2E]">luxury lifestyle</span>.
+                  </p>
+                  <p className="text-white/55 text-[11px] leading-relaxed mt-3">
+                    From floor-to-ceiling glass, to bespoke imported finishes, to the private infinity pool overlooking the harbour...
+                  </p>
                 </div>
                 {/* Record button */}
                 <div className="absolute inset-x-0 bottom-6 flex items-center justify-center gap-8 px-6">
