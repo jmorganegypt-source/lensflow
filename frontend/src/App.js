@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Pricing from "./pages/Pricing";
+import Compare from "./pages/Compare";
 import Presenters from "./pages/Presenters";
 import Concierge from "./pages/Concierge";
 
@@ -94,6 +95,7 @@ export default function App() {
             {/* LensFlow (root) */}
             <Route path="/" element={<Landing />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/compare" element={<Compare />} />
             <Route path="/presenters" element={<Presenters />} />
             <Route path="/concierge" element={<Concierge />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />

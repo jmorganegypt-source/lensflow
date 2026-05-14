@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import MarketingNav from "../components/MarketingNav";
 import Footer from "../components/Footer";
 import { Check, Sparkles, Crown, Gem, Phone, Loader2 } from "lucide-react";
@@ -204,7 +204,7 @@ export default function Pricing() {
               </div>
             ))}
           </div>
-          <p className="text-white/50 text-sm text-center mt-6 max-w-2xl mx-auto">Show us a comparable quote and we'll <span className="text-[#C99A2E] font-medium">beat it by 20%</span> — locked in for 12 months.</p>
+          <p className="text-white/50 text-sm text-center mt-6 max-w-2xl mx-auto">Show us a comparable quote and we'll <span className="text-[#C99A2E] font-medium">beat it by 20%</span> — locked in for 12 months. <Link to="/compare" className="text-[#C99A2E] underline hover:text-[#DBC075]" data-testid="see-full-comparison">See full comparison →</Link></p>
         </div>
       </section>
 
