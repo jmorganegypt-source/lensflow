@@ -15,6 +15,7 @@ import Pricing from "./pages/Pricing";
 import Compare from "./pages/Compare";
 import Presenters from "./pages/Presenters";
 import Concierge from "./pages/Concierge";
+import Onboarding from "./pages/Onboarding";
 
 import AppShell from "./pages/app/AppShell";
 import Dashboard from "./pages/app/Dashboard";
@@ -102,6 +103,7 @@ export default function App() {
             <Route path="/register" element={<PublicOnly><Register /></PublicOnly>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/onboarding" element={<Protected><Onboarding /></Protected>} />
             <Route path="/app" element={<Protected><AppShell /></Protected>}>
               <Route index element={<Navigate to="/app/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />

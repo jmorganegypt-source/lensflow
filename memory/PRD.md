@@ -124,3 +124,13 @@ LensFlow now positions as **"The first AI real estate platform built for camera-
 1. If user adds voice IDs → verify TTS round-trips.
 2. Wire Stripe to Pricing upgrade buttons (revenue lever).
 3. Add referral link generator (shareability for agents).
+
+## Onboarding wizard — built 2026-05-14 (this session)
+- **`/onboarding`** route now lives between Register and `/app/dashboard`.
+- 5-step wizard (`Onboarding.jsx`): Toolkit → Role → Presenter → Publishing platforms → Brand identity (website + handle).
+- Backend: `POST /api/auth/onboarding` persists prefs onto user doc + flips `onboarded:true`. `serialize_user` now returns `onboarded` + `onboarding` dict so the frontend can auto-skip the wizard for returning users.
+- Register.jsx now nav's to `/onboarding` after successful sign-up; Onboarding auto-redirects to `/app/dashboard` if `user.onboarded` is already true.
+- Verified end-to-end via curl (register → onboarding POST → /me returns prefs).
+
+## Stripe LIVE key refreshed 2026-05-14
+- Backend `.env` updated to `sk_live_51TVCs2EH…rnxCZ` (the lensflow account standard secret key). Backend restarts cleanly; `/api/health → 200`.

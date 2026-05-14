@@ -18,7 +18,7 @@ export default function Register() {
     setLoading(false);
     if (res.ok) {
       toast.success("Welcome to LensFlow");
-      nav("/app/dashboard");
+      nav("/onboarding");
     } else setErr(res.error || "Registration failed");
   };
 

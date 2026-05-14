@@ -196,6 +196,8 @@ def serialize_user(doc: dict) -> dict:
         "name": doc.get("name", ""),
         "role": doc.get("role", "user"),
         "plan": doc.get("plan", "free"),
+        "onboarded": bool(doc.get("onboarded", False)),
+        "onboarding": doc.get("onboarding") or {},
         "created_at": doc.get("created_at").isoformat() if isinstance(doc.get("created_at"), datetime) else doc.get("created_at"),
     }
 
@@ -493,6 +495,25 @@ async def reset_password(req: ResetPasswordReq):
     await db.users.update_one({"_id": ObjectId(rec["user_id"])}, {"$set": {"password_hash": hash_password(req.new_password)}})
     await db.password_reset_tokens.update_one({"_id": rec["_id"]}, {"$set": {"used": True}})
     return {"success": True}
+
+
+@api.post("/auth/onboarding")
+async def save_onboarding(payload: dict, user: dict = Depends(get_current_user)):
+    prefs = {
+        "tools": [str(x)[:40] for x in (payload.get("tools") or [])][:20],
+        "role": str(payload.get("role") or "")[:40],
+        "presenter": str(payload.get("presenter") or "")[:40],
+        "platforms": [str(x)[:40] for x in (payload.get("platforms") or [])][:20],
+        "website": str(payload.get("website") or "")[:200],
+        "handle": str(payload.get("handle") or "")[:80],
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.users.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"onboarded": True, "onboarding": prefs}}
+    )
+    updated = await db.users.find_one({"_id": user["_id"]})
+    return {"success": True, "user": serialize_user(updated)}
 
 
 # ---------- Presenters ----------

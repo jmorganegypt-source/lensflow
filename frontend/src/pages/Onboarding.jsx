@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,6 +8,7 @@ import {
   ArrowLeft, Check, Trophy,
 } from "lucide-react";
 import api, { formatApiErrorDetail } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 
 const TOOLS = [
@@ -57,6 +58,7 @@ function Pip({ active, done }) {
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { user, fetchMe } = useAuth();
   const [step, setStep] = useState(0);
   const [tools, setTools] = useState(["teleprompter", "ai_video", "glamour"]);
   const [role, setRole] = useState("");
@@ -66,6 +68,11 @@ export default function Onboarding() {
   const [handle, setHandle] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // If user has already completed onboarding, skip straight to dashboard.
+  useEffect(() => {
+    if (user && user.onboarded) navigate("/app/dashboard", { replace: true });
+  }, [user, navigate]);
+
   const toggle = (arr, setter, id) => setter(arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id]);
 
   const next = () => setStep(s => Math.min(s + 1, 4));
@@ -74,9 +81,12 @@ export default function Onboarding() {
   const finish = async () => {
     setSaving(true);
     try {
-      await api.post("/auth/onboarding", { tools, role, presenter, platforms, website, handle }).catch(() => {});
+      await api.post("/auth/onboarding", { tools, role, presenter, platforms, website, handle });
+      await fetchMe();
       toast.success("Welcome to LensFlow!");
       navigate("/app/dashboard");
+    } catch (e) {
+      toast.error(formatApiErrorDetail(e.response?.data?.detail) || "Could not save preferences");
     } finally { setSaving(false); }
   };
 
