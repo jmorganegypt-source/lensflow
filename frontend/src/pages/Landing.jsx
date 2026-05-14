@@ -13,6 +13,8 @@ import {
 const MIA_PORTRAIT = "/assets/property/mia-headshot.jpg";
 const MIA_VIDEO_CLIP = "/assets/property/mia-clip.mp4";
 const OLIVER_PORTRAIT = "/assets/property/oliver-portrait.jpg";
+const ARIA_PORTRAIT = "/assets/property/aria-portrait.jpg";
+const MARCUS_PORTRAIT = "/assets/property/marcus-portrait.jpg";
 const HERO_PROPERTY = "/assets/property/sunset-pool.jpg";
 const FEATURE_BG = "/assets/property/tropical-villa.jpg";
 const ELITE_ESTATE = "/assets/property/elite-estates.jpg";
@@ -109,13 +111,17 @@ export default function Landing() {
           <motion.div {...stagger(1)} className="lg:col-span-6 relative">
             <div className="relative h-[560px] lg:h-[640px] flex items-center justify-center">
 
-              {/* MIA — clean portrait card (the star) */}
-              <div className="absolute left-2 lg:left-0 top-0 w-[58%] aspect-[9/14] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-2 ring-1 ring-[#C99A2E]/40" data-testid="hero-mia-card">
-                <img
-                  src={MIA_PORTRAIT}
-                  alt="Mia — LensFlow AI Presenter"
+              {/* MIA — clean demo VIDEO autoplay, the star */}
+              <div className="absolute left-2 lg:left-0 top-0 w-[58%] aspect-[9/14] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-2 ring-1 ring-[#C99A2E]/40" data-testid="hero-mia-video">
+                <video
+                  src={MIA_VIDEO_CLIP}
+                  poster={MIA_PORTRAIT}
                   className="w-full h-full object-cover"
-                  style={{ objectPosition: "50% 22%" }}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
                 />
                 {/* Top branding */}
                 <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
@@ -123,10 +129,14 @@ export default function Landing() {
                     <span className="font-serif text-[11px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
                     <span className="ml-1 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
                   </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-red-500/90 text-white">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    <span className="text-[10px] font-mono uppercase tracking-wider">REC</span>
+                  </div>
                 </div>
                 {/* Bottom label */}
                 <div className="absolute inset-x-0 bottom-0 px-5 py-5 bg-gradient-to-t from-black/95 via-black/40 to-transparent text-white">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01</div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01 of 4</div>
                   <div className="font-serif text-2xl leading-none">Mia</div>
                   <div className="text-white/70 text-xs mt-1.5">Australian-British · Warm</div>
                 </div>
@@ -238,6 +248,98 @@ export default function Landing() {
               </div>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* ============== WATCH THE PRESENTER EXPERIENCE ============== */}
+      <section className="relative py-24 px-6 lg:px-10 bg-[#0F1A2E] text-white overflow-hidden" data-testid="watch-presenter-section">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-[#C99A2E]/8 blur-3xl pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto">
+          <motion.div {...fadeUp} className="text-center mb-12">
+            <div className="text-[11px] uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-3">Watch the Presenter Experience</div>
+            <h2 className="font-serif text-4xl lg:text-6xl tracking-tighter leading-[0.95] mb-4">See Mia <span className="italic text-[#C99A2E]">narrate a real listing.</span></h2>
+            <p className="text-white/65 text-lg max-w-2xl mx-auto">Or record yourself with the AI eye-contact teleprompter. Your call — both deliver broadcast quality.</p>
+          </motion.div>
+
+          {/* 3-step linear how-it-works flow */}
+          <div className="grid md:grid-cols-3 gap-4 mb-14 max-w-4xl mx-auto">
+            {[
+              { n: "1", t: "Open on your phone", d: "Your script appears near the camera lens.", testid: "step-phone" },
+              { n: "2", t: "Read while recording", d: "Speak naturally with perfect eye contact.", testid: "step-read" },
+              { n: "3", t: "Export or use AI presenter", d: "Mia, Oliver, Aria or Marcus narrate for you.", testid: "step-export" },
+            ].map((s, i) => (
+              <motion.div key={s.n} {...stagger(i)} data-testid={s.testid} className="relative bg-white/[0.04] border border-white/10 rounded-2xl p-6 text-center">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-[#C99A2E] text-black font-serif text-lg flex items-center justify-center shadow-lg">{s.n}</div>
+                <div className="pt-4">
+                  <div className="font-serif text-xl mb-2">{s.t}</div>
+                  <div className="text-white/55 text-sm">{s.d}</div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* MIA DEMO video — big and centered */}
+          <motion.div {...fadeUp} className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-5 gap-6 items-center">
+              {/* Demo video card */}
+              <div className="md:col-span-3 relative aspect-[16/10] rounded-3xl overflow-hidden bg-black border border-[#C99A2E]/30 shadow-2xl" data-testid="mia-demo-video">
+                <video
+                  src={MIA_VIDEO_CLIP}
+                  poster={MIA_PORTRAIT}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls
+                />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C99A2E] text-black text-[9px] font-mono uppercase tracking-wider">Mia Demo · 4K</div>
+                <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded bg-red-500/90 text-white text-[10px] font-mono uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
+                </div>
+              </div>
+
+              {/* Copy + presenter chips */}
+              <div className="md:col-span-2">
+                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-3">Featuring Mia</div>
+                <h3 className="font-serif text-3xl tracking-tight mb-4 leading-tight">Female luxury<br />presenter template.</h3>
+                <p className="text-white/65 text-sm leading-relaxed mb-6">Mia delivers your script in a warm Australian-British accent — perfect for residential, beachfront and heritage listings. Drop in a property script and she takes over.</p>
+                <ul className="space-y-2 mb-6">
+                  {["4K cinematic export", "60-second listing video", "REA · Domain · Rightmove ready"].map((b, i) => (
+                    <li key={i} className="flex items-start gap-2 text-white/75 text-xs">
+                      <Check size={12} className="text-[#C99A2E] mt-0.5 shrink-0" /> <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/register?next=/app/confidence" data-testid="mia-demo-cta" className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#C99A2E] text-[#0F1A2E] font-medium text-sm hover:bg-[#DBC075] transition-colors">
+                  <Sparkles size={14} /> Try Mia free for 7 days
+                </Link>
+              </div>
+            </div>
+
+            {/* All 4 presenters strip */}
+            <div className="mt-10 pt-8 border-t border-white/10">
+              <div className="text-center mb-5">
+                <div className="text-[11px] font-mono uppercase tracking-[0.22em] text-white/45 mb-1">All four presenters · included on every paid tier</div>
+              </div>
+              <div className="grid grid-cols-4 gap-3 max-w-3xl mx-auto">
+                {[
+                  { name: "Mia", accent: "AU/UK · Warm", img: MIA_PORTRAIT, op: "50% 18%" },
+                  { name: "Oliver", accent: "British RP", img: OLIVER_PORTRAIT, op: "50% 18%" },
+                  { name: "Aria", accent: "American · Crisp", img: ARIA_PORTRAIT, op: "50% 18%" },
+                  { name: "Marcus", accent: "Continental", img: MARCUS_PORTRAIT, op: "50% 18%" },
+                ].map((p) => (
+                  <div key={p.name} className="text-center" data-testid={`presenter-chip-${p.name.toLowerCase()}`}>
+                    <div className="aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] mb-2 ring-1 ring-white/10">
+                      <img src={p.img} alt={p.name} className="w-full h-full object-cover" style={{ objectPosition: p.op }} />
+                    </div>
+                    <div className="font-serif text-base">{p.name}</div>
+                    <div className="text-white/50 text-[10px] font-mono uppercase tracking-wider">{p.accent}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
