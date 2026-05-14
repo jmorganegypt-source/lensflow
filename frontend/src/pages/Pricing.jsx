@@ -14,7 +14,7 @@ const tiers = [
     price: "$23.90",
     cadence: "AUD / month",
     blurb: "The essential kit for everyday listings.",
-    cta: "Choose Standard",
+    cta: "Start 7-day trial",
     icon: Sparkles,
     highlight: false,
     package_id: "starter_monthly",
@@ -33,11 +33,10 @@ const tiers = [
     price: "$59.90",
     cadence: "AUD / month",
     blurb: "The agent's standard kit. Unlimited drafts.",
-    cta: "Choose Professional",
+    cta: "Start 7-day trial",
     icon: Crown,
     highlight: true,
     package_id: "professional_monthly",
-    payment_link: "https://buy.stripe.com/28E00j1nv7Gc3I34n5",
     perks: [
       "Everything in Standard",
       "4K recording",
@@ -53,11 +52,10 @@ const tiers = [
     price: "$1,199",
     cadence: "AUD / month",
     blurb: "White-glove agency tier. Built around your brand.",
-    cta: "Choose Elite",
+    cta: "Start 7-day trial",
     icon: Gem,
     highlight: false,
     package_id: "elite_monthly",
-    payment_link: "https://buy.stripe.com/00w3cv8PX1hO5Qbg5N",
     perks: [
       "Private AI presenter (yours only)",
       "Face upload avatar engine",
@@ -133,6 +131,10 @@ export default function Pricing() {
       <MarketingNav />
       <section className="pt-40 pb-12 px-6 lg:px-10">
         <div className="max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C99A2E]/10 border border-[#C99A2E]/30 mb-4" data-testid="trial-badge">
+            <span className="w-1.5 h-1.5 bg-[#C99A2E] rounded-full animate-pulse" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#C99A2E]">7-day free trial · Card required · Cancel anytime</span>
+          </div>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C99A2E]/10 border border-[#C99A2E]/30 mb-6" data-testid="price-guarantee-badge">
             <span className="w-1.5 h-1.5 bg-[#C99A2E] rounded-full animate-pulse" />
             <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#C99A2E]">Lowest price guarantee · 20% below any competitor</span>
@@ -141,7 +143,7 @@ export default function Pricing() {
           <h1 className="font-serif text-6xl lg:text-8xl tracking-tighter leading-[0.95] mb-6">
             Built for the way <br /><span className="italic text-[#C99A2E]">agents really sell.</span>
           </h1>
-          <p className="text-lg text-white/55 max-w-2xl mx-auto">Four tiers · Australian-built · Beats every comparable AI video tool on price.</p>
+          <p className="text-lg text-white/55 max-w-2xl mx-auto">Four tiers · Try every feature free for 7 days · Cancel anytime before day 8 and you're never charged.</p>
         </div>
       </section>
 
@@ -158,6 +160,7 @@ export default function Pricing() {
               <div className="mb-6">
                 <span className="font-serif text-5xl tracking-tighter">{t.price}</span>
                 <span className="text-white/45 ml-2 text-xs block mt-1">{t.cadence}</span>
+                {t.id !== "concierge" && <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E]">7-day free trial</span>}
               </div>
               <button
                 onClick={() => handleTierClick(t)}

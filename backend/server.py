@@ -728,10 +728,10 @@ async def submit_concierge(req: ConciergeReq):
 # ---------- Payments (Stripe) ----------
 # Server-side authoritative price packages — never trust the frontend
 PAYMENT_PACKAGES = {
-    "starter_monthly":      {"amount": 23.90,   "currency": "aud", "label": "Standard · Monthly",     "plan": "starter"},
-    "professional_monthly": {"amount": 59.90,   "currency": "aud", "label": "Professional · Monthly", "plan": "professional"},
-    "elite_monthly":        {"amount": 1199.00, "currency": "aud", "label": "Elite Partner · Monthly", "plan": "elite"},
-    "concierge_listing":    {"amount": 1790.00, "currency": "aud", "label": "Concierge · Per Listing", "plan": "concierge"},
+    "starter_monthly":      {"amount": 23.90,   "currency": "aud", "label": "Standard · Monthly",     "plan": "starter",      "recurring": True,  "trial_days": 7},
+    "professional_monthly": {"amount": 59.90,   "currency": "aud", "label": "Professional · Monthly", "plan": "professional", "recurring": True,  "trial_days": 7},
+    "elite_monthly":        {"amount": 1199.00, "currency": "aud", "label": "Elite Partner · Monthly", "plan": "elite",        "recurring": True,  "trial_days": 7},
+    "concierge_listing":    {"amount": 1790.00, "currency": "aud", "label": "Concierge · Per Listing", "plan": "concierge",    "recurring": False, "trial_days": 0},
 }
 
 
@@ -765,6 +765,56 @@ async def create_checkout(req: CheckoutInitReq, request: Request, user: dict = D
         "plan": pkg["plan"],
     }
 
+    # --- Recurring subscription with 7-day free trial (uses Stripe SDK directly) ---
+    if pkg.get("recurring"):
+        try:
+            import stripe as _stripe
+            _stripe.api_key = STRIPE_KEY
+            session = await asyncio.to_thread(
+                _stripe.checkout.Session.create,
+                mode="subscription",
+                payment_method_collection="always",  # card required even during trial
+                line_items=[{
+                    "price_data": {
+                        "currency": pkg["currency"],
+                        "product_data": {"name": pkg["label"]},
+                        "unit_amount": int(round(pkg["amount"] * 100)),
+                        "recurring": {"interval": "month"},
+                    },
+                    "quantity": 1,
+                }],
+                subscription_data={
+                    "trial_period_days": pkg.get("trial_days", 7),
+                    "metadata": metadata,
+                },
+                customer_email=user["email"],
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata=metadata,
+                allow_promotion_codes=True,
+            )
+            await db.payment_transactions.insert_one({
+                "session_id": session.id,
+                "user_id": str(user["_id"]),
+                "user_email": user["email"],
+                "package_id": req.package_id,
+                "plan": pkg["plan"],
+                "amount": pkg["amount"],
+                "currency": pkg["currency"],
+                "trial_days": pkg.get("trial_days", 7),
+                "mode": "subscription",
+                "payment_status": "trialing",
+                "status": "open",
+                "metadata": metadata,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            })
+            return {"url": session.url, "session_id": session.id}
+        except Exception as e:
+            logger.exception("Subscription checkout failed")
+            raise HTTPException(status_code=500, detail=f"Checkout failed: {str(e)[:200]}")
+
+    # --- One-shot payment (Concierge per-listing) ---
     stripe_checkout = _stripe_for(request)
     checkout_req = CheckoutSessionRequest(
         amount=pkg["amount"],
@@ -783,6 +833,7 @@ async def create_checkout(req: CheckoutInitReq, request: Request, user: dict = D
         "plan": pkg["plan"],
         "amount": pkg["amount"],
         "currency": pkg["currency"],
+        "mode": "payment",
         "payment_status": "initiated",
         "status": "open",
         "metadata": metadata,

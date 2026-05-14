@@ -442,7 +442,7 @@ export default function Landing() {
           <motion.div {...fadeUp}>
             <div className="text-[11px] uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-3">Pricing</div>
             <h2 className="font-serif text-4xl lg:text-6xl tracking-tighter mb-5 leading-[0.95]">From $23.90 / month. <br/><span className="italic text-[#C99A2E]">20% under any competitor.</span></h2>
-            <p className="text-[#0F1A2E]/60 text-lg max-w-2xl mx-auto mb-10">Four tiers — Standard, Professional, Elite Partner and Concierge. Cancel anytime.</p>
+            <p className="text-[#0F1A2E]/60 text-lg max-w-2xl mx-auto mb-10">Four tiers · <span className="text-[#C99A2E] font-medium">7-day free trial on all subscriptions</span> · Cancel anytime.</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 max-w-3xl mx-auto">
               {[
