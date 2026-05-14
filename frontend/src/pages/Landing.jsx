@@ -109,17 +109,13 @@ export default function Landing() {
           <motion.div {...stagger(1)} className="lg:col-span-6 relative">
             <div className="relative h-[560px] lg:h-[640px] flex items-center justify-center">
 
-              {/* MIA — autoplay video, the star */}
-              <div className="absolute left-2 lg:left-0 top-0 w-[58%] aspect-[9/14] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-2 ring-1 ring-[#C99A2E]/40" data-testid="hero-mia-video">
-                <video
-                  src={MIA_VIDEO_CLIP}
-                  poster={MIA_PORTRAIT}
+              {/* MIA — clean portrait card (the star) */}
+              <div className="absolute left-2 lg:left-0 top-0 w-[58%] aspect-[9/14] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-2 ring-1 ring-[#C99A2E]/40" data-testid="hero-mia-card">
+                <img
+                  src={MIA_PORTRAIT}
+                  alt="Mia — LensFlow AI Presenter"
                   className="w-full h-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
+                  style={{ objectPosition: "50% 22%" }}
                 />
                 {/* Top branding */}
                 <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
@@ -127,19 +123,12 @@ export default function Landing() {
                     <span className="font-serif text-[11px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
                     <span className="ml-1 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
                   </div>
-                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-red-500/90 text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    <span className="text-[10px] font-mono uppercase tracking-wider">REC</span>
-                  </div>
                 </div>
                 {/* Bottom label */}
                 <div className="absolute inset-x-0 bottom-0 px-5 py-5 bg-gradient-to-t from-black/95 via-black/40 to-transparent text-white">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E]">AI Presenter · 01</span>
-                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 backdrop-blur text-[9px] font-mono uppercase tracking-wider"><Play size={8} className="fill-white"/> Playing</span>
-                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01</div>
                   <div className="font-serif text-2xl leading-none">Mia</div>
-                  <div className="text-white/70 text-xs mt-1.5">Australian-British · Warm · Live recording</div>
+                  <div className="text-white/70 text-xs mt-1.5">Australian-British · Warm</div>
                 </div>
               </div>
 
@@ -175,6 +164,80 @@ export default function Landing() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ============== WHAT IS LENSFLOW — 3 clear demo cards ============== */}
+      <section className="relative py-24 px-6 lg:px-10 bg-white border-y border-[#0F1A2E]/8" data-testid="what-is-lensflow">
+        <div className="max-w-7xl mx-auto">
+          <motion.div {...fadeUp} className="text-center mb-14 max-w-3xl mx-auto">
+            <div className="text-[11px] uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-3">What is LensFlow?</div>
+            <h2 className="font-serif text-4xl lg:text-6xl tracking-tighter leading-[0.95] mb-5">
+              Three things, one platform. <br /><span className="italic text-[#C99A2E]">All for your listings.</span>
+            </h2>
+            <p className="text-[#0F1A2E]/65 text-lg">Real estate agents use LensFlow to do three things their listings desperately need — without a film crew, without a designer, without a copywriter.</p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* CARD 1 — Glamour Photos */}
+            <motion.div {...stagger(0)} data-testid="what-card-1" className="rounded-3xl overflow-hidden bg-[#FAF7F2] border border-[#0F1A2E]/8 hover:shadow-xl hover:-translate-y-1 transition-all">
+              <div className="aspect-[5/3] relative overflow-hidden bg-[#0F1A2E]">
+                <img src="/assets/property/sunset-pool.jpg" alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C99A2E] text-black text-[9px] font-mono uppercase tracking-wider">01 · Photo Enhancement</div>
+                <div className="absolute bottom-3 left-3 right-3 flex justify-between text-white text-[10px] font-mono uppercase tracking-wider">
+                  <span className="px-2 py-1 rounded bg-black/50 backdrop-blur">Before</span>
+                  <span className="px-2 py-1 rounded bg-[#C99A2E] text-black">After · Magazine HDR</span>
+                </div>
+              </div>
+              <div className="p-7">
+                <h3 className="font-serif text-2xl mb-2 tracking-tight">Turn iPhone photos<br />into magazine spreads.</h3>
+                <p className="text-[#0F1A2E]/60 text-sm leading-relaxed mb-4">Upload any property photo. Pick a look — Magazine HDR, Golden Hour, Dusk Twilight, Lifestyle Lush, Interior Polish. AI enhances it in ~30 seconds.</p>
+                <Link to="/register?next=/app/glamour" data-testid="what-card-1-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                  Try Glamour Studio <ArrowUpRight size={14} />
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* CARD 2 — Confidence Mode (videos for camera-shy agents) */}
+            <motion.div {...stagger(1)} data-testid="what-card-2" className="rounded-3xl overflow-hidden bg-[#FAF7F2] border border-[#0F1A2E]/8 hover:shadow-xl hover:-translate-y-1 transition-all">
+              <div className="aspect-[5/3] relative overflow-hidden bg-[#0F1A2E]">
+                <img src={MIA_PORTRAIT} alt="" className="w-full h-full object-cover" style={{ objectPosition: "50% 18%" }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C99A2E] text-black text-[9px] font-mono uppercase tracking-wider">02 · Listing Videos</div>
+                <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 text-white text-[10px] font-mono uppercase tracking-wider">
+                  <span className="px-2 py-1 rounded bg-red-500/90"><span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"/> Auto-narrated</span></span>
+                  <span className="px-2 py-1 rounded bg-black/50 backdrop-blur">MP4 · 1080p</span>
+                </div>
+              </div>
+              <div className="p-7">
+                <h3 className="font-serif text-2xl mb-2 tracking-tight">Listing videos —<br />without filming yourself.</h3>
+                <p className="text-[#0F1A2E]/60 text-sm leading-relaxed mb-4">Mia or Oliver narrates your listing over a Ken-Burns slideshow of your photos. Get a downloadable MP4 in under a minute. Perfect for camera-shy agents.</p>
+                <Link to="/register?next=/app/confidence" data-testid="what-card-2-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                  Try Confidence Mode <ArrowUpRight size={14} />
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* CARD 3 — Listing Cards / Reels */}
+            <motion.div {...stagger(2)} data-testid="what-card-3" className="rounded-3xl overflow-hidden bg-[#FAF7F2] border border-[#0F1A2E]/8 hover:shadow-xl hover:-translate-y-1 transition-all">
+              <div className="aspect-[5/3] relative overflow-hidden bg-[#0F1A2E]">
+                <img src="/assets/property/mia-listing-card.jpg" alt="" className="w-full h-full object-cover" />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C99A2E] text-black text-[9px] font-mono uppercase tracking-wider">03 · Branded Reels</div>
+                <div className="absolute bottom-3 left-3 right-3 flex justify-between text-white text-[10px] font-mono uppercase tracking-wider">
+                  <span className="px-2 py-1 rounded bg-black/50 backdrop-blur">9:16 · 16:9 · 1:1</span>
+                  <span className="px-2 py-1 rounded bg-[#C99A2E] text-black">Auto-branded</span>
+                </div>
+              </div>
+              <div className="p-7">
+                <h3 className="font-serif text-2xl mb-2 tracking-tight">Auto-branded reels<br />for every property.</h3>
+                <p className="text-[#0F1A2E]/60 text-sm leading-relaxed mb-4">Add price, address, your face & logo automatically. Export 9:16 for Reels, 16:9 for YouTube, 1:1 for Instagram. REA · Domain · Rightmove ready.</p>
+                <Link to="/register?next=/app/studio" data-testid="what-card-3-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                  Try Studio <ArrowUpRight size={14} />
+                </Link>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
