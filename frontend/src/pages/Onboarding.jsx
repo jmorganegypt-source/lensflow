@@ -187,6 +187,26 @@ export default function Onboarding() {
       sub: "Optional — we'll match your tone, fonts and watermark on every export.",
       content: (
         <div className="max-w-md mx-auto space-y-5" data-testid="step-brand">
+          {/* Mia welcome video */}
+          <div className="rounded-2xl overflow-hidden border border-[#0F1A2E]/10 bg-[#0F1A2E] relative aspect-video shadow-xl" data-testid="mia-welcome-video">
+            <video
+              src="/assets/property/mia-clip.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster="/assets/property/mia-headshot.jpg"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 inset-x-0 px-4 py-3 bg-gradient-to-t from-black/85 via-black/40 to-transparent">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#C99A2E] animate-pulse" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/85">Welcome from Mia</span>
+              </div>
+              <div className="text-white font-serif text-sm mt-0.5 leading-snug">"Let's make your first listing — together."</div>
+            </div>
+          </div>
+
           <div>
             <label className="text-xs font-mono uppercase tracking-[0.18em] text-[#0F1A2E]/55 mb-2 block">Your website</label>
             <input type="text" data-testid="brand-website" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="raywhite.com.au" className="w-full px-5 py-4 rounded-2xl bg-white border-2 border-[#0F1A2E]/10 focus:border-[#C99A2E] focus:outline-none text-[#0F1A2E] text-base" />
