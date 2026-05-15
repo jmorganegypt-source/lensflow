@@ -196,6 +196,8 @@ def serialize_user(doc: dict) -> dict:
         "name": doc.get("name", ""),
         "role": doc.get("role", "user"),
         "plan": doc.get("plan", "free"),
+        "paid_at": doc.get("paid_at"),
+        "booking_url": doc.get("booking_url", ""),
         "onboarded": bool(doc.get("onboarded", False)),
         "onboarding": doc.get("onboarding") or {},
         "created_at": doc.get("created_at").isoformat() if isinstance(doc.get("created_at"), datetime) else doc.get("created_at"),
@@ -894,6 +896,7 @@ class EmailVideoReq(BaseModel):
     recipient_name: Optional[str] = ""
     listing_address: Optional[str] = ""
     sender_message: Optional[str] = ""
+    booking_url: Optional[str] = ""        # Agent's Calendly / Google Cal link for "Book inspection"
 
 
 @api.post("/projects/email-video")
@@ -909,6 +912,19 @@ async def email_video(req: EmailVideoReq, user: dict = Depends(get_current_user)
     sender_email = user.get("email", "")
     address_line = f" for <strong>{req.listing_address}</strong>" if req.listing_address else ""
     personal = f"<p style=\"font-style:italic;color:#444\">\"{req.sender_message}\"</p>" if req.sender_message else ""
+    # Persist the agent's booking URL on the user doc for future emails
+    booking_url = (req.booking_url or user.get("booking_url") or "").strip()
+    if booking_url and req.booking_url:
+        try:
+            await db.users.update_one({"_id": user["_id"]}, {"$set": {"booking_url": booking_url}})
+        except Exception:
+            pass
+    book_block = ""
+    if booking_url:
+        book_block = f"""
+        <div style=\"text-align:center;margin-top:8px;margin-bottom:24px\">
+          <a href=\"{booking_url}\" style=\"display:inline-block;background:#0F1A2E;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:600;border:1px solid #C99A2E\">📅 Book a private inspection</a>
+        </div>"""
 
     html = f"""
     <div style="font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#FAF7F2;color:#0F1A2E">
@@ -920,9 +936,10 @@ async def email_video(req: EmailVideoReq, user: dict = Depends(get_current_user)
       <p style="color:#555;line-height:1.5">Hi {req.recipient_name or 'there'},</p>
       <p style="color:#555;line-height:1.5">{sender_name} ({sender_email}) just composed a cinematic listing video and wanted you to see it first.</p>
       {personal}
-      <div style="text-align:center;margin:32px 0">
+      <div style="text-align:center;margin:32px 0 8px">
         <a href="{req.video_url}" style="display:inline-block;background:#C99A2E;color:#0F1A2E;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600">▶ Watch the video</a>
       </div>
+      {book_block}
       <p style="color:#888;font-size:12px;text-align:center;margin-top:32px">LensFlow — AI Real Estate Media Studio · <a href="https://lensflow.com.au" style="color:#C99A2E">lensflow.com.au</a></p>
     </div>
     """

@@ -384,8 +384,17 @@ function EmailVideoDialog({ videoUrl, defaultAddress, onClose }) {
     recipient_name: "",
     listing_address: defaultAddress || "",
     sender_message: "",
+    booking_url: "",
   });
   const [sending, setSending] = useState(false);
+
+  // Prefill booking_url from the user record (saved on previous send)
+  useEffect(() => {
+    api.get("/auth/me").then((r) => {
+      const u = r.data?.user || {};
+      if (u.booking_url) setForm((f) => ({ ...f, booking_url: u.booking_url }));
+    }).catch(() => {});
+  }, []);
 
   const send = async (e) => {
     e?.preventDefault();
@@ -402,7 +411,7 @@ function EmailVideoDialog({ videoUrl, defaultAddress, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose} data-testid="email-video-dialog">
-      <div className="glass-strong rounded-3xl p-7 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+      <div className="glass-strong rounded-3xl p-7 max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-5">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#C99A2E] mb-1">Share this video</div>
@@ -428,6 +437,13 @@ function EmailVideoDialog({ videoUrl, defaultAddress, onClose }) {
           <div>
             <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/55 mb-1 block">Personal note (optional)</label>
             <textarea rows={3} data-testid="email-message" value={form.sender_message} onChange={(e) => setForm({...form, sender_message: e.target.value})} placeholder="Sarah — wanted you to be the first to see this. Open it on a big screen." className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none resize-none text-sm" />
+          </div>
+          <div>
+            <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/55 mb-1 block flex items-center gap-2">
+              📅 Your booking link (optional · saved for next time)
+            </label>
+            <input type="url" data-testid="email-booking-url" value={form.booking_url} onChange={(e) => setForm({...form, booking_url: e.target.value})} placeholder="https://calendly.com/your-handle" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none text-sm" />
+            <div className="text-[10px] text-white/45 mt-1">Adds a "Book a private inspection" button to the email. Every video becomes a lead-capture asset.</div>
           </div>
           <button type="submit" disabled={sending || !form.recipient_email} data-testid="email-send" className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#C99A2E] text-black hover:bg-[#DBC075] disabled:opacity-50 font-medium text-sm">
             {sending ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : <><Send size={14} /> Send video link</>}

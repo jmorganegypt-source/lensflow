@@ -554,6 +554,60 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ============== FOUNDER STORY + GUARANTEE ============== */}
+      <section className="relative py-24 px-6 lg:px-10 bg-[#FAF7F2] text-[#0F1A2E]" data-testid="founder-section">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-5 gap-10 items-center">
+          {/* Portrait column */}
+          <div className="md:col-span-2">
+            <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#0F1A2E] to-[#1a2540] overflow-hidden border-4 border-[#C99A2E]/30 shadow-2xl flex items-center justify-center" data-testid="founder-portrait">
+              {/* Founder portrait placeholder — agent should upload personal photo */}
+              <div className="text-center text-white/40 p-8">
+                <div className="w-24 h-24 rounded-full bg-[#C99A2E]/20 border-2 border-[#C99A2E] mx-auto mb-4 flex items-center justify-center font-serif text-4xl text-[#C99A2E]">L</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#C99A2E]/80">Founder portrait · swap in your photo</div>
+              </div>
+            </div>
+            <div className="mt-4 text-center">
+              <div className="font-serif text-xl text-[#0F1A2E]">The Founder</div>
+              <div className="text-xs text-[#0F1A2E]/55 font-mono uppercase tracking-wider mt-1">LensFlow · Sydney · Australia</div>
+            </div>
+          </div>
+
+          {/* Story column */}
+          <div className="md:col-span-3">
+            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#C99A2E] mb-3">Why I built this</div>
+            <h2 className="font-serif text-4xl lg:text-5xl tracking-tighter leading-[1.05] mb-6">
+              Built by an <em className="italic text-[#C99A2E]">agent</em>, for agents who refuse to be videographers.
+            </h2>
+            <div className="space-y-4 text-[#0F1A2E]/75 leading-relaxed text-[15px]">
+              <p>
+                I spent years quoting $4,000+ per listing video — drone crews, dusk shoots, voice-over artists, editors. Then I'd wait two weeks for the cut. By the time the video was ready, the vendor had cooled, the buyer had moved on, and the property had stopped trending on REA.
+              </p>
+              <p>
+                LensFlow is the platform I wanted to exist. Mia and Oliver are the production crew I could never afford on every listing. Ava is the script-writer who works at 2am. <span className="text-[#0F1A2E] font-medium">You hit "render" — the cinematic video is in your inbox before your coffee gets cold.</span>
+              </p>
+              <p>
+                This isn't a generic SaaS dressed up for real estate. It's the operating system I built because the industry deserved one.
+              </p>
+            </div>
+
+            {/* Guarantee strip */}
+            <div className="mt-8 grid grid-cols-3 gap-3" data-testid="guarantee-strip">
+              {[
+                { icon: Check, title: "Cancel anytime", sub: "No lock-in. No fine print." },
+                { icon: Sparkles, title: "7-day free trial", sub: "Watermarked, full feature access." },
+                { icon: Star, title: "Built in Australia", sub: "REA · Domain · 4K presets." },
+              ].map((g, i) => (
+                <div key={i} className="rounded-2xl border border-[#0F1A2E]/10 bg-white p-4 text-center" data-testid={`guarantee-${i}`}>
+                  <g.icon size={18} className="text-[#C99A2E] mx-auto mb-1.5" />
+                  <div className="text-xs font-medium text-[#0F1A2E]">{g.title}</div>
+                  <div className="text-[10px] text-[#0F1A2E]/55 mt-0.5">{g.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ============== TRUST STRIP + STATS ============== */}
       <section className="relative py-20 px-6 lg:px-10 bg-white border-y border-[#0F1A2E]/8" data-testid="trust-stats">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-8">

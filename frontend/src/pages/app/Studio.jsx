@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import api, { formatApiErrorDetail } from "../../lib/api";
 import { toast } from "sonner";
-import { Sparkles, Loader2, Copy, Play, Pause, Save, Mic, Award, MessageCircle, Film, Check } from "lucide-react";
+import { Sparkles, Loader2, Copy, Play, Pause, Save, Mic, Award, MessageCircle, Film, Check, MicOff } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const TONES = [
@@ -34,9 +34,51 @@ export default function Studio() {
   const [presenters, setPresenters] = useState([]);
   const audioRef = useRef(null);
 
+  // Voice-note → key features (Web Speech API · browser-native, $0 cost)
+  const [listening, setListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const recognitionRef = useRef(null);
+
   useEffect(() => {
     api.get("/presenters").then(r => setPresenters(r.data.presenters || []));
+    // Detect browser support for SpeechRecognition
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR) {
+      setVoiceSupported(true);
+      const rec = new SR();
+      rec.lang = "en-AU";
+      rec.interimResults = true;
+      rec.continuous = true;
+      rec.onresult = (e) => {
+        let finalText = "";
+        let interim = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalText += t + " "; else interim += t;
+        }
+        if (finalText) {
+          setForm((f) => ({ ...f, key_features: (f.key_features + " " + finalText).trim() }));
+        }
+      };
+      rec.onend = () => setListening(false);
+      rec.onerror = (e) => { toast.error("Voice note: " + (e.error || "error")); setListening(false); };
+      recognitionRef.current = rec;
+    }
+    return () => { try { recognitionRef.current?.stop(); } catch { /* noop */ } };
   }, []);
+
+  const toggleVoiceNote = () => {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+    if (listening) { rec.stop(); setListening(false); return; }
+    try {
+      rec.start();
+      setListening(true);
+      toast.success("Listening — walk through the property out loud. Tap again to stop.");
+    } catch (err) {
+      toast.error("Could not start voice. Allow microphone access.");
+    }
+  };
 
   const generate = async (e) => {
     e?.preventDefault();
@@ -159,8 +201,21 @@ export default function Studio() {
             <input data-testid="studio-price" value={form.price_range} onChange={(e) => setForm({...form, price_range: e.target.value})} placeholder="Guide: $8.5M" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none" />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-[0.2em] font-mono text-white/50 mb-2">Key features</label>
-            <textarea rows={3} data-testid="studio-features" value={form.key_features} onChange={(e) => setForm({...form, key_features: e.target.value})} placeholder="Harbour views, infinity pool, 5-car garage, wine cellar..." className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none resize-none" />
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs uppercase tracking-[0.2em] font-mono text-white/50">Key features</label>
+              {voiceSupported && (
+                <button
+                  type="button"
+                  onClick={toggleVoiceNote}
+                  data-testid="studio-voice-note"
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all ${listening ? "bg-red-500 text-white animate-pulse" : "bg-[#C99A2E]/15 text-[#C99A2E] border border-[#C99A2E]/40 hover:bg-[#C99A2E]/25"}`}
+                  title="Speak instead of type"
+                >
+                  {listening ? <><MicOff size={11} /> Stop</> : <><Mic size={11} /> Voice note</>}
+                </button>
+              )}
+            </div>
+            <textarea rows={3} data-testid="studio-features" value={form.key_features} onChange={(e) => setForm({...form, key_features: e.target.value})} placeholder={listening ? "🎙 Listening — walk the property out loud…" : "Harbour views, infinity pool, 5-car garage, wine cellar..."} className={`w-full px-4 py-3 rounded-xl bg-white/[0.04] border focus:border-[#C99A2E] focus:outline-none resize-none ${listening ? "border-[#C99A2E]" : "border-white/10"}`} />
           </div>
           <div>
             <label className="block text-xs uppercase tracking-[0.2em] font-mono text-white/50 mb-2">Presenter</label>

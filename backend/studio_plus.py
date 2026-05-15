@@ -146,6 +146,39 @@ def build_router(
 ) -> APIRouter:
     router = APIRouter(prefix="/studio-plus", tags=["studio-plus"])
 
+    # Trial limits (Gemini API-burn protection — applies only to users without paid_at)
+    TRIAL_LIMITS = {
+        "glamour_enhance":  10,   # 10 photo enhancements during 7-day trial
+        "confidence_video":  3,   # 3 AI videos during 7-day trial
+    }
+
+    async def _enforce_trial_limit(user: dict, action: str) -> None:
+        """Block trial users from exceeding the action cap. Paying users (paid_at set) are unlimited."""
+        if user.get("paid_at"):
+            return
+        limit = TRIAL_LIMITS.get(action)
+        if not limit:
+            return
+        used = await db.usage_log.count_documents({
+            "user_id": str(user["_id"]),
+            "action": action,
+        })
+        if used >= limit:
+            raise HTTPException(
+                status_code=402,
+                detail=f"Trial limit reached ({used}/{limit} {action.replace('_', ' ')}s used). Upgrade to Starter $79/mo or higher for unlimited access — your watermark and limits disappear instantly.",
+            )
+
+    async def _log_usage(user: dict, action: str) -> None:
+        try:
+            await db.usage_log.insert_one({
+                "user_id": str(user["_id"]),
+                "action": action,
+                "at": time.time(),
+            })
+        except Exception:
+            pass
+
     # -------- Confidence Mode --------
     from fastapi import Depends
 
@@ -156,6 +189,7 @@ def build_router(
     ):
         if not eleven_client:
             raise HTTPException(status_code=503, detail="Voice engine not configured")
+        await _enforce_trial_limit(user, "confidence_video")
 
         _cleanup_old_videos()
         work_dir = Path(tempfile.mkdtemp(prefix="lf_conf_"))
@@ -298,6 +332,7 @@ def build_router(
 
             import gc
             gc.collect()  # Reclaim moviepy buffers before sending response
+            await _log_usage(user, "confidence_video")
 
             return {
                 "video_url": f"/api/studio-plus/video/{video_path.name}",
@@ -329,6 +364,23 @@ def build_router(
             raise HTTPException(status_code=404, detail="Video expired or not found")
         from fastapi.responses import FileResponse
         return FileResponse(str(path), media_type="video/mp4", filename="lensflow-listing.mp4")
+
+    @router.get("/usage")
+    async def get_usage(user: dict = Depends(get_current_user)):
+        """Returns per-action usage + remaining trial credits. Paying users see 'unlimited'."""
+        paid = bool(user.get("paid_at"))
+        out = {"paid": paid, "actions": {}}
+        for action, limit in TRIAL_LIMITS.items():
+            used = await db.usage_log.count_documents({
+                "user_id": str(user["_id"]),
+                "action": action,
+            })
+            out["actions"][action] = {
+                "used": used,
+                "limit": None if paid else limit,
+                "remaining": None if paid else max(0, limit - used),
+            }
+        return out
 
     # -------- Music library (royalty-free quick-picks) --------
     @router.get("/music/library")
@@ -371,6 +423,8 @@ def build_router(
         prompt = req.custom_prompt or GLAMOUR_PRESETS.get(req.preset)
         if not prompt:
             raise HTTPException(status_code=400, detail="Unknown preset")
+
+        await _enforce_trial_limit(user, "glamour_enhance")
 
         # Lazy imports — keep cold-start memory low
         import gc
@@ -456,6 +510,7 @@ def build_router(
                 "notes": notes,
             }
             gc.collect()
+            await _log_usage(user, "glamour_enhance")
             return response
         except HTTPException:
             gc.collect()
