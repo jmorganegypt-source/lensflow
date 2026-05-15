@@ -258,19 +258,46 @@ export default function Landing() {
             <div className="grid md:grid-cols-5 gap-6 items-center">
               {/* Demo video card */}
               <div className="md:col-span-3 relative aspect-[16/10] rounded-3xl overflow-hidden bg-black border border-[#C99A2E]/30 shadow-2xl" data-testid="mia-demo-video">
-                <video
-                  src={MIA_VIDEO_CLIP}
-                  poster={MIA_PORTRAIT}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  controls
+                {/* Property background — the "AI green-screen" effect */}
+                <img
+                  src="/assets/property/villa-hero-bg.jpg"
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
+                {/* Soft gradient to anchor Mia */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/15 to-black/35" />
+
+                {/* MIA cutout — positioned right side, in front of the property */}
+                <img
+                  src={MIA_PORTRAIT}
+                  alt="Mia narrating a luxury listing"
+                  className="absolute right-0 bottom-0 h-[105%] w-auto object-cover object-top"
+                  style={{ objectPosition: "50% 12%", filter: "drop-shadow(-10px 10px 30px rgba(0,0,0,0.4))" }}
+                />
+
+                {/* Script subtitle bar — bottom, like BIGVU subtitle overlay */}
+                <div className="absolute left-5 right-[45%] bottom-5 space-y-2">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#C99A2E] text-black text-[9px] font-mono uppercase tracking-wider font-medium">
+                    Ava · live script
+                  </div>
+                  <div className="rounded-xl bg-black/70 backdrop-blur-md border border-white/10 p-4">
+                    <p className="font-serif text-white text-base leading-snug" data-testid="mia-script-line">
+                      "Above Sydney Harbour, <span className="text-[#C99A2E]">the world goes quiet…</span> Then you arrive home."
+                    </p>
+                    <div className="mt-2 flex items-center gap-3 text-[10px] font-mono text-white/55 uppercase tracking-wider">
+                      <span className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" /> Mia · AU·UK</span>
+                      <span>·</span>
+                      <span>00:14 / 00:60</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top-left chip */}
                 <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C99A2E] text-black text-[9px] font-mono uppercase tracking-wider">Mia Demo · 4K</div>
-                <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded bg-red-500/90 text-white text-[10px] font-mono uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
+                {/* Top-right green-screen badge */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded bg-emerald-500/90 text-white text-[10px] font-mono uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> AI Green-Screen
                 </div>
               </div>
 
@@ -518,15 +545,15 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto text-center">
           <motion.div {...fadeUp}>
             <div className="text-[11px] uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-3">Pricing</div>
-            <h2 className="font-serif text-4xl lg:text-6xl tracking-tighter mb-5 leading-[0.95]">From $23.90 / month. <br/><span className="italic text-[#C99A2E]">20% under any competitor.</span></h2>
+            <h2 className="font-serif text-4xl lg:text-6xl tracking-tighter mb-5 leading-[0.95]">From $79 / month. <br/><span className="italic text-[#C99A2E]">Less than one listing photographer.</span></h2>
             <p className="text-[#0F1A2E]/60 text-lg max-w-2xl mx-auto mb-10">Four tiers · <span className="text-[#C99A2E] font-medium">7-day free trial on all subscriptions</span> · Cancel anytime.</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 max-w-3xl mx-auto">
               {[
-                { name: "Standard", price: "$23.90", note: "/ month", testid: "tier-standard" },
-                { name: "Professional", price: "$59.90", note: "/ month", featured: true, testid: "tier-professional" },
-                { name: "Elite Partner", price: "$1,199", note: "/ month", testid: "tier-elite" },
-                { name: "Concierge", price: "$1,790", note: "/ listing", testid: "tier-concierge" },
+                { name: "Starter",      price: "$79",    note: "/ month",  testid: "tier-starter" },
+                { name: "Elite",        price: "$199",   note: "/ month",  featured: true, testid: "tier-elite" },
+                { name: "Concierge",    price: "$399",   note: "/ month",  testid: "tier-concierge-monthly" },
+                { name: "Done-for-You", price: "$1,790", note: "/ listing", testid: "tier-done-for-you" },
               ].map((p) => (
                 <div key={p.name} data-testid={p.testid} className={`rounded-2xl p-5 border ${p.featured ? "bg-[#0F1A2E] text-white border-[#0F1A2E]" : "bg-white border-[#0F1A2E]/10"}`}>
                   <div className={`text-[10px] font-mono uppercase tracking-[0.18em] mb-2 ${p.featured ? "text-[#C99A2E]" : "text-[#0F1A2E]/45"}`}>{p.name}</div>
