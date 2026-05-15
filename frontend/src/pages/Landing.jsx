@@ -559,12 +559,13 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto grid md:grid-cols-5 gap-10 items-center">
           {/* Portrait column */}
           <div className="md:col-span-2">
-            <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#0F1A2E] to-[#1a2540] overflow-hidden border-4 border-[#C99A2E]/30 shadow-2xl flex items-center justify-center" data-testid="founder-portrait">
-              {/* Founder portrait placeholder — agent should upload personal photo */}
-              <div className="text-center text-white/40 p-8">
-                <div className="w-24 h-24 rounded-full bg-[#C99A2E]/20 border-2 border-[#C99A2E] mx-auto mb-4 flex items-center justify-center font-serif text-4xl text-[#C99A2E]">L</div>
-                <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#C99A2E]/80">Founder portrait · swap in your photo</div>
-              </div>
+            <div className="aspect-square rounded-3xl overflow-hidden border-4 border-[#C99A2E]/30 shadow-2xl" data-testid="founder-portrait">
+              <img
+                src="/assets/brand/founder.jpg"
+                alt="LensFlow Founder"
+                className="w-full h-full object-cover"
+                style={{ objectPosition: "center 18%" }}
+              />
             </div>
             <div className="mt-4 text-center">
               <div className="font-serif text-xl text-[#0F1A2E]">The Founder</div>

@@ -35,10 +35,11 @@ export default function MarketingNav() {
     <nav className={`fixed top-0 inset-x-0 z-50 backdrop-blur-xl border-b ${baseBg}`} data-testid="marketing-nav">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
         <Link to="/" className={`flex items-center gap-2.5 ${brandColor}`} data-testid="nav-logo">
-          <div className="w-9 h-9 rounded-full bg-[#C99A2E] flex items-center justify-center">
-            <span className="font-serif text-black text-xl leading-none pt-0.5">L</span>
-          </div>
-          <span className="font-serif text-2xl tracking-tight">LensFlow</span>
+          <img
+            src={isLight ? "/assets/brand/logo-horizontal.png" : "/assets/brand/logo-dark-square.png"}
+            alt="LensFlow"
+            className={isLight ? "h-10 w-auto" : "h-12 w-auto"}
+          />
         </Link>
 
         <div className="hidden md:flex items-center gap-9">
