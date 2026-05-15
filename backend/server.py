@@ -298,6 +298,21 @@ class ScriptOut(BaseModel):
     created_at: str
 
 
+class ScriptVariant(BaseModel):
+    id: str
+    style: str           # "polished" | "casual" | "cinematic"
+    style_label: str     # "Polished & Refined"
+    script: str
+    word_count: int
+    estimated_duration: int
+
+
+class ScriptVariantsOut(BaseModel):
+    title: str
+    variants: List[ScriptVariant]
+    created_at: str
+
+
 class ProjectCreate(BaseModel):
     title: str
     script: str = ""
@@ -573,14 +588,36 @@ async def tts_preview(req: TTSPreviewReq, user: dict = Depends(get_current_user)
 
 
 # ---------- AI Studio (script generation) ----------
-def _build_script_prompt(req: ScriptGenReq) -> str:
+SCRIPT_STYLES = {
+    "polished": {
+        "label": "Polished & Refined",
+        "guidance": "Sophisticated, broadcast-grade language. Confident, decisive sentences. Champagne-and-marble vocabulary. The kind of script Robb Report or The Wall Street Journal property section would write. Avoid clichés.",
+    },
+    "casual": {
+        "label": "Casual & Conversational",
+        "guidance": "Like the agent is texting a smart friend about their best listing this month. Warm, human, slightly playful, drops the formality without losing premium feel. Contractions OK. Energy without losing class.",
+    },
+    "cinematic": {
+        "label": "Cinematic & Dramatic",
+        "guidance": "Bond-trailer narration. Short punchy lines. Pause beats. Image-rich verbs. Build tension and emotional payoff. Reads like the voiceover of a luxury car ad.",
+    },
+}
+
+
+def _build_script_prompt(req: ScriptGenReq, style: Optional[str] = None) -> str:
     duration = req.duration_seconds
-    words = int(duration * 2.4)  # ~145 wpm
+    words = max(40, int(duration * 2.4))
     presenter_note = ""
     if req.presenter == "mia":
         presenter_note = "Written for Mia, a warm and elegant Australian-British presenter."
     elif req.presenter == "oliver":
         presenter_note = "Written for Oliver, a refined and authoritative British male presenter."
+
+    style_block = ""
+    if style and style in SCRIPT_STYLES:
+        s = SCRIPT_STYLES[style]
+        style_block = f"\nSTYLE: {s['label']}\n{s['guidance']}\n"
+
     return f"""You are an elite real estate copywriter for cinematic property videos.
 
 Produce a SPOKEN script ({words}±15 words, ~{duration} seconds at natural pace) for:
@@ -592,7 +629,7 @@ Bathrooms: {req.bathrooms or 'not specified'}
 Price range: {req.price_range or 'on application'}
 Key features: {req.key_features or '(use the property type for inspiration)'}
 Tone: {req.tone}
-{presenter_note}
+{presenter_note}{style_block}
 
 Rules:
 - Open with a cinematic hook (NOT "Welcome to").
@@ -649,6 +686,63 @@ async def generate_script(req: ScriptGenReq, user: dict = Depends(get_current_us
 async def list_scripts(user: dict = Depends(get_current_user)):
     docs = await db.scripts.find({"user_id": str(user["_id"])}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return {"scripts": docs}
+
+
+@api.post("/studio/scripts/variants", response_model=ScriptVariantsOut)
+async def generate_script_variants(req: ScriptGenReq, user: dict = Depends(get_current_user)):
+    """Generate 3 stylistic variants in parallel (Polished, Casual, Cinematic).
+    Agent picks their favourite — beats BIGVU's single-script flow."""
+    if not EMERGENT_KEY:
+        raise HTTPException(status_code=503, detail="AI engine not configured")
+    styles = ["polished", "casual", "cinematic"]
+
+    async def _run_one(style_key: str) -> ScriptVariant:
+        session_id = f"script-{user['_id']}-{style_key}-{uuid.uuid4().hex[:6]}"
+        chat = LlmChat(
+            api_key=EMERGENT_KEY,
+            session_id=session_id,
+            system_message="You write cinematic, conversion-focused real estate scripts for luxury video tours.",
+        ).with_model("openai", "gpt-5.2")
+        prompt = _build_script_prompt(req, style=style_key)
+        text = await chat.send_message(UserMessage(text=prompt))
+        script = (text or "").strip()
+        wc = len(script.split())
+        est = max(20, int(wc / 2.4))
+        return ScriptVariant(
+            id=str(uuid.uuid4()),
+            style=style_key,
+            style_label=SCRIPT_STYLES[style_key]["label"],
+            script=script,
+            word_count=wc,
+            estimated_duration=est,
+        )
+
+    try:
+        variants = await asyncio.gather(*[_run_one(s) for s in styles])
+    except Exception as e:
+        logger.exception("Variant gen failed")
+        raise HTTPException(status_code=500, detail=f"Script generation failed: {str(e)[:200]}")
+
+    title = f"{req.property_type.title()} · {req.address[:40]}"
+    created_at = datetime.now(timezone.utc).isoformat()
+
+    # Persist all 3 variants for the agent's history
+    await db.scripts.insert_many([
+        {
+            "id": v.id,
+            "user_id": str(user["_id"]),
+            "title": f"{title} ({v.style_label})",
+            "script": v.script,
+            "style": v.style,
+            "word_count": v.word_count,
+            "estimated_duration": v.estimated_duration,
+            "request": req.model_dump(),
+            "created_at": created_at,
+        }
+        for v in variants
+    ])
+
+    return ScriptVariantsOut(title=title, variants=list(variants), created_at=created_at)
 
 
 # ---------- Projects ----------

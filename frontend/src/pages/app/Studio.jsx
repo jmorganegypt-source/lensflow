@@ -1,25 +1,33 @@
 import React, { useEffect, useState, useRef } from "react";
 import api, { formatApiErrorDetail } from "../../lib/api";
 import { toast } from "sonner";
-import { Sparkles, Loader2, Copy, Play, Pause, Save, Mic } from "lucide-react";
+import { Sparkles, Loader2, Copy, Play, Pause, Save, Mic, Award, MessageCircle, Film, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const TONES = [
-  { v: "luxury", l: "Luxury" },
+  { v: "luxury",       l: "Luxury" },
   { v: "professional", l: "Professional" },
-  { v: "warm", l: "Warm" },
-  { v: "modern", l: "Modern" },
+  { v: "warm",         l: "Warm" },
+  { v: "modern",       l: "Modern" },
 ];
 
 const PROPERTY_TYPES = ["Penthouse", "Estate", "Beachfront Villa", "Heritage Manor", "Apartment", "Townhouse", "Commercial Tower", "Off-the-plan"];
+
+const STYLE_META = {
+  polished:  { Icon: Award,         label: "Polished & Refined",   sub: "Robb Report · WSJ property section" },
+  casual:    { Icon: MessageCircle, label: "Casual & Conversational", sub: "Warm, human, smart-friend energy" },
+  cinematic: { Icon: Film,          label: "Cinematic & Dramatic", sub: "Bond-trailer punchy lines" },
+};
 
 export default function Studio() {
   const [form, setForm] = useState({
     property_type: "Penthouse", address: "", bedrooms: 3, bathrooms: 2,
     price_range: "", key_features: "", tone: "luxury", duration_seconds: 60, presenter: "mia",
   });
-  const [script, setScript] = useState(null);
+  const [variants, setVariants] = useState([]); // [{id,style,style_label,script,word_count,estimated_duration}]
+  const [pickedId, setPickedId] = useState(null);
   const [editedScript, setEditedScript] = useState("");
+  const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [voiceLoading, setVoiceLoading] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -33,13 +41,28 @@ export default function Studio() {
   const generate = async (e) => {
     e?.preventDefault();
     setLoading(true);
+    setVariants([]);
+    setPickedId(null);
+    setEditedScript("");
     try {
-      const { data } = await api.post("/studio/scripts", form);
-      setScript(data);
-      setEditedScript(data.script);
+      const { data } = await api.post("/studio/scripts/variants", form);
+      setVariants(data.variants || []);
+      setTitle(data.title || "");
+      // Default-select polished
+      const first = (data.variants || [])[0];
+      if (first) {
+        setPickedId(first.id);
+        setEditedScript(first.script);
+      }
     } catch (err) {
       toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Generation failed");
     } finally { setLoading(false); }
+  };
+
+  const pickVariant = (v) => {
+    setPickedId(v.id);
+    setEditedScript(v.script);
+    if (playing) { audioRef.current?.pause(); setPlaying(false); }
   };
 
   const playVoice = async () => {
@@ -63,9 +86,10 @@ export default function Studio() {
 
   const saveAsProject = async () => {
     if (!editedScript) return;
+    const picked = variants.find(v => v.id === pickedId);
     try {
-      const { data } = await api.post("/projects", {
-        title: script?.title || `${form.property_type} · ${form.address || "Untitled"}`,
+      await api.post("/projects", {
+        title: title ? `${title}${picked ? ` (${picked.style_label})` : ""}` : `${form.property_type} · ${form.address || "Untitled"}`,
         script: editedScript,
         presenter: form.presenter,
         property_address: form.address,
@@ -82,13 +106,15 @@ export default function Studio() {
     toast.success("Copied");
   };
 
+  const picked = variants.find(v => v.id === pickedId);
+
   return (
     <div className="px-6 lg:px-12 py-10 max-w-7xl" data-testid="studio-page">
       <audio ref={audioRef} className="hidden" />
       <div className="mb-10">
         <div className="text-xs uppercase tracking-[0.25em] font-mono text-[#C99A2E] mb-2">AI Studio</div>
-        <h1 className="font-serif text-5xl tracking-tighter">Write the script.</h1>
-        <p className="text-white/55 mt-2">Tell us the listing — GPT-5.2 returns a broadcast script in seconds.</p>
+        <h1 className="font-serif text-5xl tracking-tighter">Three scripts, one click.</h1>
+        <p className="text-white/55 mt-2">Tell us the listing — GPT-5.2 returns three styled drafts. Pick your favourite, polish it, voice it.</p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -149,7 +175,7 @@ export default function Studio() {
             </div>
           </div>
           <button data-testid="studio-generate" disabled={loading} className="w-full px-6 py-4 rounded-full bg-[#C99A2E] text-black font-medium hover:bg-[#DBC075] disabled:opacity-60 flex items-center justify-center gap-2">
-            {loading ? <><Loader2 className="animate-spin" size={18} /> Writing the script...</> : <><Sparkles size={18} /> Generate with GPT-5.2</>}
+            {loading ? <><Loader2 className="animate-spin" size={18} /> Writing 3 versions in parallel…</> : <><Sparkles size={18} /> Generate 3 scripts with GPT-5.2</>}
           </button>
         </form>
 
@@ -157,22 +183,44 @@ export default function Studio() {
         <div className="glass rounded-3xl p-7 flex flex-col" data-testid="studio-output">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <div className="font-mono text-xs uppercase tracking-[0.2em] text-white/40">Script</div>
-              {script && <div className="font-serif text-xl mt-1">{script.title}</div>}
+              <div className="font-mono text-xs uppercase tracking-[0.2em] text-white/40">Pick your version</div>
+              {title && <div className="font-serif text-xl mt-1">{title}</div>}
             </div>
-            {script && (
+            {picked && (
               <div className="text-xs font-mono text-white/45">
-                {script.word_count} words · ~{script.estimated_duration}s
+                {picked.word_count} words · ~{picked.estimated_duration}s
               </div>
             )}
           </div>
-          {script ? (
+
+          {variants.length > 0 ? (
             <>
+              {/* Variant chips */}
+              <div className="grid grid-cols-3 gap-2 mb-5" data-testid="variant-chips">
+                {variants.map((v) => {
+                  const meta = STYLE_META[v.style] || { Icon: Sparkles, label: v.style_label, sub: "" };
+                  const active = v.id === pickedId;
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => pickVariant(v)}
+                      data-testid={`variant-${v.style}`}
+                      className={`relative text-left p-3 rounded-xl border transition-all ${active ? "border-[#C99A2E] bg-[#C99A2E]/10" : "border-white/10 hover:border-white/25 bg-white/[0.02]"}`}
+                    >
+                      <meta.Icon size={14} className={active ? "text-[#C99A2E]" : "text-white/45"} />
+                      <div className={`text-xs font-medium mt-1.5 ${active ? "text-[#C99A2E]" : "text-white"}`}>{meta.label.split(" & ")[0]}</div>
+                      <div className="text-[10px] text-white/45 mt-0.5 line-clamp-1">{meta.sub}</div>
+                      {active && <Check size={12} className="absolute top-2 right-2 text-[#C99A2E]" />}
+                    </button>
+                  );
+                })}
+              </div>
+
               <textarea
                 data-testid="studio-script-text"
                 value={editedScript}
                 onChange={(e) => setEditedScript(e.target.value)}
-                rows={14}
+                rows={11}
                 className="flex-1 w-full p-5 rounded-2xl bg-black/40 border border-white/10 focus:border-[#C99A2E] focus:outline-none resize-none font-serif text-lg leading-relaxed text-white/85 scrollbar-thin"
               />
               <div className="flex flex-wrap gap-2 mt-5">
@@ -195,8 +243,8 @@ export default function Studio() {
             <div className="flex-1 flex items-center justify-center text-center text-white/35 py-20">
               <div>
                 <Sparkles className="mx-auto mb-4 text-white/20" size={32} />
-                <p className="font-serif text-2xl text-white/40">Your script appears here.</p>
-                <p className="text-sm mt-2 text-white/35">Fill the brief and press Generate.</p>
+                <p className="font-serif text-2xl text-white/40">Three scripts appear here.</p>
+                <p className="text-sm mt-2 text-white/35">Polished · Casual · Cinematic — pick your favourite.</p>
               </div>
             </div>
           )}

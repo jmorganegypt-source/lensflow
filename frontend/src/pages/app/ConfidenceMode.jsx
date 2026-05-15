@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Camera, Upload, Loader2, Mic, Sparkles, Download, Play, X, ArrowRight } from "lucide-react";
+import { Camera, Upload, Loader2, Mic, Sparkles, Download, Play, X, ArrowRight, Music, Volume2, VolumeX } from "lucide-react";
 import api, { formatApiErrorDetail } from "../../lib/api";
 import { toast } from "sonner";
 
@@ -12,7 +12,14 @@ export default function ConfidenceMode() {
   const [presenterName, setPresenterName] = useState("");
   const [rendering, setRendering] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
+  // Music state
+  const [musicTracks, setMusicTracks] = useState([]);
+  const [musicChoice, setMusicChoice] = useState({ kind: "none", url: null, label: "No music" });
+  const [musicVolume, setMusicVolume] = useState(0.18);
+  const [previewingId, setPreviewingId] = useState(null);
   const fileRef = useRef(null);
+  const musicFileRef = useRef(null);
+  const previewAudioRef = useRef(null);
 
   useEffect(() => {
     api.get("/presenters").then(r => {
@@ -20,6 +27,7 @@ export default function ConfidenceMode() {
       setPresenters(list);
       if (list.length) { setVoiceId(list[0].voice_id); setPresenterName(list[0].name); }
     });
+    api.get("/studio-plus/music/library").then(r => setMusicTracks(r.data.tracks || [])).catch(() => {});
   }, []);
 
   const handleFiles = (fileList) => {
@@ -35,6 +43,41 @@ export default function ConfidenceMode() {
 
   const removePhoto = (i) => setPhotos((prev) => prev.filter((_, idx) => idx !== i));
 
+  // ---- Music helpers ----
+  const previewTrack = (track) => {
+    if (previewingId === track.id) {
+      previewAudioRef.current?.pause();
+      setPreviewingId(null);
+      return;
+    }
+    if (!previewAudioRef.current) previewAudioRef.current = new Audio();
+    previewAudioRef.current.pause();
+    previewAudioRef.current.src = track.url;
+    previewAudioRef.current.volume = 0.6;
+    previewAudioRef.current.play().catch(() => toast.error("Preview unavailable"));
+    setPreviewingId(track.id);
+    previewAudioRef.current.onended = () => setPreviewingId(null);
+  };
+
+  const pickPresetTrack = (track) => {
+    setMusicChoice({ kind: "preset", url: track.url, label: track.label });
+  };
+
+  const pickNoMusic = () => {
+    if (previewAudioRef.current) previewAudioRef.current.pause();
+    setPreviewingId(null);
+    setMusicChoice({ kind: "none", url: null, label: "No music" });
+  };
+
+  const pickUploadedMusic = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("audio/")) { toast.error("Please upload an audio file (MP3 / M4A / WAV)"); return; }
+    if (file.size > 12 * 1024 * 1024) { toast.error("Music file must be under 12 MB"); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => setMusicChoice({ kind: "upload", url: e.target.result, label: file.name });
+    reader.readAsDataURL(file);
+  };
+
   const render = async () => {
     if (script.length < 20) { toast.error("Script too short"); setStep(1); return; }
     if (!photos.length) { toast.error("Add at least one photo"); setStep(2); return; }
@@ -47,6 +90,8 @@ export default function ConfidenceMode() {
         voice_id: voiceId,
         photo_urls: photos.map((p) => p.dataUrl),
         duration_per_photo: 4.5,
+        music_url: musicChoice.url,
+        music_volume: musicChoice.url ? musicVolume : 0,
       });
       const baseUrl = process.env.REACT_APP_BACKEND_URL || "";
       setVideoUrl(baseUrl + data.video_url);
@@ -195,9 +240,80 @@ export default function ConfidenceMode() {
       {/* Step 4 — Render */}
       {step === 4 && (
         <div className="glass rounded-3xl p-8" data-testid="step-render">
-          <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#C99A2E] mb-3">Step 4 — Compose</div>
-          <h2 className="font-serif text-3xl mb-3">Ready to render</h2>
-          <div className="grid sm:grid-cols-3 gap-4 mb-6 text-sm">
+          <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#C99A2E] mb-3">Step 4 — Music & compose</div>
+          <h2 className="font-serif text-3xl mb-3">One last touch — music</h2>
+
+          {/* Music picker */}
+          <div className="mb-6" data-testid="music-picker">
+            <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/45 mb-3">Background music · optional</div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+              {/* No music chip */}
+              <button
+                onClick={pickNoMusic}
+                data-testid="music-none"
+                className={`text-left p-3 rounded-xl border transition-all ${musicChoice.kind === "none" ? "border-[#C99A2E] bg-[#C99A2E]/10" : "border-white/10 hover:border-white/25 bg-white/[0.02]"}`}
+              >
+                <VolumeX size={14} className={musicChoice.kind === "none" ? "text-[#C99A2E]" : "text-white/45"} />
+                <div className={`text-xs font-medium mt-1.5 ${musicChoice.kind === "none" ? "text-[#C99A2E]" : "text-white"}`}>No music</div>
+                <div className="text-[10px] text-white/45 mt-0.5">Narration only</div>
+              </button>
+              {musicTracks.map((t) => {
+                const active = musicChoice.kind === "preset" && musicChoice.url === t.url;
+                const previewing = previewingId === t.id;
+                return (
+                  <div
+                    key={t.id}
+                    data-testid={`music-track-${t.id}`}
+                    className={`relative text-left p-3 rounded-xl border transition-all ${active ? "border-[#C99A2E] bg-[#C99A2E]/10" : "border-white/10 hover:border-white/25 bg-white/[0.02]"}`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); previewTrack(t); }}
+                        data-testid={`music-preview-${t.id}`}
+                        className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-colors ${previewing ? "bg-[#C99A2E] text-black" : "bg-white/10 hover:bg-white/20 text-white/85"}`}
+                      >
+                        {previewing ? <Loader2 size={11} className="animate-spin" /> : <Play size={11} />}
+                      </button>
+                      <button onClick={() => pickPresetTrack(t)} className="text-left flex-1 min-w-0" data-testid={`music-pick-${t.id}`}>
+                        <div className={`text-xs font-medium truncate ${active ? "text-[#C99A2E]" : "text-white"}`}>{t.label}</div>
+                        <div className="text-[10px] text-white/45 mt-0.5 line-clamp-1">{t.mood}</div>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              {/* Upload chip */}
+              <button
+                onClick={() => musicFileRef.current?.click()}
+                data-testid="music-upload-trigger"
+                className={`text-left p-3 rounded-xl border-2 border-dashed transition-all ${musicChoice.kind === "upload" ? "border-[#C99A2E] bg-[#C99A2E]/10" : "border-white/15 hover:border-[#C99A2E]/40 bg-white/[0.02]"}`}
+              >
+                <Music size={14} className={musicChoice.kind === "upload" ? "text-[#C99A2E]" : "text-white/45"} />
+                <div className={`text-xs font-medium mt-1.5 ${musicChoice.kind === "upload" ? "text-[#C99A2E]" : "text-white"}`}>{musicChoice.kind === "upload" ? "Your track" : "Upload your own"}</div>
+                <div className="text-[10px] text-white/45 mt-0.5 line-clamp-1">{musicChoice.kind === "upload" ? musicChoice.label : "MP3 · M4A · WAV · 12 MB max"}</div>
+                <input ref={musicFileRef} type="file" accept="audio/*" className="hidden" onChange={(e) => pickUploadedMusic(e.target.files?.[0])} data-testid="music-upload-input" />
+              </button>
+            </div>
+
+            {/* Music volume — only show when something selected */}
+            {musicChoice.url && (
+              <div className="flex items-center gap-3 px-1" data-testid="music-volume">
+                <Volume2 size={14} className="text-white/45 shrink-0" />
+                <input
+                  type="range"
+                  min="0.05"
+                  max="0.5"
+                  step="0.01"
+                  value={musicVolume}
+                  onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
+                  className="flex-1 accent-[#C99A2E]"
+                />
+                <span className="text-[10px] font-mono text-white/55 w-12 text-right">{Math.round(musicVolume * 100)}%</span>
+              </div>
+            )}
+          </div>
+
+          <div className="grid sm:grid-cols-4 gap-4 mb-6 text-sm">
             <div className="glass-strong rounded-xl p-4">
               <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/45 mb-1">Script</div>
               <div className="text-white/85">{script.split(/\s+/).filter(Boolean).length} words</div>
@@ -209,6 +325,10 @@ export default function ConfidenceMode() {
             <div className="glass-strong rounded-xl p-4">
               <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/45 mb-1">Voice</div>
               <div className="text-white/85">{presenterName || "—"}</div>
+            </div>
+            <div className="glass-strong rounded-xl p-4">
+              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/45 mb-1">Music</div>
+              <div className="text-white/85 truncate">{musicChoice.label}</div>
             </div>
           </div>
 

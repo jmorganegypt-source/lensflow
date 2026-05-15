@@ -132,5 +132,37 @@ LensFlow now positions as **"The first AI real estate platform built for camera-
 - Register.jsx now nav's to `/onboarding` after successful sign-up; Onboarding auto-redirects to `/app/dashboard` if `user.onboarded` is already true.
 - Verified end-to-end via curl (register → onboarding POST → /me returns prefs).
 
-## Stripe LIVE key refreshed 2026-05-14
-- Backend `.env` updated to `sk_live_51TVCs2EH…rnxCZ` (the lensflow account standard secret key). Backend restarts cleanly; `/api/health → 200`.
+## Stripe LIVE key + Resend branded sender — 2026-05-14
+- Backend `.env` updated to `sk_live_51TVCs2EH…rnxCZ` (lensflow live secret key). Backend restarts cleanly; `/api/health → 200`.
+- Resend domain `lensflow.com.au` verified ✓. `RESEND_FROM_EMAIL=LensFlow <noreply@lensflow.com.au>`. Forgot-password flow now dispatches branded emails.
+- Production live at https://lensflow.com.au and https://www.lensflow.com.au.
+
+## Onboarding final touch — Mia welcome video (2026-05-14)
+- Step 5 of `/onboarding` now plays `mia-clip.mp4` autoplay/muted/looped with "Let's make your first listing — together." quote overlay. Beats BIGVU's static onboarding flow.
+
+## Product completeness sprint — 2026-05-15 (this session)
+Three big upgrades to make existing claims actually true:
+
+### 1. 3 script variants (`POST /api/studio/scripts/variants`)
+- New endpoint generates **Polished · Casual · Cinematic** in parallel via `asyncio.gather` (3 simultaneous GPT-5.2 calls).
+- `_build_script_prompt(req, style=...)` injects style-specific guidance.
+- `Studio.jsx` redesigned: 3 chip-style variant tabs, agent picks favourite, voice/copy/save buttons act on the picked one.
+- Verified via curl — all 3 styles return clearly distinct opening lines.
+
+### 2. Multi-photo Glamour Studio (up to 5 in parallel)
+- `GlamourStudio.jsx` rewritten as multi-photo grid (drop up to 5 → status pills queued/processing/done/error → batch enhance with concurrency cap 2 → individual + bulk download).
+- Backend `POST /api/studio-plus/glamour/enhance` unchanged — frontend calls it N times in parallel.
+
+### 3. Music library + custom upload + mixing (Confidence Mode)
+- New endpoint `GET /api/studio-plus/music/library` returns 6 self-hosted royalty-free tracks (`/assets/music/track-1..6.mp3`, sourced from SoundHelix CC0, ~50MB).
+- `ConfidenceVideoReq` extended with `music_url` + `music_volume` fields; supports `data:audio/...`, `/assets/...`, or external `https://` URL.
+- Renderer mixes background music under narration via `CompositeAudioClip` with `afx.AudioLoop` + `afx.MultiplyVolume`. Defaults to 18% volume so narration stays dominant.
+- `ConfidenceMode.jsx` Step 4 has a music picker grid (None · 6 quick-picks · Upload your own) with preview-on-click and a volume slider.
+
+## Honest known gaps (P0 next session)
+- D-ID lip-sync avatars (presenters are still images + voiceover slideshow, not real talking heads). Need user's D-ID API key.
+- "Send to CRM" button (download + email-to-self exists; no native CRM integration yet).
+- Talking-head avatar engine claim on Compare.jsx is aspirational — needs D-ID.
+
+## Mobile native app plan (deferred — user picked product fixes first)
+- Capacitor wrapping path (CRA-based, not Vite). Target: Google Play first ($25 one-time), then Apple App Store ($99/year, DUNS already submitted).

@@ -87,6 +87,8 @@ class ConfidenceVideoReq(BaseModel):
     voice_id: str
     photo_urls: List[str] = Field(min_length=1, max_length=8)  # data:image/...;base64 strings
     duration_per_photo: float = Field(default=4.5, ge=2.0, le=10.0)
+    music_url: Optional[str] = None       # public URL OR data:audio/*;base64 of background music
+    music_volume: float = Field(default=0.18, ge=0.0, le=0.6)  # mix level — narration stays loud
 
 
 class GlamourReq(BaseModel):
@@ -172,6 +174,35 @@ def build_router(
             audio_path = work_dir / "narration.mp3"
             audio_path.write_bytes(audio_bytes)
 
+            # 1b) Optional: download/decode background music
+            music_path: Optional[Path] = None
+            if req.music_url:
+                try:
+                    if req.music_url.startswith("data:"):
+                        # data URL upload from the agent
+                        b64 = _strip_b64(req.music_url)
+                        music_path = work_dir / "music.input"
+                        music_path.write_bytes(base64.b64decode(b64))
+                    elif req.music_url.startswith("/assets/"):
+                        # Self-hosted track served by the React frontend public folder
+                        local = Path("/app/frontend/public") / req.music_url.lstrip("/")
+                        if local.exists():
+                            music_path = work_dir / "music.input"
+                            music_path.write_bytes(local.read_bytes())
+                    elif req.music_url.startswith(("http://", "https://")):
+                        # Remote URL — fetch in a thread
+                        def _fetch():
+                            import urllib.request
+                            req_obj = urllib.request.Request(req.music_url, headers={"User-Agent": "LensFlow/1.0"})
+                            with urllib.request.urlopen(req_obj, timeout=15) as r:
+                                return r.read()
+                        mb = await asyncio.to_thread(_fetch)
+                        music_path = work_dir / "music.input"
+                        music_path.write_bytes(mb)
+                except Exception as me:
+                    logger.warning(f"Music load failed, proceeding without: {me}")
+                    music_path = None
+
             # 2) Decode photos to 1920x1080 jpgs
             frame_paths = [
                 _decode_image_to_path(p, work_dir, i) for i, p in enumerate(req.photo_urls)
@@ -179,7 +210,7 @@ def build_router(
 
             # 3) Compose video using moviepy in a worker thread
             def _render() -> Path:
-                from moviepy import ImageClip, AudioFileClip, concatenate_videoclips, vfx
+                from moviepy import ImageClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips, afx
                 audio = AudioFileClip(str(audio_path))
                 target_total = max(audio.duration, len(frame_paths) * 2.5)
                 per = target_total / len(frame_paths)
@@ -190,7 +221,26 @@ def build_router(
                     c = c.resized(lambda t, per=per: 1 + 0.06 * (t / per))
                     c = c.with_position("center")
                     clips.append(c)
-                video = concatenate_videoclips(clips, method="compose").with_audio(audio)
+
+                # Mix narration + (optional) music
+                final_audio = audio
+                music_clip = None
+                if music_path and music_path.exists():
+                    try:
+                        music_clip = AudioFileClip(str(music_path))
+                        # Loop music if shorter than narration; trim if longer
+                        if music_clip.duration < target_total:
+                            music_clip = music_clip.with_effects([afx.AudioLoop(duration=target_total)])
+                        else:
+                            music_clip = music_clip.subclipped(0, target_total)
+                        # Lower the music volume so narration is dominant
+                        music_clip = music_clip.with_effects([afx.MultiplyVolume(req.music_volume)])
+                        final_audio = CompositeAudioClip([music_clip, audio])
+                    except Exception as mix_err:
+                        logger.warning(f"Music mix failed: {mix_err} — using narration only")
+                        music_clip = None
+
+                video = concatenate_videoclips(clips, method="compose").with_audio(final_audio)
                 out = _video_dir() / f"confidence_{uuid.uuid4().hex}.mp4"
                 video.write_videofile(
                     str(out),
@@ -202,6 +252,11 @@ def build_router(
                     logger=None,
                 )
                 audio.close()
+                if music_clip:
+                    try:
+                        music_clip.close()
+                    except Exception:
+                        pass
                 for c in clips:
                     c.close()
                 video.close()
@@ -237,6 +292,26 @@ def build_router(
             raise HTTPException(status_code=404, detail="Video expired or not found")
         from fastapi.responses import FileResponse
         return FileResponse(str(path), media_type="video/mp4", filename="lensflow-listing.mp4")
+
+    # -------- Music library (royalty-free quick-picks) --------
+    @router.get("/music/library")
+    async def list_music():
+        """Curated royalty-free background tracks (self-hosted under /assets/music/).
+        Frontend gets the list, sends the chosen track URL back in /confidence-video.music_url.
+        Source: SoundHelix royalty-free demo library — free for commercial use, no attribution required."""
+        # NOTE: returns absolute paths so Confidence Mode (which posts to backend) can fetch them
+        # The frontend uses these for preview playback as well.
+        return {
+            "tracks": [
+                {"id": "luxury_cinematic", "label": "Luxury Cinematic", "mood": "Soaring · piano · strings",       "url": "/assets/music/track-1.mp3"},
+                {"id": "warm_acoustic",    "label": "Warm Acoustic",    "mood": "Guitar · sunshine · home",         "url": "/assets/music/track-2.mp3"},
+                {"id": "modern_corporate", "label": "Modern · Confident","mood": "Clean · professional · uplifting","url": "/assets/music/track-3.mp3"},
+                {"id": "ambient_calm",     "label": "Ambient · Spa",    "mood": "Floating pads · gentle pulse",     "url": "/assets/music/track-4.mp3"},
+                {"id": "bold_dramatic",    "label": "Bold · Dramatic",  "mood": "Strings · crescendo · cinema",     "url": "/assets/music/track-5.mp3"},
+                {"id": "lofi_chill",       "label": "Lo-fi · Loft",     "mood": "Mellow beats · vibe · subtle",     "url": "/assets/music/track-6.mp3"},
+            ],
+            "note": "All tracks are royalty-free for commercial use. You can also upload your own.",
+        }
 
     # -------- Glamour Photo Studio --------
     @router.get("/glamour/presets")
