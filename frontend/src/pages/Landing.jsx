@@ -68,7 +68,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg text-[#0F1A2E]/70 max-w-xl leading-relaxed mb-8" data-testid="hero-subhead">
-              The big apps make you do the work. LensFlow lets Ava do it for you — AI presenters, automatic green-screen, magazine-grade photos. Record on your phone, Ava handles the rest.
+              The big apps make you do the work. LensFlow lets Mia do it for you — she writes the script, sets the stage, and reads it on camera. Record on your phone, or skip filming entirely.
             </p>
 
             <ul className="space-y-3 mb-9" data-testid="hero-bullets">
@@ -279,7 +279,7 @@ export default function Landing() {
                 {/* Script subtitle bar — bottom, like BIGVU subtitle overlay */}
                 <div className="absolute left-5 right-[45%] bottom-5 space-y-2">
                   <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#C99A2E] text-black text-[9px] font-mono uppercase tracking-wider font-medium">
-                    Ava · live script
+                    Mia · live script
                   </div>
                   <div className="rounded-xl bg-black/70 backdrop-blur-md border border-white/10 p-4">
                     <p className="font-serif text-white text-base leading-snug" data-testid="mia-script-line">
@@ -528,7 +528,7 @@ export default function Landing() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { n: "1", title: "Input",    sub: "Agent uploads property photos and details.",  Icon: Camera },
-              { n: "2", title: "Generate", sub: "Ava writes; Mia records the script.",         Icon: Sparkles },
+              { n: "2", title: "Generate", sub: "Mia writes the script — then voices it for you.",         Icon: Sparkles },
               { n: "3", title: "Close",    sub: "The cinematic video hits the market in minutes.", Icon: Trophy },
             ].map((s) => (
               <div key={s.n} className="relative glass rounded-3xl p-7 border border-white/10 hover:border-[#C99A2E]/40 transition-colors" data-testid={`workflow-step-${s.n}`}>
@@ -583,7 +583,7 @@ export default function Landing() {
                 I spent years quoting $4,000+ per listing video — drone crews, dusk shoots, voice-over artists, editors. Then I'd wait two weeks for the cut. By the time the video was ready, the vendor had cooled, the buyer had moved on, and the property had stopped trending on REA.
               </p>
               <p>
-                LensFlow is the platform I wanted to exist. Mia and Oliver are the production crew I could never afford on every listing. Ava is the script-writer who works at 2am. <span className="text-[#0F1A2E] font-medium">You hit "render" — the cinematic video is in your inbox before your coffee gets cold.</span>
+                LensFlow is the platform I wanted to exist. Mia and Oliver are the production crew I could never afford on every listing — Mia writes your script at 2am, then voices it on camera. <span className="text-[#0F1A2E] font-medium">You hit "render" — the cinematic video is in your inbox before your coffee gets cold.</span>
               </p>
               <p>
                 This isn't a generic SaaS dressed up for real estate. It's the operating system I built because the industry deserved one.

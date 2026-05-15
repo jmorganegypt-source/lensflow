@@ -340,7 +340,7 @@ export default function ConfidenceMode() {
               data-testid="confidence-render-btn"
               className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-[#C99A2E] text-black hover:bg-[#DBC075] disabled:opacity-60 font-medium gold-glow"
             >
-              {rendering ? <><Loader2 className="animate-spin" size={18} /> Ava is setting the stage…</> : <><Sparkles size={18} /> Ava — compose my listing video</>}
+              {rendering ? <><Loader2 className="animate-spin" size={18} /> Mia is setting the stage…</> : <><Sparkles size={18} /> Mia — compose my listing video</>}
             </button>
           ) : (
             <div className="space-y-4" data-testid="confidence-video-result">
@@ -369,7 +369,7 @@ export default function ConfidenceMode() {
           )}
 
           {rendering && (
-            <p className="text-center text-white/45 text-xs font-mono mt-4 animate-pulse">~30–90s · Ava finds the right lighting · narration · H.264 encode</p>
+            <p className="text-center text-white/45 text-xs font-mono mt-4 animate-pulse">~30–90s · Mia finds the right lighting · narration · H.264 encode</p>
           )}
         </div>
       )}

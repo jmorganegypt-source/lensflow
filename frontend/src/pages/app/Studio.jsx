@@ -230,7 +230,7 @@ export default function Studio() {
             </div>
           </div>
           <button data-testid="studio-generate" disabled={loading} className="w-full px-6 py-4 rounded-full bg-[#C99A2E] text-black font-medium hover:bg-[#DBC075] disabled:opacity-60 flex items-center justify-center gap-2">
-            {loading ? <><Loader2 className="animate-spin" size={18} /> Ava is writing 3 versions for you…</> : <><Sparkles size={18} /> Ask Ava — generate 3 scripts</>}
+            {loading ? <><Loader2 className="animate-spin" size={18} /> Mia is writing 3 versions for you…</> : <><Sparkles size={18} /> Ask Mia — generate 3 scripts</>}
           </button>
         </form>
 
