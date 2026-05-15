@@ -951,11 +951,10 @@ async def email_video(req: EmailVideoReq, user: dict = Depends(get_current_user)
 # ---------- Payments (Stripe) ----------
 # Server-side authoritative price packages — never trust the frontend
 PAYMENT_PACKAGES = {
-    "starter_monthly":      {"amount": 39.00,   "currency": "aud", "label": "Starter · Monthly",       "plan": "starter",      "recurring": True,  "trial_days": 7},
-    "professional_monthly": {"amount": 89.00,   "currency": "aud", "label": "Professional · Monthly",  "plan": "professional", "recurring": True,  "trial_days": 7},
-    "elite_avatar_annual":  {"amount": 2988.00, "currency": "aud", "label": "Elite AI Presenter · 12-month commit", "plan": "elite_avatar", "recurring": True,  "trial_days": 0},
-    "enterprise_monthly":   {"amount": 1199.00, "currency": "aud", "label": "Enterprise · Monthly",     "plan": "enterprise",   "recurring": True,  "trial_days": 7},
-    "concierge_listing":    {"amount": 1790.00, "currency": "aud", "label": "Concierge · Per Listing",  "plan": "concierge",    "recurring": False, "trial_days": 0},
+    "starter_monthly":      {"amount": 79.00,   "currency": "aud", "label": "Starter · Monthly",  "plan": "starter",      "recurring": True,  "trial_days": 7},
+    "professional_monthly": {"amount": 199.00,  "currency": "aud", "label": "Elite · Monthly",    "plan": "elite",        "recurring": True,  "trial_days": 7},
+    "elite_avatar_annual":  {"amount": 399.00,  "currency": "aud", "label": "Concierge · Monthly","plan": "concierge_ai", "recurring": True,  "trial_days": 0},
+    "concierge_listing":    {"amount": 1790.00, "currency": "aud", "label": "Done-for-You · Per Listing", "plan": "concierge", "recurring": False, "trial_days": 0},
 }
 
 

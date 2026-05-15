@@ -184,7 +184,7 @@ export default function GlamourStudio() {
               data-testid="glamour-enhance-all"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#C99A2E] text-black hover:bg-[#DBC075] disabled:opacity-50 text-sm font-medium"
             >
-              {running ? <><Loader2 size={14} className="animate-spin" /> Enhancing…</> : <><Wand2 size={14} /> Enhance {queuedCount > 0 ? `${queuedCount} photo${queuedCount > 1 ? "s" : ""}` : "all"}</>}
+              {running ? <><Loader2 size={14} className="animate-spin" /> Ava is enhancing…</> : <><Wand2 size={14} /> Ava — enhance {queuedCount > 0 ? `${queuedCount} photo${queuedCount > 1 ? "s" : ""}` : "all"}</>}
             </button>
           </div>
         </div>

@@ -11,92 +11,92 @@ const tiers = [
   {
     id: "starter",
     name: "Starter",
-    price: "$39",
+    price: "$79",
     cadence: "AUD / month",
-    blurb: "Solo agent essentials. Film yourself, beautifully.",
+    blurb: "The sole performer. Film yourself, beautifully — Ava does the rest.",
     cta: "Start 7-day trial",
     icon: Sparkles,
     highlight: false,
     package_id: "starter_monthly",
     perks: [
-      "HD teleprompter · perfect eye-contact",
-      "AI script writer · 1 version",
+      "Pro AI Teleprompter · perfect eye-contact",
+      "Ava — your AI script assistant",
       "1-photo Glamour Studio",
       "Captions auto-generated",
-      "Mia & Oliver presenters",
-      "1080p export",
+      "Custom branding overlays",
+      "1080p export · REA / Domain ready",
     ],
   },
   {
     id: "professional",
-    name: "Professional",
-    price: "$89",
+    name: "Elite",
+    price: "$199",
     cadence: "AUD / month",
-    blurb: "The agent's complete kit. Film yourself, but bigger.",
+    blurb: "Mia & Oliver are your AI presenters. You don't film a thing.",
     cta: "Start 7-day trial",
     icon: Crown,
     highlight: true,
     package_id: "professional_monthly",
     perks: [
       "Everything in Starter",
-      "3 script variants per listing",
+      "Mia, Oliver, Aria & Marcus avatars",
+      "5 HD AI productions per month",
       "5-photo Glamour Studio",
-      "Confidence Mode video composer",
+      "3 script variants (Polished · Casual · Cinematic)",
       "Music library + your own track",
-      "All 4 presenters · 4K export",
       "Email finished videos to clients",
-      "REA · Domain · Rightmove exports",
+      "Priority processing queue",
     ],
   },
   {
     id: "elite_avatar",
-    name: "Elite AI Presenter",
-    price: "$249",
-    cadence: "AUD / month · 12-month commit",
-    blurb: "Mia is your personal AI presenter. You don't film a thing.",
+    name: "Concierge",
+    price: "$399",
+    cadence: "AUD / month",
+    blurb: "Virtual Twin. Bespoke avatar trained on you. Total automation.",
     cta: "Reserve your spot",
     icon: Star,
     highlight: false,
     coming_soon: true,
     perks: [
-      "Everything in Professional",
-      "Real talking-head AI presenter",
-      "Mia / Oliver / Aria / Marcus speak your scripts",
-      "Up to 15 finished listing videos / month",
-      "12-month commit · annual savings locked",
+      "Everything in Elite",
+      "Custom AI presenter trained on YOUR face",
+      "Voice clone from 60s of audio",
+      "Unlimited monthly productions",
+      "Dedicated account manager",
       "White-glove onboarding call",
-      "Priority render queue",
-      "Direct line for support",
+      "Custom brand templates",
+      "SLA · DPA · invoicing",
     ],
   },
   {
     id: "concierge",
-    name: "Concierge",
+    name: "Done-for-You",
     price: "$1,790",
     cadence: "AUD / per listing",
-    blurb: "Done-for-you broadcast production · 24-hour turnaround.",
+    blurb: "Hands-off broadcast production · 24-hour turnaround.",
     cta: "Book Concierge",
     icon: Phone,
     highlight: false,
     package_id: "concierge_listing",
     perks: [
-      "Done-for-you production",
-      "Dedicated editor & strategist",
+      "Dedicated editor + strategist",
       "24-hour turnaround",
       "Drone, dusk & lifestyle b-roll",
       "Localised voice library",
+      "Per-listing pricing · no commitment",
       "SLAs · DPA · invoicing",
     ],
   },
 ];
 
 const faqs = [
-  { q: "What's the Elite AI Presenter tier?", a: "It's our flagship 'AI does everything' option — a real talking-head presenter (Mia/Oliver/Aria/Marcus) actually speaks your script over your photos. No filming required. We're rolling out to a small waitlist first; reserve your spot and we'll contact you when your access opens." },
-  { q: "Why a 12-month commit on Elite?", a: "Premium AI avatar engines are sold annually, so we pass that lock-in straight through. In return you get the lowest possible monthly price and locked-in pricing for 12 months." },
-  { q: "Can I switch plans later?", a: "Yes — upgrade or downgrade any time. Charges prorate to the day in Settings. (Elite is the only tier with a 12-month commit.)" },
-  { q: "Does Mia's voice work outside Australia?", a: "Mia is bilingual-accent capable (AU/UK). Oliver, Aria and Marcus cover RP, American and Continental respectively." },
-  { q: "How are videos delivered?", a: "Direct download in 9:16, 16:9 and 1:1 with captions, plus REA-compatible XML & Domain JSON exports. You can also email a video link straight to a vendor or buyer from the app." },
-  { q: "What's included in Concierge?", a: "A dedicated editor, strategist, drone/dusk b-roll, scriptwriting and a 24-hour final cut. Per-listing pricing, no commitment." },
+  { q: "What does the 7-day trial include?", a: "Full access to the Starter and Elite tools. Any video generated during the trial has a small 'Generated by LensFlow' watermark. The watermark disappears once your first month's payment clears — so you can fully test, but not publish for free." },
+  { q: "Who is Ava?", a: "Ava is your AI assistant — she writes the scripts, sets the stage, finds the perfect lighting, and stitches the final cut. Where competitors give you a login and 'good luck', LensFlow gives you Ava." },
+  { q: "What's the difference between Elite and Concierge?", a: "Elite gives you our four trained AI presenters (Mia, Oliver, Aria, Marcus) ready to narrate any listing. Concierge trains a bespoke AI presenter on YOUR face — your clients see you in every video, but you never have to film yourself." },
+  { q: "Can I switch plans later?", a: "Yes — upgrade or downgrade any time. Charges prorate to the day in Settings." },
+  { q: "How are videos delivered?", a: "Direct download in 9:16, 16:9 and 1:1 with captions, plus REA-compatible XML & Domain JSON exports. You can also email a finished video link straight to a vendor or buyer from inside the app." },
+  { q: "What's included in Done-for-You?", a: "A dedicated editor, strategist, drone/dusk b-roll, scriptwriting and a 24-hour final cut. Per-listing pricing, no commitment." },
 ];
 
 export default function Pricing() {
@@ -204,10 +204,10 @@ export default function Pricing() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             {[
-              { tool: "BombBomb", price: "$59 USD", ours: "$89 AUD" },
-              { tool: "Synthesia", price: "$89 USD", ours: "$89 AUD" },
-              { tool: "HeyGen", price: "$89 USD", ours: "$89 AUD" },
-              { tool: "BIGVU", price: "$59 USD", ours: "$89 AUD" },
+              { tool: "BombBomb",  price: "$79 USD",  ours: "$79 AUD" },
+              { tool: "Synthesia", price: "$89 USD",  ours: "$199 AUD" },
+              { tool: "HeyGen",    price: "$135 USD", ours: "$199 AUD" },
+              { tool: "BIGVU",     price: "$90 USD",  ours: "$79 AUD" },
             ].map((c, i) => (
               <div key={i} className="p-4 rounded-2xl bg-white/[0.03]" data-testid={`compare-${c.tool.toLowerCase()}`}>
                 <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">{c.tool}</div>
@@ -272,8 +272,8 @@ function EliteReservationDialog({ onClose }) {
                   <Star size={14} className="text-[#C99A2E]" />
                   <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#C99A2E]">Elite AI Presenter · Limited Beta</div>
                 </div>
-                <h3 className="font-serif text-3xl tracking-tighter">Reserve your spot</h3>
-                <p className="text-white/55 text-sm mt-2">A$249/mo · 12-month commit · No charge until your access opens.</p>
+                <h3 className="font-serif text-3xl tracking-tighter">Reserve your Concierge spot</h3>
+                <p className="text-white/55 text-sm mt-2">A$399/mo · Virtual Twin · Bespoke AI presenter trained on you. No charge until your access opens.</p>
               </div>
               <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center"><X size={14} /></button>
             </div>

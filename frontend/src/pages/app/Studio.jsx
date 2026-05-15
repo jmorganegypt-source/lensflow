@@ -175,7 +175,7 @@ export default function Studio() {
             </div>
           </div>
           <button data-testid="studio-generate" disabled={loading} className="w-full px-6 py-4 rounded-full bg-[#C99A2E] text-black font-medium hover:bg-[#DBC075] disabled:opacity-60 flex items-center justify-center gap-2">
-            {loading ? <><Loader2 className="animate-spin" size={18} /> Writing 3 versions in parallel…</> : <><Sparkles size={18} /> Generate 3 scripts with GPT-5.2</>}
+            {loading ? <><Loader2 className="animate-spin" size={18} /> Ava is writing 3 versions for you…</> : <><Sparkles size={18} /> Ask Ava — generate 3 scripts</>}
           </button>
         </form>
 

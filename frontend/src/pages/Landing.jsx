@@ -63,12 +63,12 @@ export default function Landing() {
             </div>
 
             <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl tracking-tighter leading-[0.95] mb-6" data-testid="hero-headline">
-              Turn Listings Into <br />
-              <span className="text-[#C99A2E]">Luxury Experiences.</span>
+              Stop being a videographer. <br />
+              <span className="text-[#C99A2E]">Start being an agent.</span>
             </h1>
 
             <p className="text-lg text-[#0F1A2E]/70 max-w-xl leading-relaxed mb-8" data-testid="hero-subhead">
-              Read. Record. Transform. AI presenters, magazine-grade photo enhancement and premium listing assets — built for the agents who win the prestige market.
+              The big apps make you do the work. LensFlow lets Ava do it for you — AI presenters, automatic green-screen, magazine-grade photos. Record on your phone, Ava handles the rest.
             </p>
 
             <ul className="space-y-3 mb-9" data-testid="hero-bullets">
@@ -107,70 +107,45 @@ export default function Landing() {
             </div>
           </motion.div>
 
-          {/* RIGHT — Mia VIDEO front and center + Oliver portrait beside */}
+          {/* RIGHT — Clean Mia portrait + Oliver as a smaller accent card. No overlay text. */}
           <motion.div {...stagger(1)} className="lg:col-span-6 relative">
             <div className="relative h-[560px] lg:h-[640px] flex items-center justify-center">
 
-              {/* MIA — clean demo VIDEO autoplay, the star */}
-              <div className="absolute left-2 lg:left-0 top-0 w-[58%] aspect-[9/14] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform -rotate-2 ring-1 ring-[#C99A2E]/40" data-testid="hero-mia-video">
-                <video
-                  src={MIA_VIDEO_CLIP}
-                  poster={MIA_PORTRAIT}
+              {/* MIA — the star. Clean portrait, no text overlay. */}
+              <div className="absolute left-0 top-0 w-[62%] aspect-[3/4] rounded-3xl overflow-hidden bg-[#F1E9DA] shadow-2xl ring-1 ring-[#C99A2E]/30" data-testid="hero-mia-portrait">
+                <img
+                  src={MIA_PORTRAIT}
+                  alt="Mia — LensFlow AI Presenter"
                   className="w-full h-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
+                  style={{ objectPosition: "50% 22%" }}
                 />
-                {/* Top branding */}
-                <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
-                    <span className="font-serif text-[11px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
-                    <span className="ml-1 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-red-500/90 text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    <span className="text-[10px] font-mono uppercase tracking-wider">REC</span>
-                  </div>
-                </div>
-                {/* Bottom label */}
-                <div className="absolute inset-x-0 bottom-0 px-5 py-5 bg-gradient-to-t from-black/95 via-black/40 to-transparent text-white">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1">AI Presenter · 01 of 4</div>
-                  <div className="font-serif text-2xl leading-none">Mia</div>
-                  <div className="text-white/70 text-xs mt-1.5">Australian-British · Warm</div>
+                {/* Single small chip at bottom only */}
+                <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm shadow-md flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="font-serif text-[12px] text-[#0F1A2E]">Mia</span>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-[#0F1A2E]/55">AU · UK</span>
                 </div>
               </div>
 
-              {/* OLIVER — companion portrait to the right */}
-              <div className="absolute right-0 top-20 w-[42%] aspect-[3/4.4] rounded-3xl overflow-hidden bg-[#0F1A2E] shadow-2xl transform rotate-3" data-testid="hero-oliver-card">
+              {/* OLIVER — smaller, separated, no overlap with Mia. */}
+              <div className="absolute right-0 bottom-0 w-[44%] aspect-[3/4] rounded-3xl overflow-hidden bg-[#F1E9DA] shadow-2xl ring-1 ring-[#C99A2E]/30" data-testid="hero-oliver-portrait">
                 <img
                   src={OLIVER_PORTRAIT}
                   alt="Oliver — LensFlow AI Presenter"
                   className="w-full h-full object-cover"
-                  style={{ objectPosition: "50% 18%" }}
+                  style={{ objectPosition: "50% 22%" }}
                 />
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-center px-2 py-1.5 rounded-lg bg-black/55 backdrop-blur-sm border border-[#C99A2E]/40">
-                  <span className="font-serif text-[10px] text-[#C99A2E] tracking-[0.18em] uppercase">LensFlow Pro</span>
-                  <span className="ml-1.5 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.18em] bg-[#C99A2E] text-black rounded">Elite</span>
-                </div>
-                <div className="absolute inset-x-0 bottom-0 px-3 py-2.5 bg-gradient-to-t from-black/90 to-transparent text-white">
-                  <div className="text-[9px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-0.5">AI · 02</div>
-                  <div className="font-serif text-lg leading-none">Oliver</div>
-                  <div className="text-white/65 text-[9px] mt-0.5">British RP</div>
+                <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm shadow-md flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="font-serif text-[12px] text-[#0F1A2E]">Oliver</span>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-[#0F1A2E]/55">UK · RP</span>
                 </div>
               </div>
 
-              {/* Floating "4K" chip */}
-              <div className="absolute -top-2 right-8 px-3.5 py-1.5 rounded-full bg-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-4k">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#0F1A2E]">4K · Cinematic</span>
-              </div>
-
-              {/* Floating "AI Studio" chip */}
-              <div className="absolute -bottom-2 left-8 px-3.5 py-1.5 rounded-full bg-[#0F1A2E] text-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-ai">
+              {/* Single floating chip — top right of the whole composition */}
+              <div className="absolute -top-2 right-2 px-3.5 py-1.5 rounded-full bg-[#0F1A2E] text-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-ai">
                 <Sparkles size={11} className="text-[#C99A2E]" />
-                <span className="text-[10px] font-mono uppercase tracking-wider">AI Studio · Live</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider">AI Presenters · 4K</span>
               </div>
             </div>
           </motion.div>
