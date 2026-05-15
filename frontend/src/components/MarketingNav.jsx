@@ -36,9 +36,10 @@ export default function MarketingNav() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
         <Link to="/" className={`flex items-center gap-2.5 ${brandColor}`} data-testid="nav-logo">
           <img
-            src={isLight ? "/assets/brand/logo-horizontal.png" : "/assets/brand/logo-dark-square.png"}
-            alt="LensFlow"
-            className={isLight ? "h-10 w-auto" : "h-12 w-auto"}
+            src="/assets/brand/logo-horizontal.png"
+            alt="LensFlow · AI Real Estate Marketing Engine"
+            className="h-11 w-auto"
+            style={isLight ? {} : { filter: "brightness(0) invert(1)" }}
           />
         </Link>
 

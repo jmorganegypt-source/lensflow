@@ -564,7 +564,7 @@ export default function Landing() {
                 src="/assets/brand/founder.jpg"
                 alt="LensFlow Founder"
                 className="w-full h-full object-cover"
-                style={{ objectPosition: "center 25%" }}
+                style={{ objectPosition: "center top" }}
               />
             </div>
             <div className="mt-4 text-center">
