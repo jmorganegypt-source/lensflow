@@ -38,8 +38,10 @@ export default function MarketingNav() {
           <img
             src="/assets/brand/logo-horizontal.png"
             alt="LensFlow · AI Real Estate Marketing Engine"
-            className="h-11 w-auto"
-            style={isLight ? {} : { filter: "brightness(0) invert(1)" }}
+            className="h-12 w-auto"
+            style={isLight
+              ? { mixBlendMode: "multiply" }
+              : { filter: "brightness(0) invert(1)" }}
           />
         </Link>
 

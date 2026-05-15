@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 import api from "../lib/api";
 import {
   ArrowUpRight, Play, Sparkles, Mic, Film, Send, Check, Star, Camera,
-  Wand2, Volume2, Trophy, Eye, Upload, Building2, Crown,
+  Wand2, Volume2, Trophy, Eye, Upload, Building2, Crown, MapPin, Loader2, Pause,
 } from "lucide-react";
 
 // Local assets
@@ -33,6 +33,49 @@ export default function Landing() {
   useEffect(() => {
     api.get("/presenters").then((r) => setPresenters(r.data.presenters || [])).catch(() => {});
   }, []);
+
+  // ─── "Mia narrates YOUR address" live demo ───────────────────────────────
+  const [demoAddress, setDemoAddress] = useState("");
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoResult, setDemoResult] = useState(null); // { script, audio_url, estimated_duration }
+  const [demoError, setDemoError] = useState("");
+  const [demoPlaying, setDemoPlaying] = useState(false);
+  const demoAudioRef = React.useRef(null);
+
+  const runMiaDemo = async (e) => {
+    e?.preventDefault?.();
+    const addr = demoAddress.trim();
+    if (addr.length < 4) {
+      setDemoError("Type a real address — at least the street and suburb.");
+      return;
+    }
+    setDemoError("");
+    setDemoLoading(true);
+    setDemoResult(null);
+    try {
+      const { data } = await api.post("/marketing/mia-narrate", { address: addr });
+      setDemoResult(data);
+      // autoplay after a tick so the <audio> ref is mounted
+      setTimeout(() => {
+        try {
+          demoAudioRef.current?.play();
+          setDemoPlaying(true);
+        } catch (_) {}
+      }, 120);
+    } catch (err) {
+      const msg = err?.response?.data?.detail || "Mia couldn't reach the studio — try again in a moment.";
+      setDemoError(typeof msg === "string" ? msg : "Something went sideways. Try again.");
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
+  const togglePlay = () => {
+    const a = demoAudioRef.current;
+    if (!a) return;
+    if (a.paused) { a.play(); setDemoPlaying(true); }
+    else { a.pause(); setDemoPlaying(false); }
+  };
 
   return (
     <div className="bg-[#FAF7F2] text-[#0F1A2E] min-h-screen" data-testid="landing-page">
@@ -149,6 +192,132 @@ export default function Landing() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ============== MIA NARRATES YOUR ADDRESS — live conversion demo ============== */}
+      <section className="relative py-20 lg:py-24 px-6 lg:px-10 bg-gradient-to-b from-[#FAF7F2] via-white to-[#FAF7F2] border-y border-[#C99A2E]/15 overflow-hidden" data-testid="mia-demo-section">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[900px] h-[420px] rounded-full bg-[#C99A2E]/10 blur-3xl pointer-events-none" />
+        <div className="relative max-w-5xl mx-auto">
+          <motion.div {...fadeUp} className="text-center mb-10 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0F1A2E] text-white text-[10px] font-mono uppercase tracking-[0.18em] mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C99A2E] animate-pulse" />
+              Try it now · no signup
+            </div>
+            <h2 className="font-serif text-4xl lg:text-6xl tracking-tighter leading-[0.95] mb-4">
+              Type any address. <br/>
+              <span className="italic text-[#C99A2E]">Hear Mia narrate it.</span>
+            </h2>
+            <p className="text-[#0F1A2E]/65 text-base lg:text-lg">
+              Ten seconds. Cinematic teaser. Your listing's voice — generated live by our AI presenter. No email, no card, no catch.
+            </p>
+          </motion.div>
+
+          <motion.form
+            {...fadeUp}
+            onSubmit={runMiaDemo}
+            data-testid="mia-demo-form"
+            className="bg-white rounded-3xl border border-[#0F1A2E]/10 shadow-xl shadow-[#0F1A2E]/5 p-5 lg:p-7"
+          >
+            <div className="flex flex-col md:flex-row items-stretch gap-3">
+              <div className="relative flex-1">
+                <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#0F1A2E]/40" />
+                <input
+                  type="text"
+                  data-testid="mia-demo-address-input"
+                  value={demoAddress}
+                  onChange={(e) => setDemoAddress(e.target.value)}
+                  placeholder="12 Wolseley Road, Point Piper NSW"
+                  className="w-full h-14 pl-12 pr-4 rounded-2xl bg-[#FAF7F2] border border-[#0F1A2E]/10 text-[#0F1A2E] placeholder:text-[#0F1A2E]/35 text-base focus:outline-none focus:border-[#C99A2E] focus:bg-white transition-all"
+                  maxLength={200}
+                  disabled={demoLoading}
+                />
+              </div>
+              <button
+                type="submit"
+                data-testid="mia-demo-submit"
+                disabled={demoLoading || demoAddress.trim().length < 4}
+                className="h-14 px-7 rounded-2xl bg-[#0F1A2E] text-white font-medium text-sm tracking-wide hover:bg-[#1A2944] disabled:bg-[#0F1A2E]/30 disabled:cursor-not-allowed transition-all inline-flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                {demoLoading ? (
+                  <><Loader2 size={16} className="animate-spin" /> Mia's writing…</>
+                ) : (
+                  <><Volume2 size={16} className="text-[#C99A2E]" /> Hear Mia narrate it</>
+                )}
+              </button>
+            </div>
+
+            {demoError && (
+              <div data-testid="mia-demo-error" className="mt-3 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                {demoError}
+              </div>
+            )}
+
+            {demoResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                data-testid="mia-demo-result"
+                className="mt-6 grid lg:grid-cols-[auto_1fr] gap-5 items-center bg-gradient-to-br from-[#0F1A2E] to-[#1A2944] rounded-2xl p-5 lg:p-6 text-white"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <img
+                      src={MIA_PORTRAIT}
+                      alt="Mia"
+                      className="w-16 h-16 rounded-full object-cover ring-2 ring-[#C99A2E]/60"
+                      style={{ objectPosition: "50% 18%" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePlay}
+                      data-testid="mia-demo-play-toggle"
+                      className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#C99A2E] text-black flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                      aria-label={demoPlaying ? "Pause" : "Play"}
+                    >
+                      {demoPlaying ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" />}
+                    </button>
+                  </div>
+                  <div className="hidden lg:block">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E]">Mia · AU/UK</div>
+                    <div className="text-sm font-medium">~{demoResult.estimated_duration}s teaser</div>
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E] mb-1.5 lg:hidden">Mia · AU/UK · ~{demoResult.estimated_duration}s</div>
+                  <p data-testid="mia-demo-script" className="font-serif text-lg lg:text-xl leading-snug text-white/95 italic">
+                    "{demoResult.script}"
+                  </p>
+                </div>
+                <audio
+                  ref={demoAudioRef}
+                  src={demoResult.audio_url}
+                  onEnded={() => setDemoPlaying(false)}
+                  onPause={() => setDemoPlaying(false)}
+                  onPlay={() => setDemoPlaying(true)}
+                  data-testid="mia-demo-audio"
+                  className="hidden"
+                />
+              </motion.div>
+            )}
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[11px] text-[#0F1A2E]/45">
+              <div className="flex items-center gap-1.5">
+                <Sparkles size={12} className="text-[#C99A2E]" />
+                Live AI · GPT-5.2 script + ElevenLabs voice · 3 free demos / hour
+              </div>
+              {demoResult && (
+                <Link
+                  to="/register"
+                  data-testid="mia-demo-cta"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C99A2E] text-black font-medium text-xs hover:bg-[#DBC075] transition-colors"
+                >
+                  Lock in Mia for your listings <ArrowUpRight size={12} />
+                </Link>
+              )}
+            </div>
+          </motion.form>
         </div>
       </section>
 

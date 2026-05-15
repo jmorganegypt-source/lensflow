@@ -758,6 +758,133 @@ async def generate_script_variants(req: ScriptGenReq, user: dict = Depends(get_c
     return ScriptVariantsOut(title=title, variants=list(variants), created_at=created_at)
 
 
+# ---------------------------------------------------------------------------
+# Marketing demo — "Mia narrates YOUR address"
+# Public, unauthenticated. Cold-visitor conversion booster on the landing page.
+# Rate-limited per IP to protect ElevenLabs credits.
+# ---------------------------------------------------------------------------
+_demo_ip_log: dict[str, list[float]] = {}
+DEMO_HOURLY_LIMIT = 3
+DEMO_WINDOW_SECONDS = 60 * 60
+
+
+def _demo_check_rate(ip: str) -> None:
+    import time
+    now = time.time()
+    bucket = [t for t in _demo_ip_log.get(ip, []) if now - t < DEMO_WINDOW_SECONDS]
+    if len(bucket) >= DEMO_HOURLY_LIMIT:
+        wait_min = int((DEMO_WINDOW_SECONDS - (now - bucket[0])) / 60) + 1
+        raise HTTPException(
+            status_code=429,
+            detail=f"You've used your {DEMO_HOURLY_LIMIT} free demos this hour. Try again in ~{wait_min} min, or start your trial to keep going.",
+        )
+    bucket.append(now)
+    _demo_ip_log[ip] = bucket
+
+
+class MiaDemoReq(BaseModel):
+    address: str = Field(..., min_length=4, max_length=200)
+    email: Optional[EmailStr] = None  # optional — captured as a soft lead
+
+
+@api.post("/marketing/mia-narrate")
+async def mia_narrate_demo(req: MiaDemoReq, request: Request):
+    """Generate a 10-second Mia voiceover for any address. PUBLIC."""
+    if not EMERGENT_KEY:
+        raise HTTPException(status_code=503, detail="AI engine not configured")
+    if not eleven_client:
+        raise HTTPException(status_code=503, detail="Voice engine not configured")
+
+    # Rate limit by IP (X-Forwarded-For aware behind ingress)
+    fwd = request.headers.get("x-forwarded-for", "")
+    ip = fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "unknown")
+    _demo_check_rate(ip)
+
+    address = req.address.strip()
+
+    # 1) Generate a tight cinematic micro-script (~22-26 words = ~10 seconds)
+    prompt = f"""You are Mia, a luxury real-estate AI presenter narrating a TEASER for a property.
+
+Write ONE spoken sentence (22-26 words, exactly 10 seconds at natural pace) that:
+- Opens with a cinematic hook (NO "Welcome to", NO "Discover")
+- Names the address ONCE, naturally folded in
+- Suggests lifestyle and prestige WITHOUT making up property details (you don't know bedrooms/price)
+- Ends with a curiosity beat — leaves the listener wanting more
+- Reads like a $5M property reel voiceover
+
+Address: {address}
+
+Return ONLY the spoken sentence. No quotes, no labels, no markdown."""
+
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_KEY,
+            session_id=f"mia-demo-{uuid.uuid4().hex[:8]}",
+            system_message="You write tight, cinematic, broadcast-grade real estate teaser lines for luxury video.",
+        ).with_model("openai", "gpt-5.2")
+        text = await chat.send_message(UserMessage(text=prompt))
+        script = (text or "").strip().strip('"').strip("'")
+        if not script:
+            raise HTTPException(status_code=500, detail="Script came back empty — try again.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Mia demo script failed")
+        raise HTTPException(status_code=500, detail=f"Script generation failed: {str(e)[:200]}")
+
+    # 2) Synthesise with the Mia voice
+    mia_voice_id = next((p["voice_id"] for p in PRESENTERS if p["id"] == "mia"), None)
+    if not mia_voice_id:
+        raise HTTPException(status_code=503, detail="Mia voice not configured")
+
+    try:
+        def _tts():
+            audio_iter = eleven_client.text_to_speech.convert(
+                text=script,
+                voice_id=mia_voice_id,
+                model_id="eleven_multilingual_v2",
+                output_format="mp3_44100_128",
+                voice_settings=LUXURY_VOICE_SETTINGS,
+            )
+            buf = b""
+            for chunk in audio_iter:
+                buf += chunk
+            return buf
+
+        audio_bytes = await asyncio.to_thread(_tts)
+        b64 = base64.b64encode(audio_bytes).decode()
+    except Exception as e:
+        logger.exception("Mia demo TTS failed")
+        err = str(e)
+        if "detected_unusual_activity" in err or "Free Tier" in err:
+            raise HTTPException(status_code=402, detail="Voice engine temporarily out of credits — try again shortly.")
+        raise HTTPException(status_code=500, detail=f"Voice generation failed: {err[:200]}")
+
+    # 3) Log lead (best-effort, never blocks response)
+    try:
+        await db.demo_leads.insert_one({
+            "id": str(uuid.uuid4()),
+            "address": address,
+            "email": req.email,
+            "ip": ip,
+            "user_agent": request.headers.get("user-agent", "")[:300],
+            "referer": request.headers.get("referer", "")[:300],
+            "script": script,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    except Exception as e:
+        logger.warning(f"demo_leads insert failed: {e}")
+
+    word_count = len(script.split())
+    return {
+        "script": script,
+        "audio_url": f"data:audio/mpeg;base64,{b64}",
+        "word_count": word_count,
+        "estimated_duration": max(8, int(word_count / 2.4)),
+        "presenter": "Mia",
+    }
+
+
 # ---------- Projects ----------
 @api.post("/projects")
 async def create_project(req: ProjectCreate, user: dict = Depends(get_current_user)):

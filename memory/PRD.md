@@ -215,3 +215,30 @@ Three big upgrades to make existing claims actually true:
 
 ## Mobile native app plan (deferred — user picked product fixes first)
 - Capacitor wrapping path (CRA-based, not Vite). Target: Google Play first ($25 one-time), then Apple App Store ($99/year, DUNS already submitted).
+
+
+## Logo blend + "Mia narrates YOUR address" landing demo — 2026-05-15
+
+### Logo (MarketingNav.jsx)
+- Logo PNG had visible white background creating a "slapped on" box against the cream `#FAF7F2` navbar.
+- Fixed with `mixBlendMode: "multiply"` on the light-theme nav (drops white pixels, keeps navy/gold strokes vibrant).
+- Dark navbar pages keep the existing `filter: brightness(0) invert(1)` (white silhouette).
+- Bumped logo height from `h-11 → h-12` for stronger brand presence.
+
+### "Mia narrates YOUR address" — P0 conversion demo (Landing.jsx)
+**Goal**: Cold visitor types any address → hears a 10s cinematic Mia teaser → converts.
+
+**Backend** — `POST /api/marketing/mia-narrate` (PUBLIC, no auth):
+- Per-IP rate limit (3 demos / hour, in-memory `_demo_ip_log`). 4th attempt returns 429 with sales copy ("start your trial to keep going").
+- GPT-5.2 generates one 22-26 word cinematic teaser sentence (single-line prompt enforces hook + address fold-in + curiosity beat).
+- ElevenLabs (Mia voice) TTS with `LUXURY_VOICE_SETTINGS`.
+- Logs every request to `db.demo_leads` (address, IP, UA, referer, script, timestamp) — high-intent sales leads.
+- IP detection via `X-Forwarded-For` (ingress-aware).
+
+**Frontend**: New section between hero and "What is LensFlow":
+- Glass card with address input + "Hear Mia narrate it" button.
+- On success: navy result card with Mia portrait, play/pause toggle, animated italic serif script reveal, auto-plays audio.
+- "Lock in Mia for your listings" gold CTA appears only after a successful demo.
+- All elements have `data-testid` (`mia-demo-section`, `mia-demo-form`, `mia-demo-address-input`, `mia-demo-submit`, `mia-demo-result`, `mia-demo-script`, `mia-demo-audio`, `mia-demo-play-toggle`, `mia-demo-cta`, `mia-demo-error`).
+
+**Verified end-to-end**: curl returns 200 + audio base64 + 11s script; UI submits/renders/plays correctly; rate limit blocks 4th attempt with friendly copy; leads written to MongoDB.
