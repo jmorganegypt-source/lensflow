@@ -54,10 +54,10 @@ const tiers = [
     price: "$399",
     cadence: "AUD / month",
     blurb: "Virtual Twin. Bespoke avatar trained on you. Total automation.",
-    cta: "Reserve your spot",
+    cta: "Begin VIP intake",
     icon: Star,
     highlight: false,
-    coming_soon: true,
+    concierge_intake: true,
     perks: [
       "Everything in Elite",
       "Custom AI presenter trained on YOUR face",
@@ -107,6 +107,10 @@ export default function Pricing() {
   const navigate = useNavigate();
 
   const handleTierClick = async (t) => {
+    if (t.concierge_intake) {
+      navigate("/concierge");
+      return;
+    }
     if (t.coming_soon) {
       setEliteDialog(true);
       return;
@@ -159,12 +163,15 @@ export default function Pricing() {
       <section className="px-6 lg:px-10 pb-24">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {tiers.map((t) => (
-            <div key={t.id} data-testid={`pricing-tier-${t.id}`} className={`relative rounded-3xl p-8 transition-all flex flex-col ${t.highlight ? "bg-[#0E0E0E] border-2 border-[#C99A2E] gold-glow lg:scale-[1.03]" : t.coming_soon ? "bg-gradient-to-b from-[#1a1410] to-[#0E0E0E] border border-[#C99A2E]/40" : "glass hover:border-white/15"}`}>
+            <div key={t.id} data-testid={`pricing-tier-${t.id}`} className={`relative rounded-3xl p-8 transition-all flex flex-col ${t.highlight ? "bg-[#0E0E0E] border-2 border-[#C99A2E] gold-glow lg:scale-[1.03]" : (t.coming_soon || t.concierge_intake) ? "bg-gradient-to-b from-[#1a1410] to-[#0E0E0E] border border-[#C99A2E]/40" : "glass hover:border-white/15"}`}>
               {t.highlight && (
                 <div className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-[#C99A2E] text-black text-[10px] font-mono uppercase tracking-widest">Most popular</div>
               )}
               {t.coming_soon && (
                 <div className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-gradient-to-r from-[#C99A2E] to-[#DBC075] text-black text-[10px] font-mono uppercase tracking-widest">Limited Beta</div>
+              )}
+              {t.concierge_intake && (
+                <div className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-gradient-to-r from-[#C99A2E] to-[#DBC075] text-black text-[10px] font-mono uppercase tracking-widest">VIP · Bespoke</div>
               )}
               <t.icon className="text-[#C99A2E] mb-5" size={26} />
               <h3 className="font-serif text-2xl mb-1">{t.name}</h3>
@@ -174,14 +181,15 @@ export default function Pricing() {
                 <span className="text-white/45 ml-2 text-xs block mt-1">{t.cadence}</span>
                 {t.id === "starter" || t.id === "professional" ? <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E]">7-day free trial</span> : null}
                 {t.coming_soon && <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E]">Reserve · No charge yet</span>}
+                {t.concierge_intake && <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E]">VIP intake · Bespoke onboarding</span>}
               </div>
               <button
                 onClick={() => handleTierClick(t)}
-                disabled={loadingTier === t.id || (!t.payment_link && !t.coming_soon && user === null)}
+                disabled={loadingTier === t.id || (!t.payment_link && !t.coming_soon && !t.concierge_intake && user === null)}
                 data-testid={`pricing-cta-${t.id}`}
-                className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-7 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : t.coming_soon ? "bg-gradient-to-r from-[#C99A2E] to-[#DBC075] text-black hover:opacity-90" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
+                className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-7 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : (t.coming_soon || t.concierge_intake) ? "bg-gradient-to-r from-[#C99A2E] to-[#DBC075] text-black hover:opacity-90" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
               >
-                {loadingTier === t.id || (!t.payment_link && !t.coming_soon && user === null) ? <Loader2 className="animate-spin" size={16} /> : t.cta}
+                {loadingTier === t.id || (!t.payment_link && !t.coming_soon && !t.concierge_intake && user === null) ? <Loader2 className="animate-spin" size={16} /> : t.cta}
               </button>
               <ul className="space-y-3 mt-auto">
                 {t.perks.map((p, i) => (
@@ -221,8 +229,56 @@ export default function Pricing() {
         </div>
       </section>
 
+      {/* ============== FEATURE COMPARISON & ROI ============== */}
+      <section className="px-6 lg:px-10 py-20 bg-[#0F1A2E]" data-testid="feature-comparison">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#C99A2E] mb-3">Feature Comparison & ROI</div>
+            <h2 className="font-serif text-4xl lg:text-5xl tracking-tighter">Exactly what's <span className="italic text-[#C99A2E]">in each tier.</span></h2>
+          </div>
+
+          <div className="glass rounded-3xl overflow-hidden border border-white/10">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 bg-white/[0.02]">
+                  <th className="text-left px-6 py-4 text-[10px] font-mono uppercase tracking-[0.18em] text-white/55">Feature</th>
+                  <th className="px-6 py-4 text-[#C99A2E] font-mono text-[11px] uppercase tracking-wider">Starter ($79)</th>
+                  <th className="px-6 py-4 text-[#C99A2E] font-mono text-[11px] uppercase tracking-wider">Elite ($199)</th>
+                  <th className="px-6 py-4 text-[#C99A2E] font-mono text-[11px] uppercase tracking-wider">Concierge ($399)</th>
+                </tr>
+              </thead>
+              <tbody className="text-white/80">
+                {[
+                  { f: "Ava AI Script Writer",       s: "Included",   e: "Included",      c: "Bespoke" },
+                  { f: "Eye-Contact Teleprompter",   s: "Included",   e: "Included",      c: "Unlimited" },
+                  { f: "Glamour Photo Studio",       s: "1 / photo",  e: "5 photos",      c: "Unlimited" },
+                  { f: "3 Script Variants",          s: "—",          e: "Included",      c: "Included" },
+                  { f: "Music Library + Upload",     s: "—",          e: "Included",      c: "Included" },
+                  { f: "Mia & Oliver Avatars",       s: "—",          e: "5 prods / mo",  c: "Unlimited" },
+                  { f: "Email Finished Videos",      s: "—",          e: "Included",      c: "Included" },
+                  { f: "Digital Twin Clone (you)",   s: "—",          e: "—",             c: "Included" },
+                  { f: "Voice Clone from 60s audio", s: "—",          e: "—",             c: "Included" },
+                  { f: "Dedicated Account Manager",  s: "—",          e: "—",             c: "Included" },
+                  { f: "SLA · DPA · Invoicing",      s: "—",          e: "—",             c: "Included" },
+                ].map((r, i) => (
+                  <tr key={i} className={i % 2 === 0 ? "bg-white/[0.015]" : ""} data-testid={`row-${i}`}>
+                    <td className="px-6 py-3.5 text-white font-medium">{r.f}</td>
+                    {[r.s, r.e, r.c].map((v, j) => (
+                      <td key={j} className={`px-6 py-3.5 text-center ${v === "—" ? "text-white/25" : v === "Included" || v === "Unlimited" || v === "Bespoke" ? "text-emerald-400" : "text-white/75"}`}>
+                        {v === "Included" ? <Check size={15} className="inline" /> : v}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-white/45 text-xs text-center mt-6 font-mono uppercase tracking-wider">Trial users · all exports include LENSFLOW watermark · removed automatically after first paid invoice</p>
+        </div>
+      </section>
+
       <section className="px-6 lg:px-10 pb-32">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto pt-20">
           <h2 className="font-serif text-5xl tracking-tighter mb-10 text-center">Questions, answered.</h2>
           <div className="space-y-2">
             {faqs.map((f, i) => (

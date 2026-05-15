@@ -518,6 +518,42 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ============== WORKFLOW: From Zero to Sold ============== */}
+      <section className="relative py-24 px-6 lg:px-10 bg-[#0a0a0a] text-white" data-testid="workflow-section">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#C99A2E] mb-3">The Workflow</div>
+            <h2 className="font-serif text-4xl lg:text-6xl tracking-tighter leading-[0.95]">From <span className="italic text-[#C99A2E]">Zero to Sold</span> in three steps.</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { n: "1", title: "Input",    sub: "Agent uploads property photos and details.",  Icon: Camera },
+              { n: "2", title: "Generate", sub: "Ava writes; Mia records the script.",         Icon: Sparkles },
+              { n: "3", title: "Close",    sub: "The cinematic video hits the market in minutes.", Icon: Trophy },
+            ].map((s) => (
+              <div key={s.n} className="relative glass rounded-3xl p-7 border border-white/10 hover:border-[#C99A2E]/40 transition-colors" data-testid={`workflow-step-${s.n}`}>
+                <div className="absolute -top-3 left-7 px-3 py-1 rounded-full bg-[#C99A2E] text-black text-[10px] font-mono uppercase tracking-widest">Step {s.n}</div>
+                <s.Icon size={28} className="text-[#C99A2E] mb-5" />
+                <h3 className="font-serif text-3xl tracking-tight mb-2">{s.title}</h3>
+                <p className="text-white/55 text-sm leading-relaxed">{s.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============== LENSFLOW PHILOSOPHY QUOTE ============== */}
+      <section className="relative py-28 px-6 lg:px-10 bg-[#0F1A2E] text-white overflow-hidden" data-testid="philosophy-section">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#C99A2E]/5 via-transparent to-transparent" />
+        <div className="relative max-w-5xl mx-auto text-center">
+          <div className="font-serif text-7xl text-[#C99A2E] leading-none mb-6">"</div>
+          <blockquote className="font-serif italic text-3xl lg:text-5xl leading-[1.1] tracking-tighter mb-8">
+            Stop being a videographer. Start being an agent. Let <span className="text-[#C99A2E] not-italic">Mia</span> and <span className="text-[#C99A2E] not-italic">Oliver</span> handle the screen while <em className="italic">you</em> handle the sale.
+          </blockquote>
+          <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-[#C99A2E]">— The LensFlow Philosophy</div>
+        </div>
+      </section>
+
       {/* ============== TRUST STRIP + STATS ============== */}
       <section className="relative py-20 px-6 lg:px-10 bg-white border-y border-[#0F1A2E]/8" data-testid="trust-stats">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-8">

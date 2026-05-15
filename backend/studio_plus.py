@@ -214,9 +214,14 @@ def build_router(
                 _decode_image_to_path(p, work_dir, i) for i, p in enumerate(req.photo_urls)
             ]
 
+            # Determine watermark requirement — trial / free users get a corner watermark
+            user_plan = (user.get("plan") or "free").lower()
+            is_trial = user_plan in ("free", "trial", "starter") and not user.get("paid_at")
+            # `paid_at` is set on a user when their first paid invoice clears. Until then = trial.
+
             # 3) Compose video using moviepy in a worker thread
             def _render() -> Path:
-                from moviepy import ImageClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips, afx
+                from moviepy import ImageClip, AudioFileClip, CompositeAudioClip, CompositeVideoClip, TextClip, concatenate_videoclips, afx
                 audio = AudioFileClip(str(audio_path))
                 target_total = max(audio.duration, len(frame_paths) * 2.5)
                 per = target_total / len(frame_paths)
@@ -247,6 +252,27 @@ def build_router(
                         music_clip = None
 
                 video = concatenate_videoclips(clips, method="compose").with_audio(final_audio)
+
+                # Trial watermark — protects API burn until first paid invoice
+                if is_trial:
+                    try:
+                        wm = (
+                            TextClip(
+                                text="LENSFLOW · 7-DAY TRIAL",
+                                font_size=42,
+                                color="white",
+                                stroke_color="black",
+                                stroke_width=2,
+                                method="label",
+                            )
+                            .with_duration(video.duration)
+                            .with_opacity(0.55)
+                            .with_position(("right", "bottom"))
+                        )
+                        video = CompositeVideoClip([video, wm])
+                    except Exception as wm_err:
+                        logger.warning(f"Watermark overlay skipped: {wm_err}")
+
                 out = _video_dir() / f"confidence_{uuid.uuid4().hex}.mp4"
                 video.write_videofile(
                     str(out),
