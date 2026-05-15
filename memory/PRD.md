@@ -158,6 +158,17 @@ Major business-model upgrade — built tonight at user's instruction:
 - Pricing screenshot: 4 tiers render correctly, Elite "Limited Beta" gold gradient pill, reservation modal opens cleanly
 - TTS preview: ✅ returns audio with new voice settings
 
+## Production hardening — memory pressure fixes (2026-05-15)
+Production deployment was occasionally returning 502 on `/api/studio-plus/glamour/enhance` and uvicorn was restarting under load. Root cause: 200 MB K8s pod was holding both the input base64 (~5-10 MB) AND the Gemini output base64 (~5-10 MB) AND the decoded PIL images simultaneously, plus a large JSON response body.
+
+Fixes in `studio_plus.py`:
+1. **Upfront downscale to 1600 px / JPEG 85** before sending to Gemini. Cuts payload 50-80%, makes API calls faster, reduces peak memory.
+2. **Aggressive `del` of large variables** as soon as they're no longer needed (input b64, raw bytes, downscaled bytes, chat object, response objects). Frees memory before the response is serialized.
+3. **`gc.collect()` after every glamour + confidence-video call** (both success and failure paths) so freed buffers actually return to the OS before the next request lands.
+4. Validation moved before allocation — bad base64 now fails fast without holding two copies of the bytes.
+
+Verified end-to-end: 3000×2000 source → enhanced output returned successfully, no 502.
+
 ## Next session priorities
 1. If user adds voice IDs → verify TTS round-trips.
 2. Wire Stripe to Pricing upgrade buttons (revenue lever).

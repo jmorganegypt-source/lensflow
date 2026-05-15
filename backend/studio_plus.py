@@ -270,6 +270,9 @@ def build_router(
 
             video_path = await asyncio.to_thread(_render)
 
+            import gc
+            gc.collect()  # Reclaim moviepy buffers before sending response
+
             return {
                 "video_url": f"/api/studio-plus/video/{video_path.name}",
                 "duration_seconds": int(video_path.stat().st_size > 0) * 1,  # placeholder
@@ -278,6 +281,8 @@ def build_router(
             }
         except Exception as e:
             logger.exception("Confidence video render failed")
+            import gc
+            gc.collect()
             raise HTTPException(status_code=500, detail=f"Video render failed: {str(e)[:200]}")
         finally:
             # Best-effort cleanup of source dir (keep output mp4)
@@ -341,18 +346,45 @@ def build_router(
         if not prompt:
             raise HTTPException(status_code=400, detail="Unknown preset")
 
+        # Lazy imports — keep cold-start memory low
+        import gc
+        from PIL import Image
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+
+        image_b64_in = _strip_b64(req.image)
+
+        # ---- Downscale upfront to keep memory + payload manageable on small pods ----
+        # Source photos from agents are often 5-12 MB DSLR shots. Gemini Nano works fine at 1600px.
         try:
-            # Lazy imports — keep cold-start memory low
-            from PIL import Image
-            from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+            raw = base64.b64decode(image_b64_in)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid base64 image data")
 
-            image_b64 = _strip_b64(req.image)
-            # Validate it's a real image
-            try:
-                Image.open(io.BytesIO(base64.b64decode(image_b64))).verify()
-            except Exception:
-                raise HTTPException(status_code=400, detail="Invalid image data")
+        # Discard the raw input b64 string ASAP — it's a duplicate of `raw`
+        del image_b64_in
 
+        try:
+            with Image.open(io.BytesIO(raw)) as im:
+                im.load()  # force-decode while file handle is open
+                if im.mode not in ("RGB", "L"):
+                    im = im.convert("RGB")
+                max_side = 1600
+                if max(im.size) > max_side:
+                    im.thumbnail((max_side, max_side), Image.LANCZOS)
+                buf = io.BytesIO()
+                im.save(buf, format="JPEG", quality=85, optimize=True)
+                downscaled = buf.getvalue()
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=400, detail="Could not read image — please upload a JPG, PNG or WebP")
+        finally:
+            del raw  # free the original bytes
+
+        upload_b64 = base64.b64encode(downscaled).decode("ascii")
+        del downscaled
+
+        try:
             chat = LlmChat(
                 api_key=emergent_key,
                 session_id=f"glamour-{user.get('_id', 'anon')}-{uuid.uuid4().hex[:8]}",
@@ -364,8 +396,9 @@ def build_router(
 
             msg = UserMessage(
                 text=prompt,
-                file_contents=[ImageContent(image_b64)],
+                file_contents=[ImageContent(upload_b64)],
             )
+            del upload_b64  # we don't need it after the chat has it
 
             text_resp, images = await chat.send_message_multimodal_response(msg)
 
@@ -374,9 +407,14 @@ def build_router(
 
             out = images[0]
             mime = out.get("mime_type", "image/png")
-            data = out["data"]  # base64 string
+            data_out = out["data"]  # base64 string from Gemini
+            notes = (text_resp or "")[:300]
 
-            # Track usage
+            # Free the chat object + returned images ref BEFORE we return the response
+            # (the response body itself still needs the b64 string)
+            del images, out, chat, msg, text_resp
+
+            # Track usage (best-effort — never block the response)
             try:
                 await db.glamour_jobs.insert_one({
                     "user_id": str(user["_id"]),
@@ -386,16 +424,20 @@ def build_router(
             except Exception:
                 pass
 
-            return {
-                "enhanced_image": f"data:{mime};base64,{data}",
+            response = {
+                "enhanced_image": f"data:{mime};base64,{data_out}",
                 "preset": req.preset,
-                "notes": (text_resp or "")[:300],
+                "notes": notes,
             }
+            gc.collect()
+            return response
         except HTTPException:
+            gc.collect()
             raise
         except Exception as e:
             logger.exception("Glamour enhance failed")
             err = str(e)
+            gc.collect()
             raise HTTPException(status_code=500, detail=f"Enhancement failed: {err[:200]}")
 
     # -------- Voice Clone (Elite tier) --------
