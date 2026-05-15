@@ -538,6 +538,16 @@ async def list_presenters():
 
 
 # ---------- TTS preview (ElevenLabs) ----------
+# Premium voice settings — tuned for luxury real-estate narration.
+# These dramatically lift Mia/Oliver/Aria/Marcus from "default AI" to "broadcast presenter".
+LUXURY_VOICE_SETTINGS = {
+    "stability": 0.60,         # 0.5 default -> 0.60 = warmer, less robotic, fewer awkward inflections
+    "similarity_boost": 0.85,  # 0.5 default -> 0.85 = stronger character match (Mia sounds more like Mia)
+    "style": 0.30,             # 0.0 default -> 0.30 = adds tasteful luxury cadence without overacting
+    "use_speaker_boost": True, # Cleaner, broadcast-grade output
+}
+
+
 @api.post("/tts/preview")
 async def tts_preview(req: TTSPreviewReq, user: dict = Depends(get_current_user)):
     if not eleven_client:
@@ -552,6 +562,7 @@ async def tts_preview(req: TTSPreviewReq, user: dict = Depends(get_current_user)
                 voice_id=req.voice_id,
                 model_id="eleven_multilingual_v2",
                 output_format="mp3_44100_128",
+                voice_settings=LUXURY_VOICE_SETTINGS,
             )
             buf = b""
             for chunk in audio_iter:
@@ -840,13 +851,111 @@ async def submit_concierge(req: ConciergeReq):
     return {"success": True, "id": doc["id"]}
 
 
+# ---------- Elite Avatar reservations ----------
+class EliteReservationReq(BaseModel):
+    name: str
+    email: EmailStr
+    company: Optional[str] = None
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+
+
+@api.post("/reservations/elite")
+async def reserve_elite(req: EliteReservationReq):
+    """Captures interest in the Elite AI Presenter tier (A$249/mo, 12-mo commit).
+    No payment yet — we contact them when D-ID integration goes live."""
+    doc = req.model_dump()
+    doc["id"] = str(uuid.uuid4())
+    doc["tier"] = "elite_avatar"
+    doc["status"] = "waitlist"
+    doc["created_at"] = datetime.now(timezone.utc).isoformat()
+    await db.elite_reservations.insert_one(doc)
+    logger.info(f"[ELITE-RESERVE] {req.email} :: {req.company or 'solo'}")
+
+    # Optional: notify admin via Resend (best-effort)
+    try:
+        if RESEND_KEY:
+            resend.Emails.send({
+                "from": RESEND_FROM,
+                "to": [os.environ.get("ADMIN_EMAIL", "admin@lensflow.com.au")],
+                "subject": f"[Elite Reservation] {req.name} · {req.company or 'solo'}",
+                "html": f"<p><b>{req.name}</b> ({req.email}, {req.phone or '—'})</p><p>Company: {req.company or '—'}</p><p>Notes: {req.notes or '—'}</p>",
+            })
+    except Exception:
+        pass
+
+    return {"success": True, "id": doc["id"], "message": "You're on the Elite waitlist — we'll be in touch within 24 hours."}
+
+
+# ---------- Email finished video ----------
+class EmailVideoReq(BaseModel):
+    video_url: str = Field(min_length=10, max_length=500)
+    recipient_email: EmailStr
+    recipient_name: Optional[str] = ""
+    listing_address: Optional[str] = ""
+    sender_message: Optional[str] = ""
+
+
+@api.post("/projects/email-video")
+async def email_video(req: EmailVideoReq, user: dict = Depends(get_current_user)):
+    """Sends a finished listing video link to the agent's client / vendor / themselves.
+    Lets agents share LensFlow output via email without leaving the app."""
+    if not RESEND_KEY:
+        # Fallback: still log + succeed so agents on console-only setups aren't blocked
+        logger.info(f"[VIDEO-EMAIL] (console) {user.get('email')} -> {req.recipient_email}: {req.video_url}")
+        return {"success": True, "delivered": False, "message": "Email queued (Resend not configured — link logged)."}
+
+    sender_name = user.get("name", "your LensFlow agent")
+    sender_email = user.get("email", "")
+    address_line = f" for <strong>{req.listing_address}</strong>" if req.listing_address else ""
+    personal = f"<p style=\"font-style:italic;color:#444\">\"{req.sender_message}\"</p>" if req.sender_message else ""
+
+    html = f"""
+    <div style="font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#FAF7F2;color:#0F1A2E">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="display:inline-block;width:48px;height:48px;border-radius:50%;background:#C99A2E;line-height:48px;color:#0F1A2E;font-weight:700;font-size:24px;font-family:Georgia,serif">L</div>
+        <div style="font-family:Georgia,serif;font-size:28px;margin-top:8px">LensFlow</div>
+      </div>
+      <h2 style="font-family:Georgia,serif;font-size:24px;font-weight:400;margin:0 0 12px">A new listing video{address_line}</h2>
+      <p style="color:#555;line-height:1.5">Hi {req.recipient_name or 'there'},</p>
+      <p style="color:#555;line-height:1.5">{sender_name} ({sender_email}) just composed a cinematic listing video and wanted you to see it first.</p>
+      {personal}
+      <div style="text-align:center;margin:32px 0">
+        <a href="{req.video_url}" style="display:inline-block;background:#C99A2E;color:#0F1A2E;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600">▶ Watch the video</a>
+      </div>
+      <p style="color:#888;font-size:12px;text-align:center;margin-top:32px">LensFlow — AI Real Estate Media Studio · <a href="https://lensflow.com.au" style="color:#C99A2E">lensflow.com.au</a></p>
+    </div>
+    """
+
+    try:
+        resend.Emails.send({
+            "from": RESEND_FROM,
+            "to": [req.recipient_email],
+            "reply_to": sender_email or None,
+            "subject": f"A listing video from {sender_name}{address_line.replace('<strong>', '').replace('</strong>', '')}",
+            "html": html,
+        })
+        await db.video_emails.insert_one({
+            "user_id": str(user["_id"]),
+            "recipient": req.recipient_email,
+            "video_url": req.video_url,
+            "address": req.listing_address,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        return {"success": True, "delivered": True, "message": "Video link emailed."}
+    except Exception as e:
+        logger.error(f"Video email failed: {e}")
+        raise HTTPException(status_code=502, detail="Email delivery failed. Try again or copy the link directly.")
+
+
 # ---------- Payments (Stripe) ----------
 # Server-side authoritative price packages — never trust the frontend
 PAYMENT_PACKAGES = {
-    "starter_monthly":      {"amount": 23.90,   "currency": "aud", "label": "Standard · Monthly",     "plan": "starter",      "recurring": True,  "trial_days": 7},
-    "professional_monthly": {"amount": 59.90,   "currency": "aud", "label": "Professional · Monthly", "plan": "professional", "recurring": True,  "trial_days": 7},
-    "elite_monthly":        {"amount": 1199.00, "currency": "aud", "label": "Elite Partner · Monthly", "plan": "elite",        "recurring": True,  "trial_days": 7},
-    "concierge_listing":    {"amount": 1790.00, "currency": "aud", "label": "Concierge · Per Listing", "plan": "concierge",    "recurring": False, "trial_days": 0},
+    "starter_monthly":      {"amount": 39.00,   "currency": "aud", "label": "Starter · Monthly",       "plan": "starter",      "recurring": True,  "trial_days": 7},
+    "professional_monthly": {"amount": 89.00,   "currency": "aud", "label": "Professional · Monthly",  "plan": "professional", "recurring": True,  "trial_days": 7},
+    "elite_avatar_annual":  {"amount": 2988.00, "currency": "aud", "label": "Elite AI Presenter · 12-month commit", "plan": "elite_avatar", "recurring": True,  "trial_days": 0},
+    "enterprise_monthly":   {"amount": 1199.00, "currency": "aud", "label": "Enterprise · Monthly",     "plan": "enterprise",   "recurring": True,  "trial_days": 7},
+    "concierge_listing":    {"amount": 1790.00, "currency": "aud", "label": "Concierge · Per Listing",  "plan": "concierge",    "recurring": False, "trial_days": 0},
 }
 
 

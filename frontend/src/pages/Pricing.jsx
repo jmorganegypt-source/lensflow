@@ -2,27 +2,27 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import MarketingNav from "../components/MarketingNav";
 import Footer from "../components/Footer";
-import { Check, Sparkles, Crown, Gem, Phone, Loader2 } from "lucide-react";
+import { Check, Sparkles, Crown, Gem, Phone, Loader2, Star, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import api, { formatApiErrorDetail } from "../lib/api";
 import { toast } from "sonner";
 
 const tiers = [
   {
-    id: "standard",
-    name: "Standard",
-    price: "$23.90",
+    id: "starter",
+    name: "Starter",
+    price: "$39",
     cadence: "AUD / month",
-    blurb: "The essential kit for everyday listings.",
+    blurb: "Solo agent essentials. Film yourself, beautifully.",
     cta: "Start 7-day trial",
     icon: Sparkles,
     highlight: false,
     package_id: "starter_monthly",
     perks: [
-      "HD teleprompter",
-      "AI script writer",
+      "HD teleprompter · perfect eye-contact",
+      "AI script writer · 1 version",
+      "1-photo Glamour Studio",
       "Captions auto-generated",
-      "Basic branding overlays",
       "Mia & Oliver presenters",
       "1080p export",
     ],
@@ -30,39 +30,43 @@ const tiers = [
   {
     id: "professional",
     name: "Professional",
-    price: "$59.90",
+    price: "$89",
     cadence: "AUD / month",
-    blurb: "The agent's standard kit. Unlimited drafts.",
+    blurb: "The agent's complete kit. Film yourself, but bigger.",
     cta: "Start 7-day trial",
     icon: Crown,
     highlight: true,
     package_id: "professional_monthly",
     perks: [
-      "Everything in Standard",
-      "4K recording",
-      "Luxury scene switching",
-      "Premium exports (REA · Domain · Rightmove)",
-      "All 4 presenters · all accents",
-      "No watermark · Priority TTS",
+      "Everything in Starter",
+      "3 script variants per listing",
+      "5-photo Glamour Studio",
+      "Confidence Mode video composer",
+      "Music library + your own track",
+      "All 4 presenters · 4K export",
+      "Email finished videos to clients",
+      "REA · Domain · Rightmove exports",
     ],
   },
   {
-    id: "elite",
-    name: "Elite Partner",
-    price: "$1,199",
-    cadence: "AUD / month",
-    blurb: "White-glove agency tier. Built around your brand.",
-    cta: "Start 7-day trial",
-    icon: Gem,
+    id: "elite_avatar",
+    name: "Elite AI Presenter",
+    price: "$249",
+    cadence: "AUD / month · 12-month commit",
+    blurb: "Mia is your personal AI presenter. You don't film a thing.",
+    cta: "Reserve your spot",
+    icon: Star,
     highlight: false,
-    package_id: "elite_monthly",
+    coming_soon: true,
     perks: [
-      "Private AI presenter (yours only)",
-      "Face upload avatar engine",
-      "Voice clone / voice polish",
-      "Priority rendering queue",
-      "Dedicated account strategist",
-      "Custom brand templates",
+      "Everything in Professional",
+      "Real talking-head AI presenter",
+      "Mia / Oliver / Aria / Marcus speak your scripts",
+      "Up to 15 finished listing videos / month",
+      "12-month commit · annual savings locked",
+      "White-glove onboarding call",
+      "Priority render queue",
+      "Direct line for support",
     ],
   },
   {
@@ -70,7 +74,7 @@ const tiers = [
     name: "Concierge",
     price: "$1,790",
     cadence: "AUD / per listing",
-    blurb: "Done for you. Broadcast-grade, 24-hour turnaround.",
+    blurb: "Done-for-you broadcast production · 24-hour turnaround.",
     cta: "Book Concierge",
     icon: Phone,
     highlight: false,
@@ -87,21 +91,26 @@ const tiers = [
 ];
 
 const faqs = [
-  { q: "Can I switch plans later?", a: "Yes — upgrade or downgrade any time. Charges prorate to the day in Settings." },
-  { q: "Can I use my own ElevenLabs key?", a: "Yes on Professional and above. Bring your own keys or use ours — costs are bundled either way." },
+  { q: "What's the Elite AI Presenter tier?", a: "It's our flagship 'AI does everything' option — a real talking-head presenter (Mia/Oliver/Aria/Marcus) actually speaks your script over your photos. No filming required. We're rolling out to a small waitlist first; reserve your spot and we'll contact you when your access opens." },
+  { q: "Why a 12-month commit on Elite?", a: "Premium AI avatar engines are sold annually, so we pass that lock-in straight through. In return you get the lowest possible monthly price and locked-in pricing for 12 months." },
+  { q: "Can I switch plans later?", a: "Yes — upgrade or downgrade any time. Charges prorate to the day in Settings. (Elite is the only tier with a 12-month commit.)" },
   { q: "Does Mia's voice work outside Australia?", a: "Mia is bilingual-accent capable (AU/UK). Oliver, Aria and Marcus cover RP, American and Continental respectively." },
-  { q: "How are videos delivered?", a: "Direct download in 9:16, 16:9 and 1:1 with captions, plus REA-compatible XML & Domain JSON exports." },
+  { q: "How are videos delivered?", a: "Direct download in 9:16, 16:9 and 1:1 with captions, plus REA-compatible XML & Domain JSON exports. You can also email a video link straight to a vendor or buyer from the app." },
   { q: "What's included in Concierge?", a: "A dedicated editor, strategist, drone/dusk b-roll, scriptwriting and a 24-hour final cut. Per-listing pricing, no commitment." },
 ];
 
 export default function Pricing() {
   const [open, setOpen] = useState(null);
   const [loadingTier, setLoadingTier] = useState(null);
+  const [eliteDialog, setEliteDialog] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleTierClick = async (t) => {
-    // Payment Link path (no auth required) — direct redirect to hosted Stripe checkout
+    if (t.coming_soon) {
+      setEliteDialog(true);
+      return;
+    }
     if (t.payment_link) {
       window.location.href = t.payment_link;
       return;
@@ -150,9 +159,12 @@ export default function Pricing() {
       <section className="px-6 lg:px-10 pb-24">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {tiers.map((t) => (
-            <div key={t.id} data-testid={`pricing-tier-${t.id}`} className={`relative rounded-3xl p-8 transition-all flex flex-col ${t.highlight ? "bg-[#0E0E0E] border-2 border-[#C99A2E] gold-glow lg:scale-[1.03]" : "glass hover:border-white/15"}`}>
+            <div key={t.id} data-testid={`pricing-tier-${t.id}`} className={`relative rounded-3xl p-8 transition-all flex flex-col ${t.highlight ? "bg-[#0E0E0E] border-2 border-[#C99A2E] gold-glow lg:scale-[1.03]" : t.coming_soon ? "bg-gradient-to-b from-[#1a1410] to-[#0E0E0E] border border-[#C99A2E]/40" : "glass hover:border-white/15"}`}>
               {t.highlight && (
                 <div className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-[#C99A2E] text-black text-[10px] font-mono uppercase tracking-widest">Most popular</div>
+              )}
+              {t.coming_soon && (
+                <div className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-gradient-to-r from-[#C99A2E] to-[#DBC075] text-black text-[10px] font-mono uppercase tracking-widest">Limited Beta</div>
               )}
               <t.icon className="text-[#C99A2E] mb-5" size={26} />
               <h3 className="font-serif text-2xl mb-1">{t.name}</h3>
@@ -160,15 +172,16 @@ export default function Pricing() {
               <div className="mb-6">
                 <span className="font-serif text-5xl tracking-tighter">{t.price}</span>
                 <span className="text-white/45 ml-2 text-xs block mt-1">{t.cadence}</span>
-                {t.id !== "concierge" && <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E]">7-day free trial</span>}
+                {t.id === "starter" || t.id === "professional" ? <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E]">7-day free trial</span> : null}
+                {t.coming_soon && <span className="block mt-2 text-[10px] font-mono uppercase tracking-[0.18em] text-[#C99A2E]">Reserve · No charge yet</span>}
               </div>
               <button
                 onClick={() => handleTierClick(t)}
-                disabled={loadingTier === t.id || (!t.payment_link && user === null)}
+                disabled={loadingTier === t.id || (!t.payment_link && !t.coming_soon && user === null)}
                 data-testid={`pricing-cta-${t.id}`}
-                className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-7 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
+                className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-full font-medium mb-7 transition-colors ${t.highlight ? "bg-[#C99A2E] text-black hover:bg-[#DBC075]" : t.coming_soon ? "bg-gradient-to-r from-[#C99A2E] to-[#DBC075] text-black hover:opacity-90" : "glass-strong hover:bg-white/10"} disabled:opacity-60`}
               >
-                {loadingTier === t.id || (!t.payment_link && user === null) ? <Loader2 className="animate-spin" size={16} /> : t.cta}
+                {loadingTier === t.id || (!t.payment_link && !t.coming_soon && user === null) ? <Loader2 className="animate-spin" size={16} /> : t.cta}
               </button>
               <ul className="space-y-3 mt-auto">
                 {t.perks.map((p, i) => (
@@ -191,10 +204,10 @@ export default function Pricing() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             {[
-              { tool: "BombBomb", price: "$59 USD", ours: "$59.90 AUD" },
-              { tool: "Synthesia", price: "$89 USD", ours: "$59.90 AUD" },
-              { tool: "HeyGen", price: "$89 USD", ours: "$59.90 AUD" },
-              { tool: "Pictory", price: "$59 USD", ours: "$59.90 AUD" },
+              { tool: "BombBomb", price: "$59 USD", ours: "$89 AUD" },
+              { tool: "Synthesia", price: "$89 USD", ours: "$89 AUD" },
+              { tool: "HeyGen", price: "$89 USD", ours: "$89 AUD" },
+              { tool: "BIGVU", price: "$59 USD", ours: "$89 AUD" },
             ].map((c, i) => (
               <div key={i} className="p-4 rounded-2xl bg-white/[0.03]" data-testid={`compare-${c.tool.toLowerCase()}`}>
                 <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">{c.tool}</div>
@@ -226,6 +239,69 @@ export default function Pricing() {
       </section>
 
       <Footer />
+      {eliteDialog && <EliteReservationDialog onClose={() => setEliteDialog(false)} />}
+    </div>
+  );
+}
+
+// ---------- Elite Reservation Dialog ----------
+function EliteReservationDialog({ onClose }) {
+  const [form, setForm] = useState({ name: "", email: "", company: "", phone: "", notes: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const submit = async (e) => {
+    e?.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.post("/reservations/elite", form);
+      setDone(true);
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Could not save reservation");
+    } finally { setSubmitting(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose} data-testid="elite-reservation-dialog">
+      <div className="bg-gradient-to-b from-[#1a1410] to-[#0a0a0a] border border-[#C99A2E]/40 rounded-3xl p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        {!done ? (
+          <>
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Star size={14} className="text-[#C99A2E]" />
+                  <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#C99A2E]">Elite AI Presenter · Limited Beta</div>
+                </div>
+                <h3 className="font-serif text-3xl tracking-tighter">Reserve your spot</h3>
+                <p className="text-white/55 text-sm mt-2">A$249/mo · 12-month commit · No charge until your access opens.</p>
+              </div>
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center"><X size={14} /></button>
+            </div>
+            <form onSubmit={submit} className="space-y-3">
+              <input type="text" required placeholder="Your name *" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} data-testid="elite-name" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none text-sm" />
+              <input type="email" required placeholder="Email *" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} data-testid="elite-email" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none text-sm" />
+              <div className="grid grid-cols-2 gap-3">
+                <input type="text" placeholder="Agency / Company" value={form.company} onChange={(e) => setForm({...form, company: e.target.value})} data-testid="elite-company" className="px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none text-sm" />
+                <input type="tel" placeholder="Phone" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} data-testid="elite-phone" className="px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none text-sm" />
+              </div>
+              <textarea rows={3} placeholder="What kind of listings? (helps us match the right presenter)" value={form.notes} onChange={(e) => setForm({...form, notes: e.target.value})} data-testid="elite-notes" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none resize-none text-sm" />
+              <button type="submit" disabled={submitting} data-testid="elite-submit" className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full bg-gradient-to-r from-[#C99A2E] to-[#DBC075] text-black hover:opacity-90 disabled:opacity-50 font-medium text-sm">
+                {submitting ? <><Loader2 className="animate-spin" size={14} /> Saving your spot…</> : <>Reserve my Elite spot</>}
+              </button>
+              <p className="text-white/45 text-[11px] text-center pt-2">No credit card required at reservation. We'll email you when your access opens with a one-click upgrade link.</p>
+            </form>
+          </>
+        ) : (
+          <div className="text-center py-6" data-testid="elite-success">
+            <div className="w-14 h-14 rounded-full bg-[#C99A2E]/15 border border-[#C99A2E]/40 flex items-center justify-center mx-auto mb-4">
+              <Check size={26} className="text-[#C99A2E]" />
+            </div>
+            <h3 className="font-serif text-2xl mb-2">You're on the list.</h3>
+            <p className="text-white/65 text-sm mb-6">We'll email you within 24 hours with your private Elite onboarding link.</p>
+            <button onClick={onClose} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#C99A2E] text-black hover:bg-[#DBC075] font-medium text-sm">Done</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

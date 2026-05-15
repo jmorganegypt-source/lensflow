@@ -167,6 +167,12 @@ def build_router(
                     voice_id=req.voice_id,
                     model_id="eleven_multilingual_v2",
                     output_format="mp3_44100_128",
+                    voice_settings={
+                        "stability": 0.60,
+                        "similarity_boost": 0.85,
+                        "style": 0.30,
+                        "use_speaker_boost": True,
+                    },
                 )
                 return b"".join(audio_iter)
 

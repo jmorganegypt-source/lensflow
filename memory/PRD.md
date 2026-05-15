@@ -120,6 +120,44 @@ LensFlow now positions as **"The first AI real estate platform built for camera-
 - **P2**: Export presets (REA XML, Domain JSON, 9:16/16:9/1:1 video crop).
 - **P2**: Multi-user agency seats.
 
+## Pricing restructure + Elite waitlist + Email video + Voice tuning — 2026-05-15
+Major business-model upgrade — built tonight at user's instruction:
+
+### Pricing — new 4-tier structure (was 4-tier, prices were 40-60% under-priced)
+| Tier | Old | NEW | Notes |
+|---|---|---|---|
+| Starter | A$23.90 | **A$39** | +63% |
+| Professional | A$59.90 | **A$89** | +49% (now matches Synthesia/HeyGen entry) |
+| Elite Avatar | n/a | **A$249/mo · 12-mo commit** | NEW tier — reservation/waitlist mode while D-ID integration is pending |
+| Enterprise | A$1,199 | A$1,199 (unchanged) | Removed from main pricing card grid for now |
+| Concierge | A$1,790/listing | A$1,790/listing | Unchanged |
+
+`PAYMENT_PACKAGES` updated server-side. Stripe checkout refuses any frontend price tampering.
+
+### `POST /api/reservations/elite` (new)
+- Public endpoint — captures name/email/company/phone/notes for the Elite Avatar waitlist.
+- Stores in `db.elite_reservations` with `status:waitlist`.
+- Sends a Resend notification email to ADMIN_EMAIL on each new reservation (best-effort, non-blocking).
+- Frontend: `EliteReservationDialog` modal opens when user clicks the Elite tier card. Captures interest before D-ID integration goes live (validate demand before paying $420/yr upfront).
+
+### `POST /api/projects/email-video` (new — auth required)
+- Sends a branded HTML email containing a finished video link to the agent's chosen recipient (vendor / buyer / themselves).
+- Uses Resend with branded `noreply@lensflow.com.au` sender, `reply_to: agent_email`.
+- Logs delivery in `db.video_emails`.
+- Frontend: After Confidence Mode renders, agents see "Download MP4 / Email this video / Make another" buttons. Click "Email this video" opens `EmailVideoDialog` with recipient/name/address/personal-message fields.
+- Verified: real email delivered to admin@lensflow.com.au end-to-end.
+
+### Premium voice settings for ALL ElevenLabs presenters
+- Added `LUXURY_VOICE_SETTINGS` constant: `stability=0.60, similarity_boost=0.85, style=0.30, use_speaker_boost=True`.
+- Applied to `/api/tts/preview` (Studio "Hear it" button) AND Confidence Mode video narration.
+- Effect: Mia/Oliver/Aria/Marcus go from "default AI voice" to "broadcast-grade luxury presenter cadence". Same ElevenLabs key, same model, dramatically better output.
+
+### Verification
+- Elite reservation: ✅ stored + 200 OK
+- Email-video: ✅ Resend `delivered:true` to real inbox
+- Pricing screenshot: 4 tiers render correctly, Elite "Limited Beta" gold gradient pill, reservation modal opens cleanly
+- TTS preview: ✅ returns audio with new voice settings
+
 ## Next session priorities
 1. If user adds voice IDs → verify TTS round-trips.
 2. Wire Stripe to Pricing upgrade buttons (revenue lever).

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Camera, Upload, Loader2, Mic, Sparkles, Download, Play, X, ArrowRight, Music, Volume2, VolumeX } from "lucide-react";
+import { Camera, Upload, Loader2, Mic, Sparkles, Download, Play, X, ArrowRight, Music, Volume2, VolumeX, Mail, Send } from "lucide-react";
 import api, { formatApiErrorDetail } from "../../lib/api";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ export default function ConfidenceMode() {
   const [presenterName, setPresenterName] = useState("");
   const [rendering, setRendering] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
+  const [emailDialog, setEmailDialog] = useState(false);
   // Music state
   const [musicTracks, setMusicTracks] = useState([]);
   const [musicChoice, setMusicChoice] = useState({ kind: "none", url: null, label: "No music" });
@@ -346,14 +347,24 @@ export default function ConfidenceMode() {
               <div className="rounded-2xl overflow-hidden bg-black border border-[#C99A2E]/30">
                 <video src={videoUrl} controls className="w-full aspect-video" data-testid="confidence-video-player" />
               </div>
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-3 justify-center flex-wrap">
                 <a href={videoUrl} download="lensflow-listing.mp4" data-testid="confidence-download" className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#C99A2E] text-black hover:bg-[#DBC075] font-medium">
                   <Download size={14} /> Download MP4
                 </a>
+                <button onClick={() => setEmailDialog(true)} data-testid="confidence-email" className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 hover:bg-white/15 text-white font-medium">
+                  <Mail size={14} /> Email this video
+                </button>
                 <button onClick={() => { setVideoUrl(null); setStep(1); setScript(""); setPhotos([]); }} className="inline-flex items-center gap-2 px-5 py-3 rounded-full glass-strong hover:bg-white/10">
                   Make another
                 </button>
               </div>
+              {emailDialog && (
+                <EmailVideoDialog
+                  videoUrl={videoUrl}
+                  defaultAddress={photos.length ? "" : ""}
+                  onClose={() => setEmailDialog(false)}
+                />
+              )}
             </div>
           )}
 
@@ -362,6 +373,67 @@ export default function ConfidenceMode() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ---------- Email Video Dialog ----------
+function EmailVideoDialog({ videoUrl, defaultAddress, onClose }) {
+  const [form, setForm] = useState({
+    recipient_email: "",
+    recipient_name: "",
+    listing_address: defaultAddress || "",
+    sender_message: "",
+  });
+  const [sending, setSending] = useState(false);
+
+  const send = async (e) => {
+    e?.preventDefault();
+    if (!form.recipient_email) return;
+    setSending(true);
+    try {
+      const { data } = await api.post("/projects/email-video", { ...form, video_url: videoUrl });
+      toast.success(data.message || "Sent");
+      onClose();
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Failed to send");
+    } finally { setSending(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose} data-testid="email-video-dialog">
+      <div className="glass-strong rounded-3xl p-7 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#C99A2E] mb-1">Share this video</div>
+            <h3 className="font-serif text-2xl">Email it to a vendor or buyer</h3>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center"><X size={14} /></button>
+        </div>
+        <form onSubmit={send} className="space-y-3">
+          <div>
+            <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/55 mb-1 block">Recipient email *</label>
+            <input type="email" required data-testid="email-recipient" value={form.recipient_email} onChange={(e) => setForm({...form, recipient_email: e.target.value})} placeholder="vendor@example.com" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none text-sm" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/55 mb-1 block">Their name</label>
+              <input type="text" data-testid="email-name" value={form.recipient_name} onChange={(e) => setForm({...form, recipient_name: e.target.value})} placeholder="Sarah" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none text-sm" />
+            </div>
+            <div>
+              <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/55 mb-1 block">Listing address</label>
+              <input type="text" data-testid="email-address" value={form.listing_address} onChange={(e) => setForm({...form, listing_address: e.target.value})} placeholder="12 Wentworth Rd" className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none text-sm" />
+            </div>
+          </div>
+          <div>
+            <label className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/55 mb-1 block">Personal note (optional)</label>
+            <textarea rows={3} data-testid="email-message" value={form.sender_message} onChange={(e) => setForm({...form, sender_message: e.target.value})} placeholder="Sarah — wanted you to be the first to see this. Open it on a big screen." className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#C99A2E] focus:outline-none resize-none text-sm" />
+          </div>
+          <button type="submit" disabled={sending || !form.recipient_email} data-testid="email-send" className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#C99A2E] text-black hover:bg-[#DBC075] disabled:opacity-50 font-medium text-sm">
+            {sending ? <><Loader2 className="animate-spin" size={14} /> Sending…</> : <><Send size={14} /> Send video link</>}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
