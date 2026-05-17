@@ -138,7 +138,7 @@ export default function LumenCreate() {
     if (teleRef.current) teleRef.current.scrollTop = 0;
   };
 
-  const sendMoment = async () => {
+  const sendMoment = async ({ skipEmail = false } = {}) => {
     if (!script) return;
     setSending(true);
     try {
@@ -155,9 +155,12 @@ export default function LumenCreate() {
         recording_url: recordingUrl,
         duration_seconds: duration,
       });
-      const { data: r } = await lumenApi.post(`/moments/${m.id}/send`, { recipient_email: recipientEmail, sender_note: senderNote });
-      setSentResult({ url: r.share_url, recipient: recipientEmail });
-      toast.success("Sent! 💌");
+      const payload = skipEmail
+        ? { sender_note: senderNote }
+        : { recipient_email: recipientEmail, sender_note: senderNote };
+      const { data: r } = await lumenApi.post(`/moments/${m.id}/send`, payload);
+      setSentResult({ url: r.share_url, recipient: skipEmail ? "share" : recipientEmail, emailed: !!r.emailed });
+      toast.success(skipEmail ? "Link ready — copy & share anywhere ✨" : "Sent! 💌");
     } catch (err) {
       toast.error(lumenErr(err.response?.data?.detail) || "Send failed");
     } finally { setSending(false); }
@@ -407,9 +410,13 @@ export default function LumenCreate() {
 
           {sentResult ? (
             <div className="lumen-card p-8 text-center" data-testid="send-success">
-              <div className="text-5xl mb-3">💌</div>
-              <h3 className="lumen-display text-3xl mb-2">Sent to {sentResult.recipient || recipient}.</h3>
-              <p className="text-[#5C5C7A] mb-6">Your moment is live. Send it anywhere:</p>
+              <div className="text-5xl mb-3">{sentResult.emailed ? "💌" : "🔗"}</div>
+              <h3 className="lumen-display text-3xl mb-2">
+                {sentResult.emailed ? `Sent to ${sentResult.recipient}.` : "Your link is ready."}
+              </h3>
+              <p className="text-[#5C5C7A] mb-6">
+                {sentResult.emailed ? "Your moment is live. Send it anywhere:" : "Copy it and paste into Messages, WhatsApp, Instagram — anywhere."}
+              </p>
               <div className="bg-[#FFF1E6] rounded-xl p-3 text-sm text-[#5C5C7A] font-mono break-all mb-4 text-left">{sentResult.url}</div>
               <div className="flex flex-wrap gap-2 justify-center">
                 {canNativeShare && (
@@ -429,16 +436,29 @@ export default function LumenCreate() {
             <div className="lumen-card p-6 space-y-4">
               <div>
                 <label className="text-xs uppercase tracking-widest font-bold text-[#9999B0] mb-1.5 block">Recipient's email</label>
-                <input data-testid="send-email" type="email" required value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="them@email.com" className="lumen-input" />
+                <input data-testid="send-email" type="email" value={recipientEmail} onChange={e => setRecipientEmail(e.target.value)} placeholder="them@email.com" className="lumen-input" />
               </div>
               <div>
                 <label className="text-xs uppercase tracking-widest font-bold text-[#9999B0] mb-1.5 block">Note (optional)</label>
                 <textarea data-testid="send-note" rows={3} value={senderNote} onChange={e => setSenderNote(e.target.value)} placeholder="A short message above the video..." className="lumen-input resize-none" />
               </div>
-              <button onClick={sendMoment} disabled={sending || !recipientEmail || !script} data-testid="send-cta" className="lumen-btn-primary w-full flex items-center justify-center gap-2">
-                {sending ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : <><Send size={16}/> Send moment</>}
+              <button onClick={() => sendMoment()} disabled={sending || !recipientEmail || !script} data-testid="send-cta" className="lumen-btn-primary w-full flex items-center justify-center gap-2">
+                {sending ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : <><Send size={16}/> Email it to {recipientEmail ? recipientEmail.split("@")[0] : "them"}</>}
               </button>
-              <p className="text-xs text-center text-[#9999B0]">You can also copy the share link after sending.</p>
+              <div className="flex items-center gap-3 text-xs text-[#9999B0]">
+                <div className="flex-1 h-px bg-[#FFD166]/40" />
+                <span className="uppercase tracking-widest font-bold">or</span>
+                <div className="flex-1 h-px bg-[#FFD166]/40" />
+              </div>
+              <button
+                onClick={() => sendMoment({ skipEmail: true })}
+                disabled={sending || !script}
+                data-testid="get-link-cta"
+                className="lumen-btn-ghost w-full flex items-center justify-center gap-2"
+              >
+                {sending ? <><Loader2 size={16} className="animate-spin" /> Preparing…</> : <><Copy size={16}/> Just give me a link to share</>}
+              </button>
+              <p className="text-xs text-center text-[#9999B0]">Skip the email — copy & paste into WhatsApp, Messages, Instagram, anywhere.</p>
             </div>
           )}
         </div>

@@ -138,7 +138,7 @@ class MomentUpdate(BaseModel):
 
 
 class SendMoment(BaseModel):
-    recipient_email: EmailStr
+    recipient_email: Optional[EmailStr] = None  # optional → "Copy link" flow doesn't need it
     sender_note: str = Field(default="", max_length=400)
 
 
@@ -479,15 +479,23 @@ async def send_moment(moment_id: str, req: SendMoment, u: dict = Depends(get_cur
     """
     try:
         send = _state["resend_send"]
-        if send:
+        if send and req.recipient_email:
             send(req.recipient_email, subject, html)
     except Exception as e:
         logger.error(f"send moment email failed: {e}")
     await _db().lumen_moments.update_one(
         {"id": moment_id},
-        {"$set": {"sent": True, "sent_to_email": req.recipient_email, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        {"$set": {
+            "sent": True,
+            "sent_to_email": req.recipient_email,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }},
     )
-    return {"success": True, "share_url": share_url}
+    return {
+        "success": True,
+        "share_url": share_url,
+        "emailed": bool(req.recipient_email),
+    }
 
 
 # ---------- Public share view ----------
