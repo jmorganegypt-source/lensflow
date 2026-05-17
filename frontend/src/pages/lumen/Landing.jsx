@@ -4,6 +4,12 @@ import LumenNav from "./_Nav";
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Heart, Send, Music, Sparkles, Camera } from "lucide-react";
 
+const useLumenTitle = (title) => React.useEffect(() => {
+  const prev = document.title;
+  document.title = title;
+  return () => { document.title = prev; };
+}, [title]);
+
 const photos = [
   { url: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=500&q=80", rot: -4, top: "10%", left: "5%" },
   { url: "https://images.unsplash.com/photo-1543269664-7eef42226a21?w=500&q=80", rot: 3, top: "30%", right: "8%" },
@@ -25,6 +31,7 @@ const occasions = [
 const fadeUp = { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-80px" }, transition: { duration: 0.6 } };
 
 export default function LumenLanding() {
+  useLumenTitle("Lumen — Record. Read. Send love. 💌");
   return (
     <div className="lumen-root" data-testid="lumen-landing">
       <LumenNav />

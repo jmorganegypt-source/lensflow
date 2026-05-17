@@ -16,6 +16,12 @@ export default function LumenAppShell() {
   const nav = useNavigate();
   const onLogout = async () => { await logout(); nav("/lumen"); };
 
+  React.useEffect(() => {
+    const prev = document.title;
+    document.title = "Lumen Studio 💌";
+    return () => { document.title = prev; };
+  }, []);
+
   return (
     <div className="lumen-root min-h-screen flex flex-col md:flex-row" data-testid="lumen-app-shell">
       <aside className="hidden md:flex w-60 shrink-0 flex-col bg-white/60 backdrop-blur-sm border-r border-black/[0.04]">

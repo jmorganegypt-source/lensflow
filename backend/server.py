@@ -54,6 +54,7 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 STRIPE_KEY = os.environ.get("STRIPE_API_KEY", "")
 RESEND_KEY = os.environ.get("RESEND_API_KEY", "")
 RESEND_FROM = os.environ.get("RESEND_FROM_EMAIL", "LensFlow <onboarding@resend.dev>")
+LUMEN_RESEND_FROM = os.environ.get("LUMEN_RESEND_FROM_EMAIL", "Lumen 💌 <hello@lensflow.com.au>")
 
 if RESEND_KEY:
     resend.api_key = RESEND_KEY
@@ -1321,14 +1322,16 @@ async def stripe_webhook(request: Request):
 # ---------------------------------------------------------------------------
 # Startup
 # ---------------------------------------------------------------------------
-def _resend_send(to_email: str, subject: str, html: str):
-    """Generic Resend sender used by lumen module (falls back to console log)."""
+def _resend_send(to_email: str, subject: str, html: str, from_email: Optional[str] = None):
+    """Generic Resend sender used by lumen module (falls back to console log).
+    `from_email` lets each sub-app (Lumen, LensFlow) brand its own outbound mail."""
+    sender = from_email or RESEND_FROM
     if not RESEND_KEY:
-        logger.info(f"[EMAIL DEV] {subject} → {to_email}")
+        logger.info(f"[EMAIL DEV] from={sender} :: {subject} → {to_email}")
         return
     try:
-        resend.Emails.send({"from": RESEND_FROM, "to": [to_email], "subject": subject, "html": html})
-        logger.info(f"[EMAIL] sent: {subject} → {to_email}")
+        resend.Emails.send({"from": sender, "to": [to_email], "subject": subject, "html": html})
+        logger.info(f"[EMAIL] from={sender} :: {subject} → {to_email}")
     except Exception as e:
         logger.error(f"resend send failed: {e}")
 
@@ -1368,7 +1371,7 @@ async def startup():
         eleven_client=eleven_client,
         stripe_key=STRIPE_KEY,
         resend_send=_resend_send,
-        resend_from=RESEND_FROM,
+        resend_from=LUMEN_RESEND_FROM,
     )
     await lumen_module.ensure_indexes(db)
     logger.info("Lumen sub-app initialized")

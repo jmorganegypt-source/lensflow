@@ -12,6 +12,14 @@ export default function LumenShare() {
     lumenApi.get(`/share/${token}`).then(r => setMoment(r.data)).catch(e => setErr("Moment not found"));
   }, [token]);
 
+  useEffect(() => {
+    const prev = document.title;
+    document.title = moment?.sender_name
+      ? `${moment.sender_name} sent you a Lumen moment 💌`
+      : "A Lumen moment for you 💌";
+    return () => { document.title = prev; };
+  }, [moment]);
+
   if (err) return (
     <div className="lumen-root min-h-screen flex items-center justify-center p-6" data-testid="lumen-share-error">
       <div className="lumen-card p-10 text-center max-w-md">

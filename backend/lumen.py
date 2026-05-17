@@ -480,7 +480,7 @@ async def send_moment(moment_id: str, req: SendMoment, u: dict = Depends(get_cur
     try:
         send = _state["resend_send"]
         if send and req.recipient_email:
-            send(req.recipient_email, subject, html)
+            send(req.recipient_email, subject, html, from_email=_state["resend_from"])
     except Exception as e:
         logger.error(f"send moment email failed: {e}")
     await _db().lumen_moments.update_one(
