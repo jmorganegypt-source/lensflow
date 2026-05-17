@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 import { ArrowUpRight, Loader2, Check } from "lucide-react";
@@ -7,6 +7,9 @@ import { ArrowUpRight, Loader2, Check } from "lucide-react";
 export default function Register() {
   const { register } = useAuth();
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = searchParams.get("next") || "/onboarding";
+
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
@@ -18,7 +21,7 @@ export default function Register() {
     setLoading(false);
     if (res.ok) {
       toast.success("Welcome to LensFlow");
-      nav("/onboarding");
+      nav(nextPath);
     } else setErr(res.error || "Registration failed");
   };
 
