@@ -53,8 +53,6 @@ def test_register_creates_user_with_trial(lumen_user):
     assert user["watermark_subscription"] is False
     assert user["in_trial"] is True
     assert user["trial_until"] is not None
-    # cookie set
-    cookies = [c.name for c in lumen_user.cookies]
     # token must be present (cookie or Bearer header)
     assert state["lumen_token"]
 
