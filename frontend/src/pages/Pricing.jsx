@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import useDocTitle from "../hooks/useDocTitle";
 import { useNavigate, Link } from "react-router-dom";
 import MarketingNav from "../components/MarketingNav";
 import Footer from "../components/Footer";
@@ -100,6 +101,7 @@ const faqs = [
 ];
 
 export default function Pricing() {
+  useDocTitle("Pricing — LensFlow · Plans from $79/mo");
   const [open, setOpen] = useState(null);
   const [loadingTier, setLoadingTier] = useState(null);
   const [eliteDialog, setEliteDialog] = useState(false);

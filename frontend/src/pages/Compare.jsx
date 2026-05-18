@@ -1,4 +1,5 @@
 import React from "react";
+import useDocTitle from "../hooks/useDocTitle";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import MarketingNav from "../components/MarketingNav";
@@ -55,6 +56,7 @@ const Cell = ({ on, edge }) => on ? (
 );
 
 export default function Compare() {
+  useDocTitle("Compare — LensFlow vs BIGVU, Synthesia, HeyGen");
   return (
     <div className="min-h-screen bg-[#050505] text-white" data-testid="compare-page">
       <MarketingNav />

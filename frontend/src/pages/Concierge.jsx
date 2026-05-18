@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import useDocTitle from "../hooks/useDocTitle";
 import MarketingNav from "../components/MarketingNav";
 import Footer from "../components/Footer";
 import api, { formatApiErrorDetail } from "../lib/api";
@@ -8,6 +9,7 @@ import { Send, Loader2, Phone, Mail, MapPin } from "lucide-react";
 const CONCIERGE_BG = "https://customer-assets.emergentagent.com/job_luxury-video-studio-1/artifacts/105xaupo_concierge.jpg";
 
 export default function Concierge() {
+  useDocTitle("Concierge — Done-for-You Listings · LensFlow");
   const [form, setForm] = useState({ name: "", email: "", phone: "", company: "", property_address: "", message: "", package: "Bespoke" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);

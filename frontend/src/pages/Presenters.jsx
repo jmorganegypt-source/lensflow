@@ -6,8 +6,10 @@ import api, { formatApiErrorDetail } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 import { Play, Loader2, Pause } from "lucide-react";
+import useDocTitle from "../hooks/useDocTitle";
 
 export default function Presenters() {
+  useDocTitle("Presenters · Mia & Oliver — LensFlow");
   const { user } = useAuth();
   const [presenters, setPresenters] = useState([]);
   const [loadingId, setLoadingId] = useState(null);

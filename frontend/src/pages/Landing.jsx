@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import useDocTitle from "../hooks/useDocTitle";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import MarketingNav from "../components/MarketingNav";
@@ -29,6 +30,7 @@ const fadeUp = {
 const stagger = (i) => ({ ...fadeUp, transition: { duration: 0.7, ease: "easeOut", delay: i * 0.08 } });
 
 export default function Landing() {
+  useDocTitle("LensFlow — AI Real Estate Video · Stop being a videographer.");
   const [presenters, setPresenters] = useState([]);
   useEffect(() => {
     api.get("/presenters").then((r) => setPresenters(r.data.presenters || [])).catch(() => {});
@@ -358,8 +360,8 @@ export default function Landing() {
               <div className="p-7">
                 <h3 className="font-serif text-2xl mb-2 tracking-tight">Turn iPhone photos<br />into magazine spreads.</h3>
                 <p className="text-[#0F1A2E]/60 text-sm leading-relaxed mb-4">Upload any property photo. Pick a look — Magazine HDR, Golden Hour, Dusk Twilight, Lifestyle Lush, Interior Polish. AI enhances it in ~30 seconds.</p>
-                <Link to="/register?next=/app/glamour" data-testid="what-card-1-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
-                  Try Glamour Studio <ArrowUpRight size={14} />
+                <Link to="/pricing#starter" data-testid="what-card-1-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                  See plans & pricing <ArrowUpRight size={14} />
                 </Link>
               </div>
             </motion.div>
@@ -378,8 +380,8 @@ export default function Landing() {
               <div className="p-7">
                 <h3 className="font-serif text-2xl mb-2 tracking-tight">Listing videos —<br />without filming yourself.</h3>
                 <p className="text-[#0F1A2E]/60 text-sm leading-relaxed mb-4">Mia or Oliver narrates your listing over a Ken-Burns slideshow of your photos. Get a downloadable MP4 in under a minute. Perfect for camera-shy agents.</p>
-                <Link to="/register?next=/app/confidence" data-testid="what-card-2-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
-                  Try Confidence Mode <ArrowUpRight size={14} />
+                <Link to="/presenters" data-testid="what-card-2-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                  Meet Mia & Oliver <ArrowUpRight size={14} />
                 </Link>
               </div>
             </motion.div>
@@ -397,8 +399,8 @@ export default function Landing() {
               <div className="p-7">
                 <h3 className="font-serif text-2xl mb-2 tracking-tight">Auto-branded reels<br />for every property.</h3>
                 <p className="text-[#0F1A2E]/60 text-sm leading-relaxed mb-4">Add price, address, your face & logo automatically. Export 9:16 for Reels, 16:9 for YouTube, 1:1 for Instagram. REA · Domain · Rightmove ready.</p>
-                <Link to="/register?next=/app/studio" data-testid="what-card-3-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
-                  Try Studio <ArrowUpRight size={14} />
+                <Link to="/compare" data-testid="what-card-3-cta" className="inline-flex items-center gap-2 text-[#C99A2E] hover:underline font-medium text-sm">
+                  Compare vs BIGVU & HeyGen <ArrowUpRight size={14} />
                 </Link>
               </div>
             </motion.div>
