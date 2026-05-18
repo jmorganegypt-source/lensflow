@@ -23,6 +23,7 @@ const tiers = [
       "Pro AI Teleprompter · perfect eye-contact",
       "Mia — your AI script writer + presenter",
       "1-photo Glamour Studio",
+      "5 signature cinematic backgrounds",
       "Captions auto-generated",
       "Custom branding overlays",
       "1080p export · REA / Domain ready",
@@ -43,9 +44,9 @@ const tiers = [
       "Mia, Oliver, Aria & Marcus avatars",
       "5 HD AI productions per month",
       "5-photo Glamour Studio",
+      "All 9 cinematic backgrounds (incl. Premium Deluxe pack)",
       "3 script variants (Polished · Casual · Cinematic)",
       "Music library + your own track",
-      "Email finished videos to clients",
       "Priority processing queue",
     ],
   },
@@ -64,29 +65,10 @@ const tiers = [
       "Custom AI presenter trained on YOUR face",
       "Voice clone from 60s of audio",
       "Unlimited monthly productions",
+      "All 9 cinematic backgrounds + custom on request",
       "Dedicated account manager",
       "White-glove onboarding call",
-      "Custom brand templates",
       "SLA · DPA · invoicing",
-    ],
-  },
-  {
-    id: "concierge",
-    name: "Done-for-You",
-    price: "$1,790",
-    cadence: "AUD / per listing",
-    blurb: "Hands-off broadcast production · 24-hour turnaround.",
-    cta: "Book Concierge",
-    icon: Phone,
-    highlight: false,
-    package_id: "concierge_listing",
-    perks: [
-      "Dedicated editor + strategist",
-      "24-hour turnaround",
-      "Drone, dusk & lifestyle b-roll",
-      "Localised voice library",
-      "Per-listing pricing · no commitment",
-      "SLAs · DPA · invoicing",
     ],
   },
 ];
@@ -97,7 +79,8 @@ const faqs = [
   { q: "What's the difference between Elite and Concierge?", a: "Elite gives you our four trained AI presenters (Mia, Oliver, Aria, Marcus) ready to narrate any listing. Concierge trains a bespoke AI presenter on YOUR face — your clients see you in every video, but you never have to film yourself." },
   { q: "Can I switch plans later?", a: "Yes — upgrade or downgrade any time. Charges prorate to the day in Settings." },
   { q: "How are videos delivered?", a: "Direct download in 9:16, 16:9 and 1:1 with captions, plus REA-compatible XML & Domain JSON exports. You can also email a finished video link straight to a vendor or buyer from inside the app." },
-  { q: "What's included in Done-for-You?", a: "A dedicated editor, strategist, drone/dusk b-roll, scriptwriting and a 24-hour final cut. Per-listing pricing, no commitment." },
+  { q: "What's included in Done-for-You?", a: "Done-for-You is our $1,790 per-listing white-glove service — not a subscription tier. A dedicated editor, strategist, drone/dusk b-roll, scriptwriting and a 24-hour final cut. Book it any time from the Done-for-You page — no commitment, no monthly fee." },
+  { q: "What's the Premium Deluxe Background Pack?", a: "Four cinematic location backgrounds — Whitehaven Beach, Manhattan Penthouse, Tuscan Villa, Hamptons Estate — that you can use behind any recorded video. Starter agents can unlock all 4 for a one-time $29.90. Already included free on Elite & Concierge." },
 ];
 
 export default function Pricing() {
@@ -141,6 +124,25 @@ export default function Pricing() {
     } finally { setLoadingTier(null); }
   };
 
+  const [loadingUnlock, setLoadingUnlock] = useState(false);
+  const buyPremiumBackgroundPack = async () => {
+    if (user === null) { toast.message("Checking your session…"); return; }
+    if (!user) {
+      navigate("/register?next=/pricing&unlock=bg_premium_pack");
+      return;
+    }
+    setLoadingUnlock(true);
+    try {
+      const { data } = await api.post("/payments/checkout", {
+        package_id: "bg_premium_pack",
+        origin_url: window.location.origin,
+      });
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Couldn't start checkout");
+    } finally { setLoadingUnlock(false); }
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] text-white" data-testid="pricing-page">
       <MarketingNav />
@@ -158,12 +160,12 @@ export default function Pricing() {
           <h1 className="font-serif text-6xl lg:text-8xl tracking-tighter leading-[0.95] mb-6">
             Built for the way <br /><span className="italic text-[#C99A2E]">agents really sell.</span>
           </h1>
-          <p className="text-lg text-white/55 max-w-2xl mx-auto">Four tiers · Try every feature free for 7 days · Cancel anytime before day 8 and you're never charged.</p>
+          <p className="text-lg text-white/55 max-w-2xl mx-auto">Three tiers · Try every feature free for 7 days · Cancel anytime before day 8 and you're never charged.</p>
         </div>
       </section>
 
-      <section className="px-6 lg:px-10 pb-24">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="px-6 lg:px-10 pb-12">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tiers.map((t) => (
             <div key={t.id} data-testid={`pricing-tier-${t.id}`} className={`relative rounded-3xl p-8 transition-all flex flex-col ${t.highlight ? "bg-[#0E0E0E] border-2 border-[#C99A2E] gold-glow lg:scale-[1.03]" : (t.coming_soon || t.concierge_intake) ? "bg-gradient-to-b from-[#1a1410] to-[#0E0E0E] border border-[#C99A2E]/40" : "glass hover:border-white/15"}`}>
               {t.highlight && (
@@ -205,6 +207,72 @@ export default function Pricing() {
           ))}
         </div>
         <p className="text-center text-white/40 text-xs mt-10 font-mono uppercase tracking-[0.2em]">All prices in AUD · GST inclusive · Cancel anytime</p>
+
+        {/* ============== DONE-FOR-YOU CALLOUT ============== */}
+        <div className="max-w-5xl mx-auto mt-16" data-testid="done-for-you-callout">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a1410] via-[#0E0E0E] to-[#0F1A2E] border border-[#C99A2E]/30 p-8 lg:p-12">
+            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-[#C99A2E]/10 blur-3xl pointer-events-none" />
+            <div className="relative grid lg:grid-cols-[1fr_auto] gap-8 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C99A2E]/15 border border-[#C99A2E]/35 mb-4">
+                  <Phone size={11} className="text-[#C99A2E]" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E]">For when you want it done for you</span>
+                </div>
+                <h3 className="font-serif text-3xl lg:text-5xl tracking-tighter mb-3">
+                  Skip the studio. <span className="italic text-[#C99A2E]">Hand us the listing.</span>
+                </h3>
+                <p className="text-white/65 text-base lg:text-lg max-w-xl mb-5">
+                  Our editing team writes, presents, edits and delivers a broadcast-grade hero video in <strong className="text-white">24 hours</strong>. Drone, dusk, lifestyle b-roll, captions, REA-ready exports — done.
+                </p>
+                <div className="flex items-baseline gap-3 mb-1">
+                  <span className="font-serif text-5xl lg:text-6xl tracking-tighter text-[#C99A2E]">$1,790</span>
+                  <span className="text-white/55 text-sm">AUD · per listing · no subscription</span>
+                </div>
+                <p className="text-white/40 text-xs">No commitment. One listing, one fee.</p>
+              </div>
+              <div className="lg:text-right">
+                <Link
+                  to="/done-for-you"
+                  data-testid="done-for-you-cta"
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#C99A2E] text-black font-medium hover:bg-[#DBC075] transition-colors whitespace-nowrap"
+                >
+                  Book a session <Phone size={14} />
+                </Link>
+                <div className="mt-4 text-[10px] font-mono uppercase tracking-[0.18em] text-white/35">24-hour turnaround · Sydney · London · LA</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ============== PREMIUM BACKGROUND PACK (Starter unlock) ============== */}
+        <div className="max-w-5xl mx-auto mt-10" data-testid="premium-bg-pack-callout">
+          <div className="grid lg:grid-cols-[auto_1fr_auto] gap-6 items-center rounded-3xl glass border border-white/10 p-6 lg:p-7">
+            <div className="hidden lg:flex w-14 h-14 rounded-2xl bg-[#C99A2E]/15 items-center justify-center">
+              <Gem size={22} className="text-[#C99A2E]" />
+            </div>
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#C99A2E] mb-1.5">Add-on · Starter tier only</div>
+              <h4 className="font-serif text-2xl lg:text-3xl tracking-tight mb-1">Premium Deluxe Background Pack</h4>
+              <p className="text-white/55 text-sm">Unlock 4 cinematic locations — Whitehaven Beach, Manhattan Penthouse, Tuscan Villa, Hamptons Estate — forever. <span className="text-white/35">Included free on Elite & Concierge.</span></p>
+            </div>
+            <div className="text-right">
+              <div className="font-serif text-3xl tracking-tighter text-[#C99A2E]">$29.90</div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/40 mb-3">One-time · lifetime unlock</div>
+              <button
+                onClick={buyPremiumBackgroundPack}
+                disabled={loadingUnlock}
+                data-testid="bg-pack-cta"
+                className="px-5 py-2.5 rounded-full bg-[#C99A2E] text-black text-sm font-medium hover:bg-[#DBC075] transition-colors inline-flex items-center gap-2 disabled:opacity-60"
+              >
+                {loadingUnlock ? <Loader2 size={14} className="animate-spin" /> : <Gem size={13} />}
+                Unlock pack
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 lg:px-10 pb-24">
 
         {/* Competitor comparison strip */}
         <div className="max-w-4xl mx-auto mt-14 glass rounded-3xl p-8 lg:p-10" data-testid="competitor-compare">

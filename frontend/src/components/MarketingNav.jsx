@@ -7,7 +7,7 @@ const links = [
   { to: "/presenters", label: "Presenters" },
   { to: "/pricing", label: "Pricing" },
   { to: "/compare", label: "Compare" },
-  { to: "/concierge", label: "Concierge" },
+  { to: "/done-for-you", label: "Done-for-You" },
 ];
 
 export default function MarketingNav() {
@@ -39,9 +39,7 @@ export default function MarketingNav() {
             src="/assets/brand/logo-horizontal.png"
             alt="LensFlow · AI Real Estate Marketing Engine"
             className="h-16 lg:h-20 w-auto"
-            style={isLight
-              ? { mixBlendMode: "multiply" }
-              : { filter: "brightness(0) invert(1)" }}
+            style={isLight ? {} : { filter: "brightness(0) invert(1)" }}
           />
         </Link>
 

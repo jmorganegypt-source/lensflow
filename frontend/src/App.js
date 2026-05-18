@@ -99,6 +99,7 @@ export default function App() {
             <Route path="/compare" element={<Compare />} />
             <Route path="/presenters" element={<Presenters />} />
             <Route path="/concierge" element={<Concierge />} />
+            <Route path="/done-for-you" element={<Concierge />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
             <Route path="/register" element={<PublicOnly><Register /></PublicOnly>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

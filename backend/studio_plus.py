@@ -402,6 +402,42 @@ def build_router(
             "note": "All tracks are royalty-free for commercial use. You can also upload your own.",
         }
 
+    # -------- Background clip library (recording backdrops) --------
+    # 5 signature backgrounds free on every plan, 4 premium gated.
+    # Starter agents can unlock all 4 premium via the $29.90 one-time "bg_premium_pack" purchase.
+    BACKGROUND_LIBRARY = [
+        # --- 5 SIGNATURE (free everywhere) ---
+        {"id": "sig_01", "label": "Skyline Loft",           "tier": "signature", "url": "/assets/backgrounds/bg-01.mp4", "poster": "/assets/backgrounds/bg-01.jpg"},
+        {"id": "sig_02", "label": "Sunset Coastline",       "tier": "signature", "url": "/assets/backgrounds/bg-02.mp4", "poster": "/assets/backgrounds/bg-02.jpg"},
+        {"id": "sig_03", "label": "Modern Garden Pool",     "tier": "signature", "url": "/assets/backgrounds/bg-03.mp4", "poster": "/assets/backgrounds/bg-03.jpg"},
+        {"id": "sig_04", "label": "Open-Plan Lounge",       "tier": "signature", "url": "/assets/backgrounds/bg-04.mp4", "poster": "/assets/backgrounds/bg-04.jpg"},
+        {"id": "sig_05", "label": "Estate Driveway",        "tier": "signature", "url": "/assets/backgrounds/bg-05.mp4", "poster": "/assets/backgrounds/bg-05.jpg"},
+        # --- 4 PREMIUM DELUXE (Elite/Concierge included, Starter $29.90 unlock) ---
+        {"id": "prm_01", "label": "Whitehaven Beach",       "tier": "premium",   "url": "/assets/backgrounds/bg-06.mp4", "poster": "/assets/backgrounds/bg-06.jpg"},
+        {"id": "prm_02", "label": "Manhattan Penthouse",    "tier": "premium",   "url": "/assets/backgrounds/bg-07.mp4", "poster": "/assets/backgrounds/bg-07.jpg"},
+        {"id": "prm_03", "label": "Tuscan Villa",           "tier": "premium",   "url": "/assets/backgrounds/bg-08.mp4", "poster": "/assets/backgrounds/bg-08.jpg"},
+        {"id": "prm_04", "label": "Hamptons Estate",        "tier": "premium",   "url": "/assets/backgrounds/bg-09.mp4", "poster": "/assets/backgrounds/bg-09.jpg"},
+    ]
+
+    @router.get("/backgrounds")
+    async def list_backgrounds(user: dict = Depends(get_current_user)):
+        """Returns full background catalog, each item flagged 'locked' for the requesting user."""
+        plan = (user.get("plan") or "trial").lower()
+        elite_or_above = plan in {"elite", "professional", "concierge_ai", "concierge", "enterprise"}
+        unlocked = bool((user.get("unlocks") or {}).get("premium_backgrounds"))
+        access_to_premium = elite_or_above or unlocked
+
+        out = []
+        for bg in BACKGROUND_LIBRARY:
+            locked = (bg["tier"] == "premium") and not access_to_premium
+            out.append({**bg, "locked": locked})
+        return {
+            "backgrounds": out,
+            "premium_unlocked": access_to_premium,
+            "premium_unlock_package_id": "bg_premium_pack",
+            "premium_unlock_price_aud": 29.90,
+        }
+
     # -------- Glamour Photo Studio --------
     @router.get("/glamour/presets")
     async def list_presets():

@@ -1100,6 +1100,7 @@ PAYMENT_PACKAGES = {
     "professional_monthly": {"amount": 199.00,  "currency": "aud", "label": "Elite · Monthly",    "plan": "elite",        "recurring": True,  "trial_days": 7},
     "elite_avatar_annual":  {"amount": 399.00,  "currency": "aud", "label": "Concierge · Monthly","plan": "concierge_ai", "recurring": True,  "trial_days": 0},
     "concierge_listing":    {"amount": 1790.00, "currency": "aud", "label": "Done-for-You · Per Listing", "plan": "concierge", "recurring": False, "trial_days": 0},
+    "bg_premium_pack":      {"amount": 29.90,   "currency": "aud", "label": "Premium Deluxe Background Pack · Lifetime", "plan": None, "recurring": False, "trial_days": 0, "unlock": "premium_backgrounds"},
 }
 
 
@@ -1130,8 +1131,10 @@ async def create_checkout(req: CheckoutInitReq, request: Request, user: dict = D
         "user_id": str(user["_id"]),
         "user_email": user["email"],
         "package_id": req.package_id,
-        "plan": pkg["plan"],
+        "plan": pkg.get("plan") or "",
     }
+    if pkg.get("unlock"):
+        metadata["unlock"] = pkg["unlock"]
 
     # --- Recurring subscription with 7-day free trial (uses Stripe SDK directly) ---
     if pkg.get("recurring"):
@@ -1295,9 +1298,24 @@ async def stripe_webhook(request: Request):
                     {"$set": {"payment_status": "paid", "status": "complete",
                               "updated_at": datetime.now(timezone.utc).isoformat()}},
                 )
-                plan = (event.metadata or {}).get("plan") or txn.get("plan") or "pro"
+                plan = (event.metadata or {}).get("plan") or txn.get("plan")
                 user_id = (event.metadata or {}).get("user_id") or txn.get("user_id")
-                if user_id:
+                package_id = (event.metadata or {}).get("package_id") or txn.get("package_id")
+                pkg = PAYMENT_PACKAGES.get(package_id, {}) if package_id else {}
+
+                # --- One-time UNLOCK purchases (e.g. Premium Background Pack) ---
+                if pkg.get("unlock") and user_id:
+                    unlock_key = pkg["unlock"]
+                    await db.users.update_one(
+                        {"_id": ObjectId(user_id)},
+                        {"$set": {f"unlocks.{unlock_key}": True,
+                                  f"unlocks.{unlock_key}_at": datetime.now(timezone.utc).isoformat()}},
+                    )
+                    logger.info(f"[WEBHOOK] unlock '{unlock_key}' granted to user {user_id}")
+                    return {"received": True}
+
+                # --- Standard plan upgrades ---
+                if user_id and plan:
                     await db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"plan": plan}})
                     logger.info(f"[WEBHOOK] plan upgrade → {plan} for user {user_id}")
                     # Send thank-you email (idempotent — guarded by payment_status check above)

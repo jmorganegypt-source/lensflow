@@ -9,8 +9,8 @@ import { Send, Loader2, Phone, Mail, MapPin } from "lucide-react";
 const CONCIERGE_BG = "https://customer-assets.emergentagent.com/job_luxury-video-studio-1/artifacts/105xaupo_concierge.jpg";
 
 export default function Concierge() {
-  useDocTitle("Concierge — Done-for-You Listings · LensFlow");
-  const [form, setForm] = useState({ name: "", email: "", phone: "", company: "", property_address: "", message: "", package: "Bespoke" });
+  useDocTitle("Done-for-You · LensFlow — $1,790 / listing");
+  const [form, setForm] = useState({ name: "", email: "", phone: "", company: "", property_address: "", message: "", package: "Done-for-You" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
