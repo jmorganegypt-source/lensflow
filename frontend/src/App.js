@@ -15,6 +15,7 @@ import Pricing from "./pages/Pricing";
 import Compare from "./pages/Compare";
 import Presenters from "./pages/Presenters";
 import Concierge from "./pages/Concierge";
+import SpatialFlow from "./pages/SpatialFlow";
 import Onboarding from "./pages/Onboarding";
 
 import AppShell from "./pages/app/AppShell";
@@ -100,6 +101,7 @@ export default function App() {
             <Route path="/presenters" element={<Presenters />} />
             <Route path="/concierge" element={<Concierge />} />
             <Route path="/done-for-you" element={<Concierge />} />
+            <Route path="/spatialflow" element={<SpatialFlow />} />
             <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
             <Route path="/register" element={<PublicOnly><Register /></PublicOnly>} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
