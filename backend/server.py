@@ -398,6 +398,16 @@ PRESENTERS = [
         "accent": "Continental European",
         "specialty": ["International", "Penthouse", "Estate"],
     },
+    {
+        "id": "emma",
+        "name": "Emma",
+        "tagline": "Coastal Editorial · Bright & Persuasive",
+        "description": "Editorial brightness with a confident close. Built for waterfront, lifestyle and Instagram-first storytelling.",
+        "voice_id": os.environ.get("ELEVENLABS_VOICE_EMMA") or "EXAVITQu4vr4xnSDxMaL",
+        "avatar": "/assets/property/emma-portrait.jpg",
+        "accent": "American",
+        "specialty": ["Waterfront", "Lifestyle", "Social Media"],
+    },
 ]
 
 

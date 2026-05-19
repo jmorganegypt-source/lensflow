@@ -56,7 +56,7 @@ export default function Presenters() {
           <h1 className="font-serif text-6xl lg:text-8xl tracking-tighter leading-[0.95] mb-6">
             Voices that <span className="italic text-[#C99A2E]">close</span>.
           </h1>
-          <p className="text-lg text-white/55 max-w-2xl">Four signature presenters, hand-tuned for prestige real estate across continents.</p>
+          <p className="text-lg text-white/55 max-w-2xl">Five signature presenters, hand-tuned for prestige real estate across continents.</p>
           <div className="mt-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs text-white/45 font-mono">
             <span className="w-1.5 h-1.5 bg-[#C99A2E] rounded-full" /> Bring your own ElevenLabs voice IDs via backend env for instant cloning
           </div>

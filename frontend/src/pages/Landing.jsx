@@ -655,7 +655,7 @@ export default function Landing() {
 
           <div className="text-center mt-10">
             <Link to="/presenters" data-testid="see-all-presenters" className="inline-flex items-center gap-2 text-[#0F1A2E] hover:text-[#C99A2E] transition-colors font-medium text-sm">
-              See all 4 presenters · Aria · Marcus too <ArrowUpRight size={14} />
+              See all 5 presenters · Aria, Marcus, Emma <ArrowUpRight size={14} />
             </Link>
           </div>
         </div>

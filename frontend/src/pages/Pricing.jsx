@@ -41,7 +41,7 @@ const tiers = [
     package_id: "professional_monthly",
     perks: [
       "Everything in Starter",
-      "Mia, Oliver, Aria & Marcus avatars",
+      "Mia, Oliver, Aria, Marcus & Emma avatars",
       "5 HD AI productions per month",
       "5-photo Glamour Studio",
       "All 9 cinematic backgrounds (incl. Premium Deluxe pack)",
