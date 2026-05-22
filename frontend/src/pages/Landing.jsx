@@ -156,52 +156,42 @@ export default function Landing() {
           <motion.div {...stagger(1)} className="lg:col-span-6 relative">
             <div className="relative h-[560px] lg:h-[640px] flex items-center justify-center">
 
-              {/* MIA — the star. Talking AI avatar (autoplay, muted, loop). */}
-              <div className="absolute left-0 top-0 w-[62%] aspect-[3/4] rounded-3xl overflow-hidden bg-[#F1E9DA] shadow-2xl ring-1 ring-[#C99A2E]/30" data-testid="hero-mia-portrait">
-                <video
-                  src="/assets/property/mia-avatar.mp4"
-                  poster="/assets/property/mia-avatar-poster.jpg"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
+              {/* MIA — high-resolution editorial still. No video, no mute icon, no creepy mime. */}
+              <div className="absolute left-0 top-0 w-[64%] aspect-[3/4] rounded-3xl overflow-hidden bg-[#F1E9DA] shadow-2xl ring-1 ring-[#C99A2E]/30" data-testid="hero-mia-portrait">
+                <img
+                  src="/assets/property/mia-hero.jpg"
+                  alt="Mia — LensFlow AI Presenter"
                   className="w-full h-full object-cover"
-                  style={{ objectPosition: "50% 25%" }}
-                  data-testid="hero-mia-video"
+                  style={{ objectPosition: "50% 22%" }}
+                  data-testid="hero-mia-image"
                 />
                 <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm shadow-md flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="font-serif text-[12px] text-[#0F1A2E]">Mia</span>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-[#0F1A2E]/55">AU · UK · Live</span>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-[#0F1A2E]/55">AU · US · Warm</span>
                 </div>
               </div>
 
-              {/* OLIVER — smaller, separated, no overlap with Mia. Talking AI avatar. */}
-              <div className="absolute right-0 bottom-0 w-[44%] aspect-[3/4] rounded-3xl overflow-hidden bg-[#F1E9DA] shadow-2xl ring-1 ring-[#C99A2E]/30" data-testid="hero-oliver-portrait">
-                <video
-                  src="/assets/property/oliver-avatar.mp4"
-                  poster="/assets/property/oliver-avatar-poster.jpg"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
+              {/* OLIVER — editorial still. */}
+              <div className="absolute right-0 bottom-0 w-[42%] aspect-[3/4] rounded-3xl overflow-hidden bg-[#F1E9DA] shadow-2xl ring-1 ring-[#C99A2E]/30" data-testid="hero-oliver-portrait">
+                <img
+                  src="/assets/property/oliver-hero.jpg"
+                  alt="Oliver — LensFlow AI Presenter"
                   className="w-full h-full object-cover"
-                  style={{ objectPosition: "50% 30%" }}
-                  data-testid="hero-oliver-video"
+                  style={{ objectPosition: "50% 25%" }}
+                  data-testid="hero-oliver-image"
                 />
                 <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm shadow-md flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="font-serif text-[12px] text-[#0F1A2E]">Oliver</span>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-[#0F1A2E]/55">UK · RP · Live</span>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-[#0F1A2E]/55">UK · RP</span>
                 </div>
               </div>
 
               {/* Single floating chip — top right of the whole composition */}
               <div className="absolute -top-2 right-2 px-3.5 py-1.5 rounded-full bg-[#0F1A2E] text-white shadow-lg flex items-center gap-2 z-10" data-testid="hero-chip-ai">
                 <Sparkles size={11} className="text-[#C99A2E]" />
-                <span className="text-[10px] font-mono uppercase tracking-wider">Live AI Avatars · Talking</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider">AI Presenters · Editorial Grade</span>
               </div>
             </div>
           </motion.div>

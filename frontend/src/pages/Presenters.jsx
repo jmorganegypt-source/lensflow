@@ -65,12 +65,29 @@ export default function Presenters() {
 
       <section className="px-6 lg:px-10 pb-32">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-6">
-          {presenters.map((p) => (
+          {presenters.map((p) => {
+            const VIDEO_MAP = {
+              oliver: { src: "/assets/property/oliver-talking.mp4", poster: "/assets/property/oliver-talking-poster.jpg" },
+            };
+            const video = VIDEO_MAP[p.id];
+            return (
             <div key={p.id} data-testid={`presenter-${p.id}`} className="group glass rounded-3xl overflow-hidden tracing-border">
               <div className="grid md:grid-cols-2 gap-0">
-                <div className="aspect-square md:aspect-auto relative">
-                  <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a0a0a]/40 md:to-[#0a0a0a]" />
+                <div className="aspect-square md:aspect-auto relative bg-black">
+                  {video ? (
+                    <video
+                      src={video.src}
+                      poster={video.poster}
+                      controls
+                      preload="metadata"
+                      playsInline
+                      className="w-full h-full object-cover"
+                      data-testid={`presenter-video-${p.id}`}
+                    />
+                  ) : (
+                    <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                  )}
+                  {!video && <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a0a0a]/40 md:to-[#0a0a0a]" />}
                 </div>
                 <div className="p-8 flex flex-col justify-between">
                   <div>
@@ -96,7 +113,7 @@ export default function Presenters() {
                 </div>
               </div>
             </div>
-          ))}
+          );})}
         </div>
 
         {/* ============== YOUR VOICE · YOUR AI TWIN ============== */}
