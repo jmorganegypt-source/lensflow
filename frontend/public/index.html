@@ -33,7 +33,33 @@
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
     </head>
     <body>
-        <noscript><div style="font-family:Georgia,serif;text-align:center;padding:80px 20px;background:#FAF7F2;color:#0F1A2E;"><h1 style="font-size:32px;margin:0 0 16px;">LensFlow</h1><p style="font-size:16px;color:#666;max-width:480px;margin:0 auto;">Please enable JavaScript to access the LensFlow studio. Or contact us at hello@lensflow.com.au.</p></div></noscript>
+        <noscript>
+          <style>
+            .lf-fallback{font-family:Georgia,'Playfair Display',serif;background:#FAF7F2;color:#0F1A2E;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;margin:0;line-height:1.5}
+            .lf-fb-card{max-width:520px;text-align:center}
+            .lf-fb-logo{font-size:14px;letter-spacing:.3em;font-family:-apple-system,system-ui,sans-serif;color:#C99A2E;margin-bottom:24px;text-transform:uppercase;font-weight:700}
+            .lf-fb-h1{font-size:34px;line-height:1.05;margin:0 0 16px;font-style:italic;color:#0F1A2E}
+            .lf-fb-p{font-size:15px;color:#0F1A2E;opacity:.65;margin:0 0 28px;font-family:-apple-system,system-ui,sans-serif}
+            .lf-fb-cta{display:block;padding:16px 24px;border-radius:50px;background:#0F1A2E;color:#fff!important;text-decoration:none;font-family:-apple-system,system-ui,sans-serif;font-weight:600;font-size:15px;margin:0 auto 10px;max-width:340px}
+            .lf-fb-gold{background:#C99A2E;color:#000!important}
+            .lf-fb-ghost{background:transparent;color:#0F1A2E!important;border:1px solid #0F1A2E33}
+            .lf-fb-small{font-size:12px;color:#0F1A2E;opacity:.45;margin-top:24px;font-family:-apple-system,system-ui,sans-serif}
+            .lf-fb-divider{width:40px;height:1px;background:#C99A2E;margin:32px auto;opacity:.5}
+          </style>
+          <div class="lf-fallback">
+            <div class="lf-fb-card">
+              <div class="lf-fb-logo">LensFlow</div>
+              <h1 class="lf-fb-h1">Open this in your <span style="color:#C99A2E">main browser.</span></h1>
+              <p class="lf-fb-p">It looks like you opened LensFlow inside an in-app browser (Instagram, TikTok, Facebook) — these sometimes break luxury video tools like ours.</p>
+              <a class="lf-fb-cta lf-fb-gold" href="https://lensflow.com.au">Tap to reload in Safari or Chrome</a>
+              <p class="lf-fb-small" style="margin:18px 0 0">On iPhone: tap the <strong>•••</strong> menu top-right → <em>Open in Safari</em>.<br/>On Android: tap the <strong>⋮</strong> menu top-right → <em>Open in Chrome</em>.</p>
+              <div class="lf-fb-divider"></div>
+              <p class="lf-fb-p" style="margin-bottom:16px">Or reach us directly — we still want to help.</p>
+              <a class="lf-fb-cta lf-fb-ghost" href="mailto:hello@lensflow.com.au?subject=I%20saw%20LensFlow%20but%20couldn%27t%20load%20it">Email hello@lensflow.com.au</a>
+              <p class="lf-fb-small">LensFlow — AI Real Estate Marketing Engine · Australia</p>
+            </div>
+          </div>
+        </noscript>
         <div id="root"></div>
         <!--
       This HTML file is a template.
